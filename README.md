@@ -56,6 +56,26 @@ in appsettings.json
                 "DesignModel": "CodeFirst"
               }
             ]
-            
-            
+      
+      --map xml
+          <?xml version="1.0" encoding="utf-8" ?>
+            <sqlMap>
+              <select id="GetUser">
+                select a.userid,a.fullname,c.orgname,a.userno,a.isadmin,b.rolename
+                from base_user a
+                left join base_role b on a.roleid=b.roleid
+                left join base_org c on a.orgid=c.orgid and c.isactive='0' and c.IsDel='0'
+                <dynamic prepend=" where 1=1">
+                  <isPropertyAvailable prepend=" and " property="userId">a.userId=?userId</isPropertyAvailable>
+                  <isPropertyAvailable prepend=" and " property="userName">a.userName=?userName</isPropertyAvailable>
+                  <isPropertyAvailable prepend=" and " property="fullName">a.fullName=?fullName</isPropertyAvailable>
+                  <isPropertyAvailable prepend=" and " property="orgId">a.orgId=?orgId</isPropertyAvailable>
+                  <isPropertyAvailable prepend=" and " property="userNo">a.userNo=?userNo</isPropertyAvailable>
+                  <isPropertyAvailable prepend=" and " property="roleId">a.roleId=?roleId</isPropertyAvailable>
+                  <isPropertyAvailable prepend=" and " property="isAdmin">a.isAdmin=?isAdmin</isPropertyAvailable>
+                  <isPropertyAvailable prepend=" and " property="areaId">a.areaId=?areaId</isPropertyAvailable>
+                  <isPropertyAvailable prepend=" and " property="isDel">a.isDel=?isDel</isPropertyAvailable>
+                </dynamic>
+              </select>
+            </sqlMap>
   
