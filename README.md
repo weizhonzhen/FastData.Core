@@ -57,7 +57,7 @@ in appsettings.json
               }
             ]
       
-      --map xml
+    map xml
           <?xml version="1.0" encoding="utf-8" ?>
             <sqlMap>
               <select id="GetUser">
@@ -77,5 +77,19 @@ in appsettings.json
                   <isPropertyAvailable prepend=" and " property="isDel">a.isDel=?isDel</isPropertyAvailable>
                 </dynamic>
               </select>
-            </sqlMap>
+          </sqlMap>
+  
+  
+  
+             db option
+                 LambdaWrite.Update<Base_LogLogin>(new Base_LogLogin { LoginOutTime = DateTime.Now }, 
+                     a => a.Token == item.Token, a => new { a.LoginOutTime });
+                     
+                 LambdaWrite.Add(info);
+                 
+                 LambdaMap.ExecuteMapPage(pageModel, "getuser", param.ToArray());
+
+
+
+
   
