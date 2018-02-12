@@ -437,12 +437,12 @@ namespace Data.Core.Context
                 if (param.Count != 0)
                     cmd.Parameters.AddRange(param.ToArray());
 
-                result.Count = BaseExecute.ToDataTable(cmd, sql.ToString());
-               
-                //if (dt.Rows.Count > 0)
-                //    result.Count = dt.Rows[0][0].ToString().ToInt(0);
-                //else
-                //    result.Count = 0;
+               var dt = BaseExecute.ToDataTable(cmd, sql.ToString());
+
+                if (dt.Rows.Count > 0)
+                    result.Count = dt.Rows[0][0].ToString().ToInt(0);
+                else
+                    result.Count = 0;
 
                 return result;
             }
