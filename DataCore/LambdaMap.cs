@@ -211,6 +211,63 @@ namespace Data.Core
         }
         #endregion
 
+            
+            
+        #region maq 执行写操作
+        /// <summary>
+        /// 执行写操作
+        /// </summary>
+        public static WriteReturn ExecuteWriteMap(string name, DbParameter[] param, WriteContext db = null, string key = null)
+        {
+            InstanceMap(key);
+
+            if (RedisInfo.Exists(name.ToLower()))
+            {
+                var sql = GetMapSql(name, ref param);
+
+                return LambdaWrite.ExecuteSql(sql, param, db, key);
+            }
+            else
+                return new WriteReturn();
+        }
+        #endregion
+
+        #region maq 执行写操作 asy
+        /// <summary>
+        ///  maq 执行写操作 asy
+        /// </summary>
+        public static async Task<WriteReturn> ExecuteWriteMapAsy(string name, DbParameter[] param, WriteContext db = null, string key = null)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                return ExecuteWriteMap(name, param, db, key);
+            });
+        }
+        #endregion
+
+        #region maq 执行写操作 asy lazy
+        /// <summary>
+        /// maq 执行写操作 asy lazy
+        /// </summary>
+        public static Lazy<WriteReturn> ExecuteLazyWriteMap(string name, DbParameter[] param, WriteContext db = null, string key = null)
+        {
+            return new Lazy<WriteReturn>(() => ExecuteWriteMap(name, param, db, key));
+        }
+        #endregion
+
+        #region maq 执行写操作 asy lazy asy
+        /// <summary>
+        /// maq 执行写操作 asy lazy asy
+        /// </summary>
+        public static async Task<Lazy<WriteReturn>> ExecuteLazyWriteMapAsy(string name, DbParameter[] param, WriteContext db = null, string key = null)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                return new Lazy<WriteReturn>(() => ExecuteWriteMap(name, param, db, key));
+            });
+        }
+        #endregion           
+            
 
         #region maq 执行返回 List<Dictionary<string, object>>
         /// <summary>
