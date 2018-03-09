@@ -24,7 +24,7 @@ namespace Data.Core
         /// <param name="model">实体</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public static WriteReturn AddList<T>(List<T> list, WriteContext db = null, string key = null) where T : class, new()
+        public static WriteReturn AddList<T>(List<T> list, DataContext db = null, string key = null) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -34,7 +34,7 @@ namespace Data.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetWriteContext(key);
+                var tempDb = BaseContext.GetContext(key);
                 result = tempDb.AddList<T>(list);
                 config = tempDb.config;
                 tempDb.Dispose();
@@ -64,7 +64,7 @@ namespace Data.Core
         /// <param name="model">实体</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> AddListAsy<T>(List<T> list, WriteContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> AddListAsy<T>(List<T> list, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -83,7 +83,7 @@ namespace Data.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="notAddField">不需要增加的字段</param>
         /// <returns></returns>
-        public static WriteReturn Add<T>(T model, Expression<Func<T, object>> notAddField = null, WriteContext db = null, string key = null) where T : class, new()
+        public static WriteReturn Add<T>(T model, Expression<Func<T, object>> notAddField = null, DataContext db = null, string key = null) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -93,7 +93,7 @@ namespace Data.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetWriteContext(key);
+                var tempDb = BaseContext.GetContext(key);
                 result = tempDb.Add<T>(model, notAddField, false);
                 config = tempDb.config;
                 tempDb.Dispose();
@@ -123,7 +123,7 @@ namespace Data.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="notAddField">不需要增加的字段</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> AddAsy<T>(T model, Expression<Func<T, object>> notAddField, WriteContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> AddAsy<T>(T model, Expression<Func<T, object>> notAddField, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -141,7 +141,7 @@ namespace Data.Core
         /// <param name="predicate">表达式</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public static WriteReturn Delete<T>(Expression<Func<T, bool>> predicate, WriteContext db = null, string key = null) where T : class, new()
+        public static WriteReturn Delete<T>(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -151,9 +151,9 @@ namespace Data.Core
 
             if (db == null)
             {
-                var tempDb = new WriteContext(key);
+                var tempDb = new DataContext(key);
                 result = tempDb.Delete<T>(predicate);
-                config = db.config;
+                config = tempDb.config;
                 tempDb.Dispose();
             }
             else
@@ -180,7 +180,7 @@ namespace Data.Core
         /// <param name="predicate">表达式</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> DeleteAsy<T>(Expression<Func<T, bool>> predicate, WriteContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> DeleteAsy<T>(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -200,7 +200,7 @@ namespace Data.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="field">需要修改的字段</param>
         /// <returns></returns>
-        public static WriteReturn Update<T>(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, WriteContext db = null, string key = null) where T : class, new()
+        public static WriteReturn Update<T>(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -210,7 +210,7 @@ namespace Data.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetWriteContext(key);
+                var tempDb = BaseContext.GetContext(key);
                 result = tempDb.Update<T>(model, predicate, field);
                 config = tempDb.config;
                 tempDb.Dispose();
@@ -242,7 +242,7 @@ namespace Data.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="field">需要修改的字段</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, WriteContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -259,7 +259,7 @@ namespace Data.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static WriteReturn ExecuteSql(string sql, DbParameter[] param, WriteContext db = null, string key = null)
+        public static WriteReturn ExecuteSql(string sql, DbParameter[] param, DataContext db = null, string key = null)
         {
             ConfigModel config = null;
             var result = new DataReturn();
@@ -269,14 +269,14 @@ namespace Data.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetWriteContext(key);
-                result = tempDb.ExecuteSql(sql, param);
+                var tempDb = BaseContext.GetContext(key);
+                result = tempDb.ExecuteSql(sql, param,true);
                 config = tempDb.config;
                 tempDb.Dispose();
             }
             else
             {
-                result = db.ExecuteSql(sql, param);
+                result = db.ExecuteSql(sql, param,true);
                 config = db.config;
             }
 
@@ -295,7 +295,7 @@ namespace Data.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<WriteReturn> ExecuteSqlAsy(string sql, DbParameter[] param, WriteContext db = null, string key = null)
+        public static async Task<WriteReturn> ExecuteSqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null)
         {
             return await Task.Factory.StartNew(() =>
             {

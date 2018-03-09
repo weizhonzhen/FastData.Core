@@ -20,9 +20,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     return redis.ContainsKey(key);
                 }
             }
@@ -64,9 +63,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     return redis.Set<T>(key, model, DateTime.Now.AddHours(hours));
                 }
             }
@@ -112,9 +110,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     return redis.Set<string>(key, model, DateTime.Now.AddHours(hours));
                 }
             }
@@ -160,9 +157,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     return redis.Set<string>(key, model, DateTime.Now.AddMinutes(Minutes));
                 }
             }
@@ -206,9 +202,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     return redis.Get<string>(key);
                 }
             }
@@ -250,9 +245,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     return redis.Get<T>(key);
                 }
             }
@@ -293,9 +287,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     return redis.Remove(key);
                 }
             }
@@ -336,9 +329,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     redis.SetAll<T>(dic);
 
                     return true;
@@ -382,9 +374,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     return redis.GetAll<T>(keys);
                 }
             }
@@ -425,9 +416,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     redis.RemoveAll(keys);
 
                     return true;
@@ -471,9 +461,8 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.Db = db;
                     redis.EnqueueItemOnList(queueName, message);
                 }
             }
@@ -511,7 +500,7 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
                     return redis.DequeueItemFromList(queueName);
                 }
@@ -556,7 +545,7 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
                     redis.PublishMessage(channel, message);
                 }
@@ -600,7 +589,7 @@ namespace Redis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext.GetClient())
+                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
                     using (var item = redis.CreateSubscription())
                     {

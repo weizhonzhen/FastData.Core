@@ -8,6 +8,22 @@ namespace Untility.Core.Base
 {
     public static class BaseRegular
     {
+        #region 转时间格式化
+        /// <summary>
+        /// 标签：2015.7.13，魏中针
+        /// 说明：转时间格式化
+        /// </summary>
+        public static DateTime ToDate(this object strValue)
+        {
+            return Convert.ToDateTime(strValue);
+        }
+
+        public static string ToDate(this object strValue, string format)
+        {
+            return Convert.ToDateTime(strValue).ToString(format);
+        }
+        #endregion
+
         #region 验证时间
         /// <summary>
         /// 验证时间

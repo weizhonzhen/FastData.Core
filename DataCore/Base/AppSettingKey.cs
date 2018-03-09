@@ -5,13 +5,8 @@
         /// <summary>
         /// 写数据库key
         /// </summary>
-        public static readonly string Write = "WriteData";
-
-        /// <summary>
-        /// 读数据库key
-        /// </summary>
-        public static readonly string Read = "ReadData";
-
+        public static readonly string Config = "DataConfig";
+        
         /// <summary>
         /// map key
         /// </summary>

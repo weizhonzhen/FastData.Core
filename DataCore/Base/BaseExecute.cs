@@ -78,7 +78,7 @@ namespace Data.Core.Base
             return cmd.ExecuteNonQuery() > 0;
         }
         #endregion
-
+                
         #region 返回分页DataReader
         /// <summary>
         /// 返回分页DataReader
@@ -96,7 +96,7 @@ namespace Data.Core.Base
                 var table = new StringBuilder();
                 var sb = new StringBuilder();
                 var param = new List<DbParameter>();
-
+                
                 cmd.Parameters.Clear();
 
                 table.Append(item.Table[0]);
@@ -105,11 +105,11 @@ namespace Data.Core.Base
                     table.AppendFormat(" {0} on {1}", item.Table[i], item.Predicate[i].Where);
 
                     if (item.Predicate[i].Param.Count != 0)
-                        param.AddRange(Parameter.ReNewParam(item.Predicate[i].Param, item.Config));
+                        param.AddRange(Parameter.ReNewParam(item.Predicate[i].Param,item.Config));
                 }
-
+                                
                 if (item.Predicate[0].Param.Count != 0)
-                    param.AddRange(Parameter.ReNewParam(item.Predicate[0].Param, item.Config));
+                    param.AddRange(Parameter.ReNewParam(item.Predicate[0].Param,item.Config));
 
                 if (item.Config.DbType == DataDbType.SqlServer)
                 {
@@ -139,7 +139,7 @@ namespace Data.Core.Base
                                         , pModel.StarId.ToString());
                     }
                     else
-                    {
+                    { 
                         sb.AppendFormat(@"select * from {3} 
                                     where rowid in(select rid from 
                                     (select rownum rn,rid from 
@@ -206,7 +206,7 @@ namespace Data.Core.Base
                 sql = string.Format("count:{0},page:{1}", sql, ParameterToSql.ObjectParamToSql(param, sb.ToString(), item.Config));
                 return cmd.ExecuteReader();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Task.Factory.StartNew(() =>
                 {
@@ -216,13 +216,13 @@ namespace Data.Core.Base
             }
         }
         #endregion
-
+        
         #region 返回分页条数
         /// <summary>
         /// 返回分页条数
         /// </summary>
         /// <returns></returns>
-        public static int ToPageCount(DataQuery item, DbCommand cmd, ref string sql)
+        public static int ToPageCount(DataQuery item, DbCommand cmd,  ref string sql)
         {
             try
             {
@@ -235,16 +235,16 @@ namespace Data.Core.Base
                     sql = string.Format("{2} {0} on {1}", item.Table[i], item.Predicate[i].Where, sql);
 
                     if (item.Predicate[i].Param.Count != 0)
-                        param.AddRange(Parameter.ReNewParam(item.Predicate[i].Param, item.Config));
+                        param.AddRange(Parameter.ReNewParam(item.Predicate[i].Param,item.Config));
                 }
 
                 if (!string.IsNullOrEmpty(item.Predicate[0].Where))
                     sql = string.Format("{1} where {0}", item.Predicate[0].Where, sql);
 
                 if (item.Predicate[0].Param.Count != 0)
-                    param.AddRange(Parameter.ReNewParam(item.Predicate[0].Param, item.Config));
+                    param.AddRange(Parameter.ReNewParam(item.Predicate[0].Param,item.Config));
 
-                if (param.Count != 0)
+                if(param.Count!=0)
                     cmd.Parameters.AddRange(param.ToArray());
 
                 var dt = BaseExecute.ToDataTable(cmd, sql.ToString());
@@ -280,7 +280,7 @@ namespace Data.Core.Base
 
                 if (param != null)
                     cmd.Parameters.AddRange(Parameter.ReNewParam(param.ToList(), config).ToArray());
-
+                
                 var dt = BaseExecute.ToDataTable(cmd, sql.ToString());
 
                 return int.Parse(dt.Rows[0][0].ToString());
@@ -289,7 +289,7 @@ namespace Data.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "ToPageCountSql", "");
+                    DbLog.LogException(config.IsOutError,config.DbType, ex, "ToPageCountSql", "");
                 });
                 return 0;
             }
@@ -329,11 +329,11 @@ namespace Data.Core.Base
                                     , sql, pModel.EndId, pModel.StarId);
 
                 if (config.DbType == DataDbType.PostgreSql)
-                    sql = string.Format("{0} limit {1} offset {2}", sql, pModel.PageSize, pModel.StarId);
+                    sql = string.Format("{0} limit {1} offset {2}"  , sql, pModel.PageSize, pModel.StarId);
 
                 if (config.DbType == DataDbType.SQLite)
                     sql = string.Format("{0} limit {1} offset {2}", sql, pModel.PageSize, pModel.StarId);
-
+                
                 tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
 
                 if (param != null)

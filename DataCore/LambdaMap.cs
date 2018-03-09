@@ -75,7 +75,7 @@ namespace Data.Core
         public static void InstanceTable(Assembly[] list, string nameSpace, string dll, string dbKey = null)
         {
             var query = new DataQuery();
-            query.Config = DataConfig.Write(dbKey);
+            query.Config = DataConfig.Get(dbKey);
             query.Key = dbKey;
 
             foreach (var item in list)
@@ -122,8 +122,8 @@ namespace Data.Core
         public static void InstanceMap(string dbKey = null)
         {
             var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map); 
-            var config = DataConfig.Read(dbKey);
-            var db = new WriteContext(dbKey, config);
+            var config = DataConfig.Get(dbKey);
+            var db = new DataContext(dbKey, config);
 
             foreach (var item in list.Path)
             {
@@ -161,7 +161,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行返回结果
         /// </summary>
-        public static List<T> ExecuteMap<T>(string name, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        public static List<T> ExecuteMap<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             InstanceMap(key);
 
@@ -179,7 +179,7 @@ namespace Data.Core
         /// <summary>
         /// 执行sql asy
         /// </summary>
-        public static async Task<List<T>> ExecuteMapAsy<T>(string name, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        public static async Task<List<T>> ExecuteMapAsy<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -192,7 +192,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行返回结果 lazy
         /// </summary>
-        public static Lazy<List<T>> ExecuteLazyMap<T>(string name, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        public static Lazy<List<T>> ExecuteLazyMap<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             return new Lazy<List<T>>(() => ExecuteMap<T>(name, param, db, key));
         }
@@ -202,7 +202,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行返回结果 lazy asy
         /// </summary>
-        public static async Task<Lazy<List<T>>> ExecuteLazyMapAsy<T>(string name, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        public static async Task<Lazy<List<T>>> ExecuteLazyMapAsy<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -211,69 +211,12 @@ namespace Data.Core
         }
         #endregion
 
-            
-            
-        #region maq 执行写操作
-        /// <summary>
-        /// 执行写操作
-        /// </summary>
-        public static WriteReturn ExecuteWriteMap(string name, DbParameter[] param, WriteContext db = null, string key = null)
-        {
-            InstanceMap(key);
-
-            if (RedisInfo.Exists(name.ToLower()))
-            {
-                var sql = GetMapSql(name, ref param);
-
-                return LambdaWrite.ExecuteSql(sql, param, db, key);
-            }
-            else
-                return new WriteReturn();
-        }
-        #endregion
-
-        #region maq 执行写操作 asy
-        /// <summary>
-        ///  maq 执行写操作 asy
-        /// </summary>
-        public static async Task<WriteReturn> ExecuteWriteMapAsy(string name, DbParameter[] param, WriteContext db = null, string key = null)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                return ExecuteWriteMap(name, param, db, key);
-            });
-        }
-        #endregion
-
-        #region maq 执行写操作 asy lazy
-        /// <summary>
-        /// maq 执行写操作 asy lazy
-        /// </summary>
-        public static Lazy<WriteReturn> ExecuteLazyWriteMap(string name, DbParameter[] param, WriteContext db = null, string key = null)
-        {
-            return new Lazy<WriteReturn>(() => ExecuteWriteMap(name, param, db, key));
-        }
-        #endregion
-
-        #region maq 执行写操作 asy lazy asy
-        /// <summary>
-        /// maq 执行写操作 asy lazy asy
-        /// </summary>
-        public static async Task<Lazy<WriteReturn>> ExecuteLazyWriteMapAsy(string name, DbParameter[] param, WriteContext db = null, string key = null)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                return new Lazy<WriteReturn>(() => ExecuteWriteMap(name, param, db, key));
-            });
-        }
-        #endregion           
-            
 
         #region maq 执行返回 List<Dictionary<string, object>>
         /// <summary>
         /// maq 执行返回 List<Dictionary<string, object>>
         /// </summary>
-        public static List<Dictionary<string, object>> ExecuteMap(string name, DbParameter[] param, ReadContext db = null, string key = null)
+        public static List<Dictionary<string, object>> ExecuteMap(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
             InstanceMap(key);
 
@@ -292,7 +235,7 @@ namespace Data.Core
         /// <summary>
         /// 执行sql List<Dictionary<string, object>> asy
         /// </summary>
-        public static async Task<List<Dictionary<string, object>>> ExecuteMapAsy(string name, DbParameter[] param, ReadContext db = null, string key = null)
+        public static async Task<List<Dictionary<string, object>>> ExecuteMapAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -305,7 +248,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行返回 List<Dictionary<string, object>> lazy
         /// </summary>
-        public static Lazy<List<Dictionary<string, object>>> ExecuteLazyMap(string name, DbParameter[] param, ReadContext db = null, string key = null)
+        public static Lazy<List<Dictionary<string, object>>> ExecuteLazyMap(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
             return new Lazy<List<Dictionary<string, object>>>(() => ExecuteMap(name, param, db, key));
         }
@@ -315,11 +258,67 @@ namespace Data.Core
         /// <summary>
         /// maq 执行返回 List<Dictionary<string, object>> lazy asy
         /// </summary>
-        public static async Task<Lazy<List<Dictionary<string, object>>>> ExecuteLazyMapAsy(string name, DbParameter[] param, ReadContext db = null, string key = null)
+        public static async Task<Lazy<List<Dictionary<string, object>>>> ExecuteLazyMapAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<List<Dictionary<string, object>>>(() => ExecuteMap(name, param, db, key));
+            });
+        }
+        #endregion
+
+
+        #region maq 执行写操作
+        /// <summary>
+        /// 执行写操作
+        /// </summary>
+        public static WriteReturn ExecuteWriteMap(string name, DbParameter[] param, DataContext db = null, string key = null)
+        {
+            InstanceMap(key);
+
+            if (RedisInfo.Exists(name.ToLower()))
+            {
+                var sql = GetMapSql(name, ref param);
+
+                return LambdaWrite.ExecuteSql(sql, param, db, key);
+            }
+            else
+                return new WriteReturn();
+        }
+        #endregion
+
+        #region maq 执行写操作 asy
+        /// <summary>
+        ///  maq 执行写操作 asy
+        /// </summary>
+        public static async Task<WriteReturn> ExecuteWriteMapAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                return ExecuteWriteMap(name, param, db, key);
+            });
+        }
+        #endregion
+
+        #region maq 执行写操作 asy lazy
+        /// <summary>
+        /// maq 执行写操作 asy lazy
+        /// </summary>
+        public static Lazy<WriteReturn> ExecuteLazyWriteMap(string name, DbParameter[] param, DataContext db = null, string key = null)
+        {
+            return new Lazy<WriteReturn>(() => ExecuteWriteMap(name, param, db, key));
+        }
+        #endregion
+
+        #region maq 执行写操作 asy lazy asy
+        /// <summary>
+        /// maq 执行写操作 asy lazy asy
+        /// </summary>
+        public static async Task<Lazy<WriteReturn>> ExecuteLazyWriteMapAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                return new Lazy<WriteReturn>(() => ExecuteWriteMap(name, param, db, key));
             });
         }
         #endregion
@@ -332,17 +331,17 @@ namespace Data.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        private static PageResult ExecuteSqlPage(PageModel pModel, string sql, DbParameter[] param, ReadContext db = null, string key = null)
+        private static PageResult ExecuteSqlPage(PageModel pModel, string sql, DbParameter[] param, DataContext db = null, string key = null)
         {
             var result = new DataReturn();
-            var config = DataConfig.Read(key);
+            var config = DataConfig.Get(key);
             var stopwatch = new Stopwatch();
 
             stopwatch.Start();
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetReadContext(key);
+                var tempDb = BaseContext.GetContext(key);
                 result = tempDb.GetPageSql(pModel, sql, param);
                 tempDb.Dispose();
             }
@@ -361,7 +360,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行分页
         /// </summary>
-        public static PageResult ExecuteMapPage(PageModel pModel, string name, DbParameter[] param, ReadContext db = null, string key = null)
+        public static PageResult ExecuteMapPage(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
             InstanceMap(key);
 
@@ -380,7 +379,7 @@ namespace Data.Core
         /// <summary>
         /// 执行分页 asy
         /// </summary>
-        public static async Task<PageResult> ExecuteMapPageAsy(PageModel pModel, string name, DbParameter[] param, ReadContext db = null, string key = null)
+        public static async Task<PageResult> ExecuteMapPageAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -393,7 +392,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行分页 lazy
         /// </summary>
-        public static Lazy<PageResult> ExecuteLazyMapPage(PageModel pModel, string name, DbParameter[] param, ReadContext db = null, string key = null)
+        public static Lazy<PageResult> ExecuteLazyMapPage(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
             return new Lazy<PageResult>(() => ExecuteMapPage(pModel, name, param, db, key));
         }
@@ -403,7 +402,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行分页lazy asy
         /// </summary>
-        public static async Task<Lazy<PageResult>> ExecuteLazyMapPageAsy(PageModel pModel, string name, DbParameter[] param, ReadContext db = null, string key = null)
+        public static async Task<Lazy<PageResult>> ExecuteLazyMapPageAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -420,17 +419,17 @@ namespace Data.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        private static PageResult<T> ExecuteSqlPage<T>(PageModel pModel, string sql, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        private static PageResult<T> ExecuteSqlPage<T>(PageModel pModel, string sql, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             var result = new DataReturn<T>();
-            var config = DataConfig.Read(key);
+            var config = DataConfig.Get(key);
             var stopwatch = new Stopwatch();
 
             stopwatch.Start();
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetReadContext(key);
+                var tempDb = BaseContext.GetContext(key);
                 result = tempDb.GetPageSql<T>(pModel, sql, param);
                 tempDb.Dispose();
             }
@@ -449,7 +448,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行分页
         /// </summary>
-        public static PageResult<T> ExecuteMapPage<T>(PageModel pModel, string name, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        public static PageResult<T> ExecuteMapPage<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             InstanceMap(key);
 
@@ -468,7 +467,7 @@ namespace Data.Core
         /// <summary>
         /// 执行分页 asy
         /// </summary>
-        public static async Task<PageResult<T>> ExecuteMapPageAsy<T>(PageModel pModel, string name, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        public static async Task<PageResult<T>> ExecuteMapPageAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -481,7 +480,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行分页 lazy
         /// </summary>
-        public static Lazy<PageResult<T>> ExecuteLazyMapPage<T>(PageModel pModel, string name, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        public static Lazy<PageResult<T>> ExecuteLazyMapPage<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             return new Lazy<PageResult<T>>(() => ExecuteMapPage<T>(pModel, name, param, db, key));
         }
@@ -491,7 +490,7 @@ namespace Data.Core
         /// <summary>
         /// maq 执行分页lazy asy
         /// </summary>
-        public static async Task<Lazy<PageResult<T>>> ExecuteLazyMapPageAsy<T>(PageModel pModel, string name, DbParameter[] param, ReadContext db = null, string key = null) where T : class, new()
+        public static async Task<Lazy<PageResult<T>>> ExecuteLazyMapPageAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -682,7 +681,7 @@ namespace Data.Core
         /// <param name="dbKey"></param>
         /// <param name="key"></param>
         /// <param name="info"></param>
-        private static bool SaveXml(string dbKey, string key, FileInfo info, ConfigModel config, WriteContext db)
+        private static bool SaveXml(string dbKey, string key, FileInfo info, ConfigModel config, DataContext db)
         {
             if (config.IsMapSave)
             {

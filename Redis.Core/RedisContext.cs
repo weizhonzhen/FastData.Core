@@ -13,12 +13,9 @@ namespace Redis.Core
         /// 获取上下文
         /// </summary>
         /// <returns></returns>
-        public static PooledRedisClientManager GetContext
+        public static PooledRedisClientManager GetContext(int db=0)
         {
-            get
-            {
-                return ClientInfo;
-            }
+            return ClientInfo(db);
         }
         #endregion
 
@@ -28,22 +25,20 @@ namespace Redis.Core
         /// 连接配置
         /// </summary>
         /// <returns></returns>
-        private static PooledRedisClientManager ClientInfo
+        private static PooledRedisClientManager ClientInfo(int db=0)
         {
-            get
-            {
-                //获取配置
-                var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis);
+            //获取配置
+            var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis);
 
-                //redis连接
-                return new PooledRedisClientManager(config.WriteServerList.Split(',')
-                 , config.ReadServerList.Split(','), new RedisClientManagerConfig
-                 {
-                     MaxReadPoolSize = config.MaxReadPoolSize == 0 ? 60 : config.MaxReadPoolSize,
-                     MaxWritePoolSize = config.MaxWritePoolSize == 0 ? 60 : config.MaxWritePoolSize,
-                     AutoStart = config.AutoStart
-                 });
-            }
+            //redis连接
+            return new PooledRedisClientManager(config.WriteServerList.Split(',')
+             , config.ReadServerList.Split(','), new RedisClientManagerConfig
+             {
+                 DefaultDb = db,
+                 MaxReadPoolSize = config.MaxReadPoolSize == 0 ? 60 : config.MaxReadPoolSize,
+                 MaxWritePoolSize = config.MaxWritePoolSize == 0 ? 60 : config.MaxWritePoolSize,
+                 AutoStart = config.AutoStart
+             });
         }
         #endregion
     }
