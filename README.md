@@ -26,7 +26,7 @@ in appsettings.json
             "AutoStart": true
           },
           "SqlMap" :{"Path": [ "map/admin/Api.xml", "map/admin/Area.xml"]},          
-           "WriteData": [
+           "DataConfig": [
               {
                 "ProviderName": "MySql.Data.MySqlClient",
                 "DbType": "MySql",
@@ -38,21 +38,6 @@ in appsettings.json
                 "Flag": "?",
                 "FactoryClient": "MySql.Data.MySqlClient.MySqlClientFactory",
                 "Key": "Write",
-                "DesignModel": "CodeFirst"
-              }
-            ],
-           "ReadData": [
-              {
-                "ProviderName": "MySql.Data.MySqlClient",
-                "DbType": "MySql",
-                "ConnStr": "Database=Cloud;Data Source=127.0.0.1;User Id=root;Password=22;CharSet=utf8;port=3306;Allow User Variables=True;pooling=true;Min Pool Size=10;Max Pool Size=100;",
-                "IsOutSql": true,
-                "IsOutError": true,
-                "IsPropertyCache": true,
-                "IsMapSave": false,
-                "Flag": "?",
-                "FactoryClient": "MySql.Data.MySqlClient.MySqlClientFactory",
-                "Key": "Read",
                 "DesignModel": "CodeFirst"
               }
             ]
