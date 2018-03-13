@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Data.Core.CacheModel;
 using Redis.Core;
+using Data.Core.Base;
 
 namespace Data.Core.Property
 {
@@ -25,8 +26,8 @@ namespace Data.Core.Property
 
             if (IsCache)
             {
-                if (RedisInfo.Exists(key))
-                    return RedisInfo.GetItem<List<PropertyModel>>(key);
+                if (RedisInfo.Exists(key, RedisDb.Properties))
+                    return RedisInfo.GetItem<List<PropertyModel>>(key, RedisDb.Properties);
                 else
                 {
                     typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
@@ -37,12 +38,12 @@ namespace Data.Core.Property
                         list.Add(temp);
                     });
 
-                    RedisInfo.SetItem<List<PropertyModel>>(key, list);
+                    RedisInfo.SetItem<List<PropertyModel>>(key, list, 8640, RedisDb.Properties);
                 }
             }
             else
             {
-                RedisInfo.RemoveItem(key);
+                RedisInfo.RemoveItem(key, RedisDb.Properties);
                 typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                 {
                     var temp = new PropertyModel();

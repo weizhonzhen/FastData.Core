@@ -56,7 +56,7 @@ namespace Data.Core
                                     cacheList.Add(model);
                                 }
 
-                                RedisInfo.SetItem<List<PropertyModel>>(key, cacheList);
+                                RedisInfo.SetItem<List<PropertyModel>>(key, cacheList, 8640, RedisDb.Properties);
                             }
                         });
                     }
@@ -121,7 +121,7 @@ namespace Data.Core
         /// <returns></returns>
         public static void InstanceMap(string dbKey = null)
         {
-            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map); 
+            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map);
             var config = DataConfig.Get(dbKey);
             var db = new DataContext(dbKey, config);
 
@@ -130,29 +130,29 @@ namespace Data.Core
                 var info = new FileInfo(item);
                 var key = BaseSymmetric.Generate(info.FullName);
 
-                if (!RedisInfo.Exists(key))
+                if (!RedisInfo.Exists(key, RedisDb.Xml))
                 {
                     var temp = new MapXmlModel();
                     temp.LastWrite = info.LastWriteTime;
                     temp.FileKey = ReadXml(info.FullName, config);
                     temp.FileName = info.FullName;
                     if (SaveXml(dbKey, key, info, config, db))
-                        RedisInfo.SetItem<MapXmlModel>(key, temp);
+                        RedisInfo.SetItem<MapXmlModel>(key, temp, 8640, RedisDb.Xml);
                 }
-                else if ((RedisInfo.GetItem<MapXmlModel>(key).LastWrite - info.LastWriteTime).Minutes != 0)
+                else if ((RedisInfo.GetItem<MapXmlModel>(key, RedisDb.Xml).LastWrite - info.LastWriteTime).Minutes != 0)
                 {
-                    foreach (var temp in RedisInfo.GetItem<MapXmlModel>(key).FileKey)
-                        RedisInfo.RemoveItem(temp);
+                    foreach (var temp in RedisInfo.GetItem<MapXmlModel>(key, RedisDb.Xml).FileKey)
+                        RedisInfo.RemoveItem(temp, RedisDb.Xml);
 
                     var model = new MapXmlModel();
                     model.LastWrite = info.LastWriteTime;
                     model.FileKey = ReadXml(info.FullName, config);
                     model.FileName = info.FullName;
                     if (SaveXml(dbKey, key, info, config, db))
-                        RedisInfo.SetItem<MapXmlModel>(key, model);
+                        RedisInfo.SetItem<MapXmlModel>(key, model, 8640, RedisDb.Xml);
                 }
             }
-            
+
             db.Dispose();
         }
         #endregion
@@ -165,7 +165,7 @@ namespace Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower()))
+            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
                 var sql = GetMapSql(name, ref param);
                 return LambdaRead.ExecuteSql<T>(sql, param, db, key);
@@ -220,7 +220,7 @@ namespace Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower()))
+            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
                 var sql = GetMapSql(name, ref param);
 
@@ -276,7 +276,7 @@ namespace Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower()))
+            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
                 var sql = GetMapSql(name, ref param);
 
@@ -364,7 +364,7 @@ namespace Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower()))
+            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
                 var sql = GetMapSql(name, ref param);
 
@@ -452,7 +452,7 @@ namespace Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower()))
+            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
                 var sql = GetMapSql(name, ref param);
 
@@ -511,7 +511,7 @@ namespace Data.Core
             GetXmlList(path, "sqlMap", ref key, ref sql, config);
 
             for (var i = 0; i < key.Count; i++)
-                RedisInfo.SetItem(key[i].ToLower(), sql[i]);
+                RedisInfo.SetItem(key[i].ToLower(), sql[i], 8640, RedisDb.Xml);
 
             return key;
         }
@@ -627,17 +627,17 @@ namespace Data.Core
             var tempParam = param.ToList();
             var sql = new StringBuilder();
 
-            for (var i = 0; i <= RedisInfo.GetItem(name.ToLower()).ToInt(0); i++)
+            for (var i = 0; i <= RedisInfo.GetItem(name.ToLower(), RedisDb.Xml).ToInt(0); i++)
             {
                 #region 文本
                 var txtKey = string.Format("{0}.{1}", name.ToLower(), i);
-                if (RedisInfo.Exists(txtKey))
-                    sql.Append(RedisInfo.GetItem(txtKey));
+                if (RedisInfo.Exists(txtKey, RedisDb.Xml))
+                    sql.Append(RedisInfo.GetItem(txtKey, RedisDb.Xml));
                 #endregion
 
                 #region 动态
                 var dynKey = string.Format("{0}.format.{1}", name.ToLower(), i);
-                if (RedisInfo.Exists(dynKey))
+                if (RedisInfo.Exists(dynKey, RedisDb.Xml))
                 {
                     if (param != null)
                     {
@@ -645,23 +645,23 @@ namespace Data.Core
                         foreach (var temp in param)
                         {
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
-                            if (RedisInfo.Exists(paramKey))
+                            if (RedisInfo.Exists(paramKey, RedisDb.Xml))
                             {
                                 var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
-                                var paramSql = RedisInfo.GetItem(paramKey).ToLower();
+                                var paramSql = RedisInfo.GetItem(paramKey, RedisDb.Xml).ToLower();
                                 if (paramSql.IndexOf(tempKey) >= 0)
                                 {
                                     tempParam.Remove(temp);
                                     tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
                                 }
                                 else
-                                    tempSql.Append(RedisInfo.GetItem(paramKey));
+                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                             }
                         }
 
                         if (tempSql.ToString() != "")
                         {
-                            sql.Append(RedisInfo.GetItem(dynKey));
+                            sql.Append(RedisInfo.GetItem(dynKey, RedisDb.Xml));
                             sql.Append(tempSql.ToString());
                         }
                     }
@@ -713,10 +713,10 @@ namespace Data.Core
                         model.LastTime = info.LastWriteTime;
                         model.EnFileContent = enContent;
                         model.DeFileContent = deContent;
-                       return db.Add(model).writeReturn.IsSuccess;
+                        return db.Add(model).writeReturn.IsSuccess;
                     }
                     else
-                       return db.Update<DataModel.MySql.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                        return db.Update<DataModel.MySql.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
                 }
 
                 if (config.DbType == DataDbType.Oracle)
@@ -735,7 +735,7 @@ namespace Data.Core
                         return db.Add(model).writeReturn.IsSuccess;
                     }
                     else
-                       return db.Update<DataModel.Oracle.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                        return db.Update<DataModel.Oracle.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
                 }
 
                 if (config.DbType == DataDbType.SqlServer)
