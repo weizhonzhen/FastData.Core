@@ -12,7 +12,13 @@ namespace Untility.Core.Base
     /// </summary>
     public static class BaseUrl
     {
-        public static readonly HttpClient http = new HttpClient(new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip });
+        private static readonly HttpClient http;
+
+        static BaseUrl()
+        {
+            http = new HttpClient(new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip });
+            http.DefaultRequestHeaders.Connection.Add("keep-alive");
+        }
 
         #region get url(select)
         /// <summary>
