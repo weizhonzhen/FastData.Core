@@ -11,6 +11,7 @@ namespace Redis.Core
     /// </summary>
     public static class RedisInfo
     {
+
         #region 是否存在
         /// <summary>
         /// 是否存在 
@@ -22,7 +23,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    return redis.ContainsKey(key);
+                    if (string.IsNullOrEmpty(key))
+                        return false;
+                    else
+                        return redis.ContainsKey(key);
                 }
             }
             catch (RedisException ex)
@@ -65,7 +69,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    return redis.Set<T>(key, model, DateTime.Now.AddHours(hours));
+                    if (string.IsNullOrEmpty(key))
+                        return false;
+                    else
+                        return redis.Set<T>(key, model, DateTime.Now.AddHours(hours));
                 }
             }
             catch (RedisException ex)
@@ -112,7 +119,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    return redis.Set<string>(key, model, DateTime.Now.AddHours(hours));
+                    if (string.IsNullOrEmpty(key))
+                        return false;
+                    else
+                        return redis.Set<string>(key, model, DateTime.Now.AddHours(hours));
                 }
             }
             catch (RedisException ex)
@@ -159,7 +169,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    return redis.Set<string>(key, model, DateTime.Now.AddMinutes(Minutes));
+                    if (string.IsNullOrEmpty(key))
+                        return false;
+                    else
+                        return redis.Set<string>(key, model, DateTime.Now.AddMinutes(Minutes));
                 }
             }
             catch (RedisException ex)
@@ -204,7 +217,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    return redis.Get<string>(key);
+                    if (string.IsNullOrEmpty(key))
+                        return "";
+                    else
+                        return redis.Get<string>(key);
                 }
             }
             catch (RedisException ex)
@@ -247,7 +263,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    return redis.Get<T>(key);
+                    if (string.IsNullOrEmpty(key))
+                        return new T();
+                    else
+                        return redis.Get<T>(key);
                 }
             }
             catch (RedisException ex)
@@ -289,7 +308,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    return redis.Remove(key);
+                    if (string.IsNullOrEmpty(key))
+                        return false;
+                    else
+                        return redis.Remove(key);
                 }
             }
             catch (RedisException ex)
@@ -463,7 +485,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.EnqueueItemOnList(queueName, message);
+                    if (string.IsNullOrEmpty(queueName))
+                        return;
+                    else
+                        redis.EnqueueItemOnList(queueName, message);
                 }
             }
             catch (RedisException ex)
@@ -502,7 +527,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    return redis.DequeueItemFromList(queueName);
+                    if (string.IsNullOrEmpty(queueName))
+                        return "";
+                    else
+                        return redis.DequeueItemFromList(queueName);
                 }
             }
             catch (RedisException ex)
@@ -547,7 +575,10 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    redis.PublishMessage(channel, message);
+                    if (string.IsNullOrEmpty(channel))
+                        return;
+                    else
+                        redis.PublishMessage(channel, message);
                 }
             }
             catch (RedisException ex)
@@ -591,12 +622,17 @@ namespace Redis.Core
             {
                 using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
                 {
-                    using (var item = redis.CreateSubscription())
+                    if (string.IsNullOrEmpty(channel))
+                        return;
+                    else
                     {
-                        item.OnMessage = message;
-                        item.OnSubscribe = subscribe;
-                        item.OnUnSubscribe = unSubscribe;
-                        item.SubscribeToChannels(channel);
+                        using (var item = redis.CreateSubscription())
+                        {
+                            item.OnMessage = message;
+                            item.OnSubscribe = subscribe;
+                            item.OnUnSubscribe = unSubscribe;
+                            item.SubscribeToChannels(channel);
+                        }
                     }
                 }
             }
