@@ -44,7 +44,9 @@ namespace Data.Core.Base
 
                             if (!dr.IsDBNull(id))
                             {
-                                if (dr.GetValue(id) != DBNull.Value)
+                                if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                                    dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), Nullable.GetUnderlyingType(info.PropertyType)), config.IsPropertyCache);
+                                else
                                     dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), info.PropertyType), config.IsPropertyCache);
                             }
                         }
@@ -61,9 +63,11 @@ namespace Data.Core.Base
                         {
                             if (!dr.IsDBNull(id))
                             {
-                                if (dr.GetValue(id) != DBNull.Value)
-                                    dynSet.SetValue(item, field[i], Convert.ChangeType(dr.GetValue(id)
-                                        , propertyList.Find(a => a.Name.ToLower() == field[i].ToLower()).PropertyType), config.IsPropertyCache);
+                                var info = propertyList.Find(a => a.Name.ToLower() == field[i].ToLower());
+                                if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                                    dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), Nullable.GetUnderlyingType(info.PropertyType)), config.IsPropertyCache);
+                                else
+                                    dynSet.SetValue(item, field[i], Convert.ChangeType(dr.GetValue(id), info.PropertyType), config.IsPropertyCache);
                             }
                         }
                         catch { }
