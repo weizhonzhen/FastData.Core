@@ -13,14 +13,34 @@ namespace Untility.Core.Base
         /// 标签：2015.7.13，魏中针
         /// 说明：转时间格式化
         /// </summary>
-        public static DateTime ToDate(this object strValue)
+        public static DateTime? ToDate(this object strValue)
         {
+            if (strValue.ToStr() == "")
+                return null;
+            return Convert.ToDateTime(strValue);
+        }
+
+        public static DateTime ToDate(this string strValue)
+        {
+            if (strValue.ToStr() == "")
+                return DateTime.MinValue;
             return Convert.ToDateTime(strValue);
         }
 
         public static string ToDate(this object strValue, string format)
         {
-            return Convert.ToDateTime(strValue).ToString(format);
+            if (strValue.ToStr() == "")
+                return null;
+            else
+                return Convert.ToDateTime(strValue).ToString(format);
+        }
+
+        public static string ToDate(this DateTime strValue, string format)
+        {
+            if (strValue.ToStr() == "")
+                return null;
+            else
+                return Convert.ToDateTime(strValue).ToString(format);
         }
         #endregion
 
@@ -55,7 +75,7 @@ namespace Untility.Core.Base
         {
             int tmp = 0;
             if (Int32.TryParse(str, out tmp))
-                return tmp;
+                return (int)tmp;
             else
                 return defValue;
         }
@@ -73,7 +93,7 @@ namespace Untility.Core.Base
         {
             float tmp = 0;
             if (float.TryParse(strValue, out tmp))
-                return tmp;
+                return (float)tmp;
             else
                 return defValue;
         }
@@ -91,7 +111,7 @@ namespace Untility.Core.Base
         {
             double tmp = 0;
             if (double.TryParse(strValue, out tmp))
-                return tmp;
+                return (double)tmp;
             else
                 return defValue;
         }
@@ -109,7 +129,7 @@ namespace Untility.Core.Base
         {
             long tmp = 0;
             if (Int64.TryParse(strValue, out tmp))
-                return tmp;
+                return (long)tmp;
             else
                 return defValue;
         }
@@ -127,7 +147,7 @@ namespace Untility.Core.Base
         {
             Decimal tmp = 0;
             if (Decimal.TryParse(strValue, out tmp))
-                return tmp;
+                return (decimal)tmp;
             else
                 return defValue;
         }
@@ -145,7 +165,7 @@ namespace Untility.Core.Base
         {
             byte tmp = 0;
             if (byte.TryParse(strValue, out tmp))
-                return tmp;
+                return (byte)tmp;
             else
                 return defValue;
         }
@@ -163,7 +183,7 @@ namespace Untility.Core.Base
         {
             Int16 tmp = 0;
             if (Int16.TryParse(strValue, out tmp))
-                return tmp;
+                return (Int16)tmp;
             else
                 return defValue;
         }
@@ -436,7 +456,7 @@ namespace Untility.Core.Base
         public static List<T> ToList<T>(T[] list)
         {
             var result = new List<T>();
-            foreach(var item in list)
+            foreach (var item in list)
             {
                 result.Add(item);
             }
