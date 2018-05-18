@@ -23,7 +23,7 @@ namespace Untility.Core.Base
             var build = new ConfigurationBuilder();
 
             //内存
-            build.AddInMemoryCollection();
+            //build.AddInMemoryCollection();
 
             //目录
             build.SetBasePath(Directory.GetCurrentDirectory());
@@ -50,7 +50,7 @@ namespace Untility.Core.Base
             var build = new ConfigurationBuilder();
 
             //内存
-            build.AddInMemoryCollection();
+            //build.AddInMemoryCollection();
 
             //目录
             build.SetBasePath(Directory.GetCurrentDirectory());
