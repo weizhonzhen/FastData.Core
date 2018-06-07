@@ -94,7 +94,7 @@ namespace Data.Core.Base
         /// <param name="sql">sql</param>
         /// <param name="oracleParam">参数</param>
         /// <returns></returns>
-        public static OptionModel InsertToSql<T>(T model, ConfigModel config, Expression<Func<T, object>> notAddField)
+        public static OptionModel InsertToSql<T>(T model, ConfigModel config, Expression<Func<T, object>> notAddField=null)
         {
             var sbName = new StringBuilder();
             var sbValue = new StringBuilder();

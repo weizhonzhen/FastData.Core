@@ -83,7 +83,7 @@ namespace Data.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="notAddField">不需要增加的字段</param>
         /// <returns></returns>
-        public static WriteReturn Add<T>(T model, Expression<Func<T, object>> notAddField = null, DataContext db = null, string key = null) where T : class, new()
+        public static WriteReturn Add<T>(T model, DataContext db = null, string key = null) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -94,13 +94,13 @@ namespace Data.Core
             if (db == null)
             {
                 var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Add<T>(model, notAddField, false);
+                result = tempDb.Add<T>(model, false);
                 config = tempDb.config;
                 tempDb.Dispose();
             }
             else
             {
-                result = db.Add<T>(model, notAddField, false);
+                result = db.Add<T>(model, false);
                 config = db.config;
             }
 
@@ -123,11 +123,11 @@ namespace Data.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="notAddField">不需要增加的字段</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> AddAsy<T>(T model, Expression<Func<T, object>> notAddField, DataContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> AddAsy<T>(T model, DataContext db = null, string key = null) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return Add<T>(model, notAddField, db, key);
+                return Add<T>(model, db, key);
             });
         }
         #endregion

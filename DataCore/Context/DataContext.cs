@@ -743,7 +743,7 @@ namespace Data.Core.Context
         /// <typeparam name="T">泛型</typeparam>
         /// <param name="model">实体</param>
         /// <returns></returns>
-        public DataReturn<T> Add<T>(T model, Expression<Func<T, object>> notAddField = null, bool isTrans = false) where T : class, new()
+        public DataReturn<T> Add<T>(T model, bool isTrans = false) where T : class, new()
         {
             var result = new DataReturn<T>();
             var insert = new OptionModel();
@@ -753,7 +753,7 @@ namespace Data.Core.Context
                 if (isTrans)
                     BeginTrans();
 
-                insert = BaseModel.InsertToSql<T>(model, config, notAddField);
+                insert = BaseModel.InsertToSql<T>(model, config);
 
                 if (insert.Result)
                 {
