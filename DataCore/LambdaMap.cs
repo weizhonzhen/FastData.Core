@@ -561,6 +561,9 @@ namespace Data.Core
                             tempKey = temp.Attributes["id"].Value.ToLower();
 
                             //节点数
+                            if (Array.Exists(key.ToArray(), element => element == tempKey))
+                                Task.Factory.StartNew(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
+
                             key.Add(tempKey);
                             sql.Add(temp.ChildNodes.Count.ToString());
 
