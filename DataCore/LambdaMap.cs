@@ -585,6 +585,18 @@ namespace Data.Core
 
                                     foreach (XmlNode dyn in node.ChildNodes)
                                     {
+                                        //条件
+                                        key.Add(string.Format("{0}.condition.{1}", tempKey, i));
+                                        key.Add(dyn.Name);
+
+                                        //条件值
+                                        if (dyn.Attributes["compareValue"] != null)
+                                        {
+                                            key.Add(string.Format("{0}.condition.value.{1}", tempKey, i));
+                                            sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
+                                        }
+
+                                        //属性和值
                                         key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
                                         sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
                                     }
@@ -648,18 +660,129 @@ namespace Data.Core
                         foreach (var temp in param)
                         {
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+                            var conditionKey = string.Format("{0}.condition.{1}", name.ToLower(), i);
+                            var conditionValueKey = string.Format("{0}.condition.value.{1}", name.ToLower(), i);
                             if (RedisInfo.Exists(paramKey, RedisDb.Xml))
                             {
                                 var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
                                 var paramSql = RedisInfo.GetItem(paramKey, RedisDb.Xml).ToLower();
-                                if (paramSql.IndexOf(tempKey) >= 0)
+                                var condition = RedisInfo.GetItem(conditionKey).ToLower();
+                                var conditionValue = RedisInfo.GetItem(conditionValueKey).ToLower();
+                                switch (condition)
                                 {
-                                    tempParam.Remove(temp);
-                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                    case "isEqual":
+                                        {
+                                            if (conditionValue == temp.Value.ToStr())
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isNotEqual":
+                                        {
+                                            if (conditionValue != temp.Value.ToStr())
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isGreaterThan":
+                                        {
+                                            if (temp.Value.ToStr().ToDecimal(0) > conditionValue.ToDecimal(0))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isLessThan":
+                                        {
+                                            if (temp.Value.ToStr().ToDecimal(0) < conditionValue.ToDecimal(0))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isNullOrEmpty":
+                                        {
+                                            if (string.IsNullOrEmpty(temp.Value.ToStr()))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isNotNullOrEmpty":
+                                        {
+                                            if (!string.IsNullOrEmpty(temp.Value.ToStr()))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    default:
+                                        {
+                                            //isPropertyAvailable
+                                            if (paramSql.IndexOf(tempKey) >= 0)
+                                            {
+                                                tempParam.Remove(temp);
+                                                tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                            }
+                                            else
+                                                tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+
+                                            break;
+                                        }
                                 }
-                                else
-                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                             }
+                            else
+                                tempParam.Remove(temp);
                         }
 
                         if (tempSql.ToString() != "")
