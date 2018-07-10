@@ -587,7 +587,7 @@ namespace Data.Core
                                     {
                                         //条件
                                         key.Add(string.Format("{0}.condition.{1}", tempKey, i));
-                                        key.Add(dyn.Name);
+                                        sql.Add(dyn.Name);
 
                                         //条件值
                                         if (dyn.Attributes["compareValue"] != null)
