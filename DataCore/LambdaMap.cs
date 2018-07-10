@@ -667,7 +667,7 @@ namespace Data.Core
                                 var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
                                 var paramSql = RedisInfo.GetItem(paramKey, RedisDb.Xml).ToLower();
                                 var condition = RedisInfo.GetItem(conditionKey).ToLower();
-                                var conditionValue = RedisInfo.GetItem(conditionValueKey).ToLower();
+                                var conditionValue = RedisInfo.GetItem(conditionValueKey).ToStr().ToLower();
                                 switch (condition)
                                 {
                                     case "isEqual":
