@@ -499,7 +499,6 @@ namespace Data.Core
         }
         #endregion
 
-
         #region 读取xml map并缓存
         /// <summary>
         /// 读取xml map并缓存
@@ -585,15 +584,25 @@ namespace Data.Core
 
                                     foreach (XmlNode dyn in node.ChildNodes)
                                     {
-                                        //条件
-                                        key.Add(string.Format("{0}.condition.{1}", tempKey, i));
-                                        sql.Add(dyn.Name);
-
-                                        //条件值
-                                        if (dyn.Attributes["compareValue"] != null)
+                                        if (dyn.Name != "isPropertyAvailable")
                                         {
-                                            key.Add(string.Format("{0}.condition.value.{1}", tempKey, i));
-                                            sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
+                                            //条件类型
+                                            key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            sql.Add(dyn.Name);
+
+                                            //比较条件值
+                                            if (dyn.Attributes["compareValue"] != null)
+                                            {
+                                                key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
+                                            }
+
+                                            //判断条件内容
+                                            if (dyn.Attributes["condition"] != null)
+                                            {
+                                                key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                sql.Add(dyn.Attributes["condition"].Value.ToLower());
+                                            }
                                         }
 
                                         //属性和值
@@ -660,13 +669,13 @@ namespace Data.Core
                         foreach (var temp in param)
                         {
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
-                            var conditionKey = string.Format("{0}.condition.{1}", name.ToLower(), i);
-                            var conditionValueKey = string.Format("{0}.condition.value.{1}", name.ToLower(), i);
+                            var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+                            var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             if (RedisInfo.Exists(paramKey, RedisDb.Xml))
                             {
                                 var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
                                 var paramSql = RedisInfo.GetItem(paramKey, RedisDb.Xml).ToLower();
-                                var condition = RedisInfo.GetItem(conditionKey).ToLower();
+                                var condition = RedisInfo.GetItem(conditionKey).ToStr().ToLower();
                                 var conditionValue = RedisInfo.GetItem(conditionValueKey).ToStr().ToLower();
                                 switch (condition)
                                 {
@@ -693,7 +702,7 @@ namespace Data.Core
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                    tempSql.Append(paramSql.ToString().Replace(temp.ParameterName.ToLower(), temp.Value.ToString()));
                                                 }
                                                 else
                                                     tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
@@ -766,6 +775,23 @@ namespace Data.Core
                                                 tempParam.Remove(temp);
                                             break;
                                         }
+                                    case "if":
+                                        {
+                                            conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
+                                            if (BaseCodeDom.GetResult(conditionValue))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
                                     default:
                                         {
                                             //isPropertyAvailable
@@ -781,8 +807,6 @@ namespace Data.Core
                                         }
                                 }
                             }
-                            else
-                                tempParam.Remove(temp);
                         }
 
                         if (tempSql.ToString() != "")
