@@ -563,7 +563,6 @@ namespace Data.Core
                             //节点数
                             if (Array.Exists(key.ToArray(), element => element == tempKey))
                                 Task.Factory.StartNew(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
-
                             key.Add(tempKey);
                             sql.Add(temp.ChildNodes.Count.ToString());
 
@@ -585,18 +584,21 @@ namespace Data.Core
 
                                     foreach (XmlNode dyn in node.ChildNodes)
                                     {
-                                        if (dyn.Name != "isPropertyAvailable")
+                                        if (dyn.Name == "isPropertyAvailable")
                                         {
+                                            //属性和值
+                                            key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
+                                        }
+                                        else if (dyn.Name != "choose")
+                                        {
+                                            //属性和值
+                                            key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
+
                                             //条件类型
                                             key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
                                             sql.Add(dyn.Name);
-
-                                            //比较条件值
-                                            if (dyn.Attributes["compareValue"] != null)
-                                            {
-                                                key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
-                                            }
 
                                             //判断条件内容
                                             if (dyn.Attributes["condition"] != null)
@@ -604,11 +606,39 @@ namespace Data.Core
                                                 key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
                                                 sql.Add(dyn.Attributes["condition"].Value.ToLower());
                                             }
-                                        }
 
-                                        //属性和值
-                                        key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                        sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
+                                            //比较条件值
+                                            if (dyn.Attributes["compareValue"] != null)
+                                            {
+                                                key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //条件类型
+                                            key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            sql.Add(dyn.Name);
+
+                                            if (dyn is XmlElement)
+                                            {
+                                                var count = 0;
+                                                key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                sql.Add(dyn.ChildNodes.Count.ToStr());
+                                                foreach (XmlNode child in dyn.ChildNodes)
+                                                {
+                                                    //条件
+                                                    key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                    sql.Add(child.Attributes["property"].Value.ToLower());
+
+                                                    //内容
+                                                    key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                    sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
+
+                                                    count++;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 #endregion
@@ -791,6 +821,36 @@ namespace Data.Core
                                             }
                                             else
                                                 tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "choose":
+                                        {
+                                            var isSuccess = false;
+                                            for (int j = 0; j < RedisInfo.GetItem(paramKey, RedisDb.Xml).ToStr().ToInt(0); j++)
+                                            {
+                                                conditionKey = string.Format("{0}.choose.{1}", paramKey, j);
+                                                condition = RedisInfo.GetItem(conditionKey).ToStr().ToLower();
+
+                                                conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
+                                                conditionValue = RedisInfo.GetItem(conditionValueKey).ToStr().ToLower();
+                                                conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
+                                                if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
+                                                {
+                                                    isSuccess = true;
+                                                    if (condition.IndexOf(tempKey) >= 0)
+                                                    {
+                                                        tempParam.Remove(temp);
+                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToString()));
+                                                    }
+                                                    else
+                                                        tempSql.Append(condition);
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!isSuccess)
+                                                tempParam.Remove(temp);
+
                                             break;
                                         }
                                     default:
