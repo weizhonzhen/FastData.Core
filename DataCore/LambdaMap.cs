@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Untility.Core.Base;
 using Untility.Core.Page;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 
 namespace Data.Core
 {
@@ -778,7 +779,7 @@ namespace Data.Core
                                     case "if":
                                         {
                                             conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
-                                            if (BaseCodeDom.GetResult(conditionValue))
+                                            if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
                                             {
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
