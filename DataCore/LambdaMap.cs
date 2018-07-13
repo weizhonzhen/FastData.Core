@@ -168,7 +168,7 @@ namespace Data.Core
 
             if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
-                var sql = GetMapSql(name, ref param);
+                var sql = GetMapSql(name, ref param, db, key);
                 return LambdaRead.ExecuteSql<T>(sql, param, db, key);
             }
             else
@@ -223,7 +223,7 @@ namespace Data.Core
 
             if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
-                var sql = GetMapSql(name, ref param);
+                var sql = GetMapSql(name, ref param, db, key);
 
                 return LambdaRead.ExecuteSql(sql, param, db, key);
             }
@@ -279,7 +279,7 @@ namespace Data.Core
 
             if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
-                var sql = GetMapSql(name, ref param);
+                var sql = GetMapSql(name, ref param, db, key);
 
                 return LambdaWrite.ExecuteSql(sql, param, db, key);
             }
@@ -367,7 +367,7 @@ namespace Data.Core
 
             if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
-                var sql = GetMapSql(name, ref param);
+                var sql = GetMapSql(name, ref param, db, key);
 
                 return ExecuteSqlPage(pModel, sql, param, db, key);
             }
@@ -455,7 +455,7 @@ namespace Data.Core
 
             if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
             {
-                var sql = GetMapSql(name, ref param);
+                var sql = GetMapSql(name, ref param, db, key);
 
                 return ExecuteSqlPage<T>(pModel, sql, param, db, key);
             }
@@ -499,6 +499,7 @@ namespace Data.Core
             });
         }
         #endregion
+
 
         #region 读取xml map并缓存
         /// <summary>
@@ -677,10 +678,13 @@ namespace Data.Core
         /// <param name="name"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        private static string GetMapSql(string name, ref DbParameter[] param)
+        private static string GetMapSql(string name, ref DbParameter[] param, DataContext db, string key)
         {
             var tempParam = param.ToList();
             var sql = new StringBuilder();
+            var flag = "";
+            if (db != null) { flag = db.config.Flag; }
+            if (key != null) { flag = BaseContext.GetContext(key).config.Flag; }
 
             for (var i = 0; i <= RedisInfo.GetItem(name.ToLower(), RedisDb.Xml).ToInt(0); i++)
             {
@@ -704,6 +708,7 @@ namespace Data.Core
                             var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             if (RedisInfo.Exists(paramKey, RedisDb.Xml))
                             {
+                                var flagParam = string.Format("{0}{1}", flag, temp.ParameterName.ToLower());
                                 var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
                                 var paramSql = RedisInfo.GetItem(paramKey, RedisDb.Xml).ToLower();
                                 var condition = RedisInfo.GetItem(conditionKey).ToStr().ToLower();
@@ -718,6 +723,11 @@ namespace Data.Core
                                                 {
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                                                 }
                                                 else
                                                     tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
@@ -735,6 +745,11 @@ namespace Data.Core
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(paramSql.ToString().Replace(temp.ParameterName.ToLower(), temp.Value.ToString()));
                                                 }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                                }
                                                 else
                                                     tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                                             }
@@ -750,6 +765,11 @@ namespace Data.Core
                                                 {
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                                                 }
                                                 else
                                                     tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
@@ -767,6 +787,11 @@ namespace Data.Core
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
                                                 }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                                }
                                                 else
                                                     tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                                             }
@@ -782,6 +807,11 @@ namespace Data.Core
                                                 {
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                                                 }
                                                 else
                                                     tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
@@ -799,6 +829,11 @@ namespace Data.Core
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
                                                 }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
+                                                }
                                                 else
                                                     tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                                             }
@@ -815,6 +850,11 @@ namespace Data.Core
                                                 {
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                                                 }
                                                 else
                                                     tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
@@ -842,6 +882,11 @@ namespace Data.Core
                                                         tempParam.Remove(temp);
                                                         tempSql.Append(condition.Replace(tempKey, temp.Value.ToString()));
                                                     }
+                                                    else if (condition.IndexOf(flagParam) < 0 && flag != "")
+                                                    {
+                                                        tempParam.Remove(temp);
+                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToString()));
+                                                    }
                                                     else
                                                         tempSql.Append(condition);
                                                     break;
@@ -860,6 +905,11 @@ namespace Data.Core
                                             {
                                                 tempParam.Remove(temp);
                                                 tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                            }
+                                            else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                            {
+                                                tempParam.Remove(temp);
+                                                tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
                                             }
                                             else
                                                 tempSql.Append(RedisInfo.GetItem(paramKey, RedisDb.Xml));
