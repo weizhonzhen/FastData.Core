@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Aop\LogAttribute.cs" />
+    <Compile Remove="Aop\**" />
+    <EmbeddedResource Remove="Aop\**" />
+    <None Remove="Aop\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -14,10 +16,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Aop\" />
   </ItemGroup>
 
 </Project>

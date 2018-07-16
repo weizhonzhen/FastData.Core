@@ -122,7 +122,7 @@ namespace Data.Core
         /// <returns></returns>
         public static void InstanceMap(string dbKey = null)
         {
-            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map);
+            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map,"map.json");
             var config = DataConfig.Get(dbKey);
             var db = new DataContext(dbKey, config);
 

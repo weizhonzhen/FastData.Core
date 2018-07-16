@@ -18,7 +18,7 @@ namespace Untility.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="key">键名</param>
         /// <returns></returns>
-        public static T GetValue<T>(string key) where T : class, new()
+        public static T GetValue<T>(string key,string fileName= "appsettings.json") where T : class, new()
         {
             var build = new ConfigurationBuilder();
 
@@ -29,7 +29,7 @@ namespace Untility.Core.Base
             build.SetBasePath(Directory.GetCurrentDirectory());
 
             //加载配置文件
-            build.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            build.AddJsonFile(fileName, optional: true, reloadOnChange: true);
 
             //编译成对象
             var config = build.Build();
@@ -45,7 +45,7 @@ namespace Untility.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="key">键名</param>
         /// <returns></returns>
-        public static List<T> GetListValue<T>(string key) where T : class, new()
+        public static List<T> GetListValue<T>(string key, string fileName = "appsettings.json") where T : class, new()
         {
             var build = new ConfigurationBuilder();
 
@@ -56,7 +56,7 @@ namespace Untility.Core.Base
             build.SetBasePath(Directory.GetCurrentDirectory());
 
             //加载配置文件
-            build.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            build.AddJsonFile(fileName, optional: true, reloadOnChange: true);
 
             //编译成对象
             var config = build.Build();

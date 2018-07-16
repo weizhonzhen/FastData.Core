@@ -14,9 +14,9 @@ namespace Data.Core.Base
         {
             var item = new ConfigModel();
             if (key != null)
-                item = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config).Find(a => a.Key == key);
+                item = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config,"db.json").Find(a => a.Key == key);
             else
-                item = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config)[0] ?? new ConfigModel();
+                item = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, "db.json")[0] ?? new ConfigModel();
 
             if (item.DesignModel == "")
                 item.DesignModel = Config.DbFirst;

@@ -18,8 +18,7 @@ namespace Redis.Core
             return ClientInfo(db);
         }
         #endregion
-
-
+        
         #region 连接配置
         /// <summary>
         /// 连接配置
@@ -28,7 +27,7 @@ namespace Redis.Core
         private static PooledRedisClientManager ClientInfo(int db=0)
         {
             //获取配置
-            var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis);
+            var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis,"db.json");
 
             //redis连接
             return new PooledRedisClientManager(config.WriteServerList.Split(',')
