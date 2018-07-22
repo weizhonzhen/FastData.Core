@@ -16,7 +16,7 @@ in Startup.cs Startup mothod
             // init map cache
             LambdaMap.InstanceMap();
        
-in appsettings.json 
+in db.json 
 
           "Redis": { 
             "WriteServerList": "127.0.0.1:6379",
