@@ -7,14 +7,14 @@ in Startup.cs Startup mothod
 
             //init model Properties cahce
             var test = new DataModel.Base.Base_Api();
-            LambdaMap.InstanceProperties(AppDomain.CurrentDomain.GetAssemblies(), "DataModel", "Model.dll");
+            FastMap.InstanceProperties(AppDomain.CurrentDomain.GetAssemblies(), "DataModel", "Model.dll");
 
             //init code first
-            LambdaMap.InstanceTable(AppDomain.CurrentDomain.GetAssemblies(), "DataModel.Base", "Model.dll");
-            LambdaMap.InstanceTable(AppDomain.CurrentDomain.GetAssemblies(), "DataModel.Report", "Model.dll");
+            FastMap.InstanceTable(AppDomain.CurrentDomain.GetAssemblies(), "DataModel.Base", "Model.dll");
+            FastMap.InstanceTable(AppDomain.CurrentDomain.GetAssemblies(), "DataModel.Report", "Model.dll");
 
             // init map cache
-            LambdaMap.InstanceMap();
+            FastMap.InstanceMap();
        
 in db.json 
 
@@ -67,12 +67,12 @@ in db.json
   
   
              db option
-                 LambdaWrite.Update<Base_LogLogin>(new Base_LogLogin { LoginOutTime = DateTime.Now }, 
+                 FastWrite.Update<Base_LogLogin>(new Base_LogLogin { LoginOutTime = DateTime.Now }, 
                      a => a.Token == item.Token, a => new { a.LoginOutTime });
                      
-                 LambdaWrite.Add(info);
+                 FastWrite.Add(info);
                  
-                 LambdaMap.ExecuteMapPage(pageModel, "getuser", param.ToArray());
+                 FastMap.ExecuteMapPage(pageModel, "getuser", param.ToArray());
 
 
 
