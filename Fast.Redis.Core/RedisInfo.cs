@@ -63,7 +63,7 @@ namespace Fast.Redis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static bool SetItem<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
+        public static bool Set<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace Fast.Redis.Core
             {
                 Task.Factory.StartNew(() =>
                 {
-                    SaveLog<T>(ex, "SetItem<T>");
+                    SaveLog<T>(ex, "Set<T>");
                 });
                 return false;
             }
@@ -95,11 +95,11 @@ namespace Fast.Redis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static async Task<bool> SetItemAsy<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
+        public static async Task<bool> SetAsy<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return SetItem<T>(key, model, hours, db);
+                return Set<T>(key, model, hours, db);
             });
         }
         #endregion
@@ -113,7 +113,7 @@ namespace Fast.Redis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static bool SetItem(string key, string model, int hours = 24 * 30 * 12, int db = 0)
+        public static bool Set(string key, string model, int hours = 24 * 30 * 12, int db = 0)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace Fast.Redis.Core
             {
                 Task.Factory.StartNew(() =>
                 {
-                    SaveLog(ex, "SetItem", key);
+                    SaveLog(ex, "Set", key);
                 });
                 return false;
             }
@@ -145,11 +145,11 @@ namespace Fast.Redis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static async Task<bool> SetItemAsy(string key, string model, int hours = 24 * 30 * 12, int db = 0)
+        public static async Task<bool> SetAsy(string key, string model, int hours = 24 * 30 * 12, int db = 0)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return SetItem(key, model, hours, db);
+                return Set(key, model, hours, db);
             });
         }
         #endregion
@@ -163,7 +163,7 @@ namespace Fast.Redis.Core
         /// <param name="model">值</param>
         /// <param name="Minutes">存期限</param>
         /// <returns></returns>
-        public static bool SetItem(string key, string model, double Minutes, int db = 0)
+        public static bool Set(string key, string model, double Minutes, int db = 0)
         {
             try
             {
@@ -179,7 +179,7 @@ namespace Fast.Redis.Core
             {
                 Task.Factory.StartNew(() =>
                 {
-                    SaveLog(ex, "SetItem", key);
+                    SaveLog(ex, "Set", key);
                 });
                 return false;
             }
@@ -195,11 +195,11 @@ namespace Fast.Redis.Core
         /// <param name="model">值</param>
         /// <param name="Minutes">存期限</param>
         /// <returns></returns>
-        public static async Task<bool> SetItemAsy(string key, string model, double Minutes, int db = 0)
+        public static async Task<bool> SetAsy(string key, string model, double Minutes, int db = 0)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return SetItem(key, model, Minutes, db);
+                return Set(key, model, Minutes, db);
             });
         }
         #endregion
@@ -211,7 +211,7 @@ namespace Fast.Redis.Core
         /// <typeparam name="T">泛型</typeparam>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static string GetItem(string key, int db = 0)
+        public static string Get(string key, int db = 0)
         {
             try
             {
@@ -227,7 +227,7 @@ namespace Fast.Redis.Core
             {
                 Task.Factory.StartNew(() =>
                 {
-                    SaveLog(ex, "GetItem", key);
+                    SaveLog(ex, "Get", key);
                 });
                 return "";
             }
@@ -241,11 +241,11 @@ namespace Fast.Redis.Core
         /// <typeparam name="T">泛型</typeparam>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static async Task<string> GetItemAsy(string key, int db = 0)
+        public static async Task<string> GetAsy(string key, int db = 0)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return GetItem(key, db);
+                return Get(key, db);
             });
         }
         #endregion
@@ -257,7 +257,7 @@ namespace Fast.Redis.Core
         /// <typeparam name="T">泛型</typeparam>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static T GetItem<T>(string key, int db = 0) where T : class, new()
+        public static T Get<T>(string key, int db = 0) where T : class, new()
         {
             try
             {
@@ -273,7 +273,7 @@ namespace Fast.Redis.Core
             {
                 Task.Factory.StartNew(() =>
                 {
-                    SaveLog<T>(ex, "GetItem<T>");
+                    SaveLog<T>(ex, "Get<T>");
                 });
                 return new T();
             }
@@ -287,11 +287,11 @@ namespace Fast.Redis.Core
         /// <typeparam name="T">泛型</typeparam>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static async Task<T> GetItemAsy<T>(string key, int db = 0) where T : class, new()
+        public static async Task<T> GetAsy<T>(string key, int db = 0) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return GetItem<T>(key, db);
+                return Get<T>(key, db);
             });
         }
         #endregion
@@ -302,7 +302,7 @@ namespace Fast.Redis.Core
         /// </summary>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static bool RemoveItem(string key, int db = 0)
+        public static bool Remove(string key, int db = 0)
         {
             try
             {
@@ -318,7 +318,7 @@ namespace Fast.Redis.Core
             {
                 Task.Factory.StartNew(() =>
                 {
-                    SaveLog(ex, "RemoveItem", key);
+                    SaveLog(ex, "Remove", key);
                 });
                 return false;
             }
@@ -331,11 +331,11 @@ namespace Fast.Redis.Core
         /// </summary>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static async Task<bool> RemoveItemAsy(string key, int db = 0)
+        public static async Task<bool> RemoveAsy(string key, int db = 0)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return RemoveItem(key, db);
+                return Remove(key, db);
             });
         }
         #endregion
