@@ -821,7 +821,7 @@ namespace Fast.Data.Core.Context
                     //{
                     //    var dic = new Dictionary<string, object>();
                     //    dic.Add(string.Format("{0}{1}", item.GetType().Name, key), dynGet.GetValue(item, item.GetType().Name, config.IsPropertyCache) ?? DBNull.Value);
-                    //    RedisInfo.SetDic(dic);
+                    //    BaseCache.SetDic(dic);
                     //}
 
                     //cmd.GetType().GetProperty("ArrayBindCount").SetValue(cmd, list.Count, null);
@@ -836,7 +836,7 @@ namespace Fast.Data.Core.Context
                     //    //param.GetType().GetProperty("DbType").SetValue(param, 11, null);//??                        
                     //    param.ParameterName = item.Name;
                     //    param.Direction = ParameterDirection.Input;
-                    //    param.Value = RedisInfo.GetDic<object>(cacheKey.ToArray()).ToArray();
+                    //    param.Value = BaseCache.GetDic<object>(cacheKey.ToArray()).ToArray();
                     //    BaseCache.Clear(cacheKey);
                     //    cmd.Parameters.Add(param);                       
                     //}

@@ -4,7 +4,6 @@ using Fast.Data.Core.Check;
 using Fast.Data.Core.Context;
 using Fast.Data.Core.Model;
 using Fast.Data.Core.Type;
-using Fast.Redis.Core;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -18,6 +17,7 @@ using System.Xml;
 using Fast.Untility.Core.Base;
 using Fast.Untility.Core.Page;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Fast.Untility.Core.Cache;
 
 namespace Fast.Data.Core
 {
@@ -57,7 +57,7 @@ namespace Fast.Data.Core
                                     cacheList.Add(model);
                                 }
 
-                                RedisInfo.Set<List<PropertyModel>>(key, cacheList, 8640, RedisDb.Properties);
+                                BaseCache.Set<List<PropertyModel>>(key, cacheList);
                             }
                         });
                     }
@@ -131,26 +131,26 @@ namespace Fast.Data.Core
                 var info = new FileInfo(item);
                 var key = BaseSymmetric.Generate(info.FullName);
 
-                if (!RedisInfo.Exists(key,RedisDb.Xml))
+                if (!BaseCache.Exists(key))
                 {
                     var temp = new MapXmlModel();
                     temp.LastWrite = info.LastWriteTime;
                     temp.FileKey = ReadXml(info.FullName, config);
                     temp.FileName = info.FullName;
                     if (SaveXml(dbKey, key, info, config, db))
-                        RedisInfo.Set<MapXmlModel>(key, temp,8640, RedisDb.Xml);
+                        BaseCache.Set<MapXmlModel>(key, temp);
                 }
-                else if ((RedisInfo.Get<MapXmlModel>(key, RedisDb.Xml).LastWrite - info.LastWriteTime).Minutes != 0)
+                else if ((BaseCache.Get<MapXmlModel>(key).LastWrite - info.LastWriteTime).Minutes != 0)
                 {
-                    foreach (var temp in RedisInfo.Get<MapXmlModel>(key, RedisDb.Xml).FileKey)
-                        RedisInfo.Remove(temp, RedisDb.Xml);
+                    foreach (var temp in BaseCache.Get<MapXmlModel>(key).FileKey)
+                        BaseCache.Remove(temp);
 
                     var model = new MapXmlModel();
                     model.LastWrite = info.LastWriteTime;
                     model.FileKey = ReadXml(info.FullName, config);
                     model.FileName = info.FullName;
                     if (SaveXml(dbKey, key, info, config, db))
-                        RedisInfo.Set<MapXmlModel>(key, model,8640, RedisDb.Xml);
+                        BaseCache.Set<MapXmlModel>(key, model);
                 }
             }
             
@@ -166,7 +166,7 @@ namespace Fast.Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
+            if (BaseCache.Exists(name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
                 return FastRead.ExecuteSql<T>(sql, param, db, key);
@@ -221,7 +221,7 @@ namespace Fast.Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
+            if (BaseCache.Exists(name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
 
@@ -277,7 +277,7 @@ namespace Fast.Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
+            if (BaseCache.Exists(name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
 
@@ -365,7 +365,7 @@ namespace Fast.Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
+            if (BaseCache.Exists(name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
 
@@ -453,7 +453,7 @@ namespace Fast.Data.Core
         {
             InstanceMap(key);
 
-            if (RedisInfo.Exists(name.ToLower(), RedisDb.Xml))
+            if (BaseCache.Exists(name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
 
@@ -512,7 +512,7 @@ namespace Fast.Data.Core
             GetXmlList(path, "sqlMap", ref key, ref sql, config);
 
             for (var i = 0; i < key.Count; i++)
-                RedisInfo.Set(key[i].ToLower(), sql[i],8640, RedisDb.Xml);
+                BaseCache.Set(key[i].ToLower(), sql[i]);
 
             return key;
         }
@@ -686,17 +686,17 @@ namespace Fast.Data.Core
             if (db != null) { flag = db.config.Flag; }
             if (key != null) { flag = BaseContext.GetContext(key).config.Flag; }
 
-            for (var i = 0; i <= RedisInfo.Get(name.ToLower(), RedisDb.Xml).ToInt(0); i++)
+            for (var i = 0; i <= BaseCache.Get(name.ToLower()).ToInt(0); i++)
             {
                 #region 文本
                 var txtKey = string.Format("{0}.{1}", name.ToLower(), i);
-                if (RedisInfo.Exists(txtKey, RedisDb.Xml))
-                    sql.Append(RedisInfo.Get(txtKey, RedisDb.Xml));
+                if (BaseCache.Exists(txtKey))
+                    sql.Append(BaseCache.Get(txtKey));
                 #endregion
 
                 #region 动态
                 var dynKey = string.Format("{0}.format.{1}", name.ToLower(), i);
-                if (RedisInfo.Exists(dynKey, RedisDb.Xml))
+                if (BaseCache.Exists(dynKey))
                 {
                     if (param != null)
                     {
@@ -706,13 +706,13 @@ namespace Fast.Data.Core
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
-                            if (RedisInfo.Exists(paramKey, RedisDb.Xml))
+                            if (BaseCache.Exists(paramKey))
                             {
                                 var flagParam = string.Format("{0}{1}", flag, temp.ParameterName.ToLower());
                                 var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
-                                var paramSql = RedisInfo.Get(paramKey, RedisDb.Xml).ToLower();
-                                var condition = RedisInfo.Get(conditionKey, RedisDb.Xml).ToStr().ToLower();
-                                var conditionValue = RedisInfo.Get(conditionValueKey, RedisDb.Xml).ToStr().ToLower();
+                                var paramSql = BaseCache.Get(paramKey).ToLower();
+                                var condition = BaseCache.Get(conditionKey).ToStr().ToLower();
+                                var conditionValue = BaseCache.Get(conditionValueKey).ToStr().ToLower();
                                 switch (condition)
                                 {
                                     case "isEqual":
@@ -727,10 +727,10 @@ namespace Fast.Data.Core
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                                 }
                                                 else
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                             }
                                             else
                                                 tempParam.Remove(temp);
@@ -748,10 +748,10 @@ namespace Fast.Data.Core
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                                 }
                                                 else
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                             }
                                             else
                                                 tempParam.Remove(temp);
@@ -769,10 +769,10 @@ namespace Fast.Data.Core
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                                 }
                                                 else
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                             }
                                             else
                                                 tempParam.Remove(temp);
@@ -790,10 +790,10 @@ namespace Fast.Data.Core
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                                 }
                                                 else
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                             }
                                             else
                                                 tempParam.Remove(temp);
@@ -811,10 +811,10 @@ namespace Fast.Data.Core
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                                 }
                                                 else
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                             }
                                             else
                                                 tempParam.Remove(temp);
@@ -832,10 +832,10 @@ namespace Fast.Data.Core
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                                 }
                                                 else
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                             }
                                             else
                                                 tempParam.Remove(temp);
@@ -854,10 +854,10 @@ namespace Fast.Data.Core
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                                 }
                                                 else
-                                                    tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                    tempSql.Append(BaseCache.Get(paramKey));
                                             }
                                             else
                                                 tempParam.Remove(temp);
@@ -866,13 +866,13 @@ namespace Fast.Data.Core
                                     case "choose":
                                         {
                                             var isSuccess = false;
-                                            for (int j = 0; j < RedisInfo.Get(paramKey, RedisDb.Xml).ToStr().ToInt(0); j++)
+                                            for (int j = 0; j < BaseCache.Get(paramKey).ToStr().ToInt(0); j++)
                                             {
                                                 conditionKey = string.Format("{0}.choose.{1}", paramKey, j);
-                                                condition = RedisInfo.Get(conditionKey, RedisDb.Xml).ToStr().ToLower();
+                                                condition = BaseCache.Get(conditionKey).ToStr().ToLower();
 
                                                 conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
-                                                conditionValue = RedisInfo.Get(conditionValueKey, RedisDb.Xml).ToStr().ToLower();
+                                                conditionValue = BaseCache.Get(conditionValueKey).ToStr().ToLower();
                                                 conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
                                                 if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
                                                 {
@@ -909,10 +909,10 @@ namespace Fast.Data.Core
                                             else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                             {
                                                 tempParam.Remove(temp);
-                                                tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                tempSql.Append(BaseCache.Get(paramKey));
                                             }
                                             else
-                                                tempSql.Append(RedisInfo.Get(paramKey, RedisDb.Xml));
+                                                tempSql.Append(BaseCache.Get(paramKey));
 
                                             break;
                                         }
@@ -922,7 +922,7 @@ namespace Fast.Data.Core
 
                         if (tempSql.ToString() != "")
                         {
-                            sql.Append(RedisInfo.Get(dynKey, RedisDb.Xml));
+                            sql.Append(BaseCache.Get(dynKey));
                             sql.Append(tempSql.ToString());
                         }
                     }

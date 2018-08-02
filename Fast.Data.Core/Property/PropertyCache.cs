@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Fast.Data.Core.CacheModel;
-using Fast.Redis.Core;
 using Fast.Data.Core.Base;
+using Fast.Untility.Core.Cache;
 
 namespace Fast.Data.Core.Property
 {
@@ -26,8 +26,8 @@ namespace Fast.Data.Core.Property
 
             if (IsCache)
             {
-                if (RedisInfo.Exists(key, RedisDb.Properties))
-                    return RedisInfo.Get<List<PropertyModel>>(key,RedisDb.Properties);
+                if (BaseCache.Exists(key))
+                    return BaseCache.Get<List<PropertyModel>>(key);
                 else
                 {
                     typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
@@ -38,12 +38,12 @@ namespace Fast.Data.Core.Property
                         list.Add(temp);
                     });
 
-                    RedisInfo.Set<List<PropertyModel>>(key, list,8640, RedisDb.Properties);
+                    BaseCache.Set<List<PropertyModel>>(key, list);
                 }
             }
             else
             {
-                RedisInfo.Remove(key, RedisDb.Properties);
+                BaseCache.Remove(key);
                 typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                 {
                     var temp = new PropertyModel();

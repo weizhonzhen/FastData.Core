@@ -3,11 +3,55 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using Fast.Untility.Core.Attributes;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Fast.Untility.Core.Base
 {
     public static class BaseRegular
     {
+        #region 转成字节流
+        /// <summary>
+        /// 转成字节流
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static byte[] ToByte(this object value)
+        {
+            using (var stream = new MemoryStream())
+            {
+                var formatter = new BinaryFormatter();
+                formatter.Serialize(stream, value);
+                return stream.GetBuffer();
+            }
+        }
+        #endregion
+
+        #region 转成字节流
+        /// <summary>
+        /// 转成字节流
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static T ToModel<T>(this byte[] value) where T : class, new()
+        {
+            using (var stream = new MemoryStream(value))
+            {
+                var formatter = new BinaryFormatter();
+                return formatter.Deserialize(stream) as T;
+            }
+        }
+
+        public static object ToModel(this byte[] value)
+        {
+            using (var stream = new MemoryStream(value))
+            {
+                var formatter = new BinaryFormatter();
+                return formatter.Deserialize(stream);
+            }
+        }
+        #endregion
+
         #region 转时间格式化
         /// <summary>
         /// 标签：2015.7.13，魏中针

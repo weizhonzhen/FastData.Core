@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Context\WriteContext.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Model\" />
   </ItemGroup>
 
@@ -17,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fast.Redis.Core\Fast.Redis.Core.csproj" />
     <ProjectReference Include="..\Fast.Untility.Core\Fast.Untility.Core.csproj" />
   </ItemGroup>
 
