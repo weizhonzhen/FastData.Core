@@ -17,14 +17,7 @@ in Startup.cs Startup mothod
             FastMap.InstanceMap();
        
 in db.json 
-
-          "Redis": { 
-            "WriteServerList": "127.0.0.1:6379",
-            "ReadServerList": "127.0.0.1:6379",
-            "MaxWritePoolSize": 60,
-            "MaxReadPoolSize": 60,
-            "AutoStart": true
-          },
+        
           "SqlMap" :{"Path": [ "map/admin/Api.xml", "map/admin/Area.xml"]},          
            "DataConfig": [
               {
