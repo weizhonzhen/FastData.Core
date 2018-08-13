@@ -21,6 +21,12 @@ namespace FastData.Core.Base
             if (item.DesignModel == "")
                 item.DesignModel = Config.DbFirst;
 
+            if (item.SqlErrorType == "")
+                item.SqlErrorType = SqlErrorType.Db;
+
+            if (item.CacheType == "")
+                item.CacheType = CacheType.Web;
+
             item.IsPropertyCache = true;
             item.DbType = item.DbType.ToLower();
 

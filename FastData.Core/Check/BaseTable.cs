@@ -10,7 +10,6 @@ using System.Data.Common;
 using FastData.Core.Type;
 using FastUntility.Core.Base;
 using System.Reflection;
-using FastData.Core;
 
 namespace FastData.Core.Check
 {
@@ -23,7 +22,7 @@ namespace FastData.Core.Check
         /// <summary>
         /// 验证表
         /// </summary>
-        public static void Check(DataQuery item, string tableName, string nameSpace, List<PropertyInfo> listInfo, List<Attribute> listAttribute)
+        public static void Check(DataQuery item, string tableName,List<PropertyInfo> listInfo, List<Attribute> listAttribute)
         {
             try
             {
@@ -48,7 +47,7 @@ namespace FastData.Core.Check
                                 {
                                     table.Column.Remove(temp);
                                     table.Column.Add(result.Item);
-                                    UpdateTable(item, result, nameSpace, tableName);
+                                    UpdateTable(item, result, tableName);
                                 }
                             }
                         }
@@ -65,13 +64,13 @@ namespace FastData.Core.Check
                                 {
                                     table.Column.Remove(temp);
                                     table.Column.Add(result.Item);
-                                    UpdateTable(item, result, nameSpace, tableName);
+                                    UpdateTable(item, result, tableName);
                                 }
 
                                 if (result.IsDelete)
                                 {
                                     model.Remove(temp);
-                                    UpdateTable(item, result, nameSpace, tableName);
+                                    UpdateTable(item, result, tableName);
                                 }
                             }
 
@@ -154,7 +153,7 @@ namespace FastData.Core.Check
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <param name="info"></param>
-        private static void UpdateTable(DataQuery item, CompareModel<ColumnModel> info, string nameSpace, string tableName)
+        private static void UpdateTable(DataQuery item, CompareModel<ColumnModel> info,  string tableName)
         {
             var db = BaseContext.GetContext(item.Key);
 

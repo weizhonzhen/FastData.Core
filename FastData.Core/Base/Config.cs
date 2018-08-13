@@ -17,4 +17,16 @@
         /// </summary>
         public static readonly string DbFirst = "DbFirst";
     }
+
+    internal static class CacheType
+    {
+        public static readonly string Web = "web";
+        public static readonly string Redis = "redis";
+    }
+
+    internal static class SqlErrorType
+    {
+        public static readonly string Db = "db";
+        public static readonly string File = "file";
+    }
 }

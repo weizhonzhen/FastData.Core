@@ -21,13 +21,14 @@ namespace FastData.Core.Property
         /// <returns></returns>
         public static List<PropertyModel> GetPropertyInfo<T>(bool IsCache = true)
         {
+            var config = DataConfig.Get();
             var list = new List<PropertyModel>();
             var key = string.Format("Core.{0}.{1}", typeof(T).Namespace, typeof(T).Name);
 
             if (IsCache)
             {
-                if (BaseCache.Exists(key))
-                    return BaseCache.Get<List<PropertyModel>>(key);
+                if (DbCache.Exists(config.CacheType,key))
+                    return DbCache.Get<List<PropertyModel>>(config.CacheType, key);
                 else
                 {
                     typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
@@ -38,12 +39,12 @@ namespace FastData.Core.Property
                         list.Add(temp);
                     });
 
-                    BaseCache.Set<List<PropertyModel>>(key, list);
+                    DbCache.Set<List<PropertyModel>>(config.CacheType, key, list);
                 }
             }
             else
             {
-                BaseCache.Remove(key);
+                DbCache.Remove(config.CacheType, key);
                 typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                 {
                     var temp = new PropertyModel();

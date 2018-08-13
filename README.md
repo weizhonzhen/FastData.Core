@@ -31,7 +31,9 @@ in db.json
                 "Flag": "?",
                 "FactoryClient": "MySql.Data.MySqlClient.MySqlClientFactory",
                 "Key": "Write",
-                "DesignModel": "CodeFirst"
+                "DesignModel": "CodeFirst",
+                "":"",
+                "":""
               }
             ]
       

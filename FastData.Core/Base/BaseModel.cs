@@ -77,7 +77,10 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
+                    if (config.SqlErrorType == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
+                    else
+                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
                 });
                 result.Result = false;
                 return result;
@@ -134,7 +137,10 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "InsertToSql<T>", result.Sql);
+                    if (config.SqlErrorType == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "InsertToSql<T>", result.Sql);
+                    else
+                        DbLog.LogException(config.IsOutError, config.DbType, ex, "InsertToSql<T>", result.Sql);
                 });
                 result.Result = false;
                 return result;

@@ -69,5 +69,15 @@
         /// map文件是否加密
         /// </summary>
         public bool IsEncrypt { get; set; }
+
+        /// <summary>
+        /// sql存放类型file,db 
+        /// </summary>
+        public string SqlErrorType { get; set; }
+
+        /// <summary>
+        /// 缓存类型 web,redis
+        /// </summary>
+        public string CacheType { get; set; }
     }
 }

@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastData.Core", "FastData.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastUntility.Core", "FastUntility.Core\FastUntility.Core.csproj", "{E906B7A5-C014-4179-8C5A-C97363175291}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastRedis.Core", "FastRedis.Core\FastRedis.Core.csproj", "{4E6C2D69-63E8-4A78-B02C-80FFED3A4AB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{E906B7A5-C014-4179-8C5A-C97363175291}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E906B7A5-C014-4179-8C5A-C97363175291}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E906B7A5-C014-4179-8C5A-C97363175291}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E6C2D69-63E8-4A78-B02C-80FFED3A4AB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E6C2D69-63E8-4A78-B02C-80FFED3A4AB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E6C2D69-63E8-4A78-B02C-80FFED3A4AB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E6C2D69-63E8-4A78-B02C-80FFED3A4AB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

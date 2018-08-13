@@ -104,7 +104,10 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    DbLog.LogException<T>(config.IsOutError,  config.DbType, ex, "QueryField<T>", "");
+                    if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "QueryField<T>", "");
+                    else
+                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "QueryField<T>", "");
                 });
 
                 return new FieldModel
@@ -203,7 +206,10 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "QueryField<T1,T2,T>", "");
+                    if (config.SqlErrorType == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "QueryField<T1,T2,T>", "");
+                    else
+                        DbLog.LogException(config.IsOutError, config.DbType, ex, "QueryField<T1,T2,T>", "");
                 });
                 return new FieldModel { Field = "*" };
             }
@@ -236,7 +242,10 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "GroupBy<T>", "");
+                    if (config.SqlErrorType == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "GroupBy<T>", "");
+                    else
+                        DbLog.LogException(config.IsOutError, config.DbType, ex, "GroupBy<T>", "");
                 });
 
                 return new List<string>();
@@ -272,7 +281,10 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "OrderBy<T>", "");
+                    if (config.SqlErrorType == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "OrderBy<T>", "");
+                    else
+                        DbLog.LogException(config.IsOutError, config.DbType, ex, "OrderBy<T>", "");
                 });
                 return new List<string>();
             }

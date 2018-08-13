@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FastRedis.Core\FastRedis.Core.csproj" />
     <ProjectReference Include="..\FastUntility.Core\FastUntility.Core.csproj" />
   </ItemGroup>
 
