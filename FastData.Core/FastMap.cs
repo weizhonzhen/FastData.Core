@@ -137,6 +137,7 @@ namespace FastData.Core
 
             if (config.IsMapSave)
             {
+                query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
                 if (query.Config.DbType == DataDbType.Oracle)
                 {
                     var listInfo = typeof(FastData.Core.DataModel.Oracle.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
@@ -161,6 +162,7 @@ namespace FastData.Core
 
             if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
             {
+                query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
                 if (query.Config.DbType == DataDbType.Oracle)
                 {
                     var listInfo = typeof(FastData.Core.DataModel.Oracle.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
