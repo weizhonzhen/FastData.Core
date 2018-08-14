@@ -503,7 +503,9 @@ namespace FastData.Core.Context
             {
                 if (param != null)
                     result.sql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
-                
+                else
+                    result.sql = sql;
+
                 cmd.Parameters.Clear();
 
                 if (param != null)
@@ -543,6 +545,8 @@ namespace FastData.Core.Context
             {
                 if (param != null)
                     result.Sql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
+                else
+                    result.Sql = sql;
 
                 cmd.Parameters.Clear();
 
@@ -942,6 +946,8 @@ namespace FastData.Core.Context
 
                 if (param != null)
                     result.Sql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
+                else
+                    result.Sql = sql;
 
                 if (isLog)
                     Task.Factory.StartNew(() =>
