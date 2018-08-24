@@ -321,7 +321,6 @@ namespace FastData.Core.Check
         {
             var sql = "";
             var db = BaseContext.GetContext(item.Key);
-            var readDb = BaseContext.GetContext(item.Key);
 
             if (item.Config.DbType == DataDbType.MySql)
                 sql = string.Format("alter table {0} comment '{1}'", tableName, value);
@@ -332,8 +331,7 @@ namespace FastData.Core.Check
             if (item.Config.DbType == DataDbType.SqlServer)
             {
                 sql = string.Format("select count(0) count from sys.extended_properties where object_id('{0}')=major_id and minor_id=0", tableName);
-                var count = readDb.ExecuteSql(sql).DicList[0]["count"].ToStr().ToInt(0);
-                readDb.Dispose();
+                var count = db.ExecuteSql(sql).DicList[0]["count"].ToStr().ToInt(0);
                 if (count >= 1)
                     sql = string.Format("execute sp_updateextendedproperty N'MS_Description', '{0}', N'user', N'dbo', N'table', N'{1}', NULL, NULL", value, tableName);
                 else
