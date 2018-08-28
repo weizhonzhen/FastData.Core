@@ -652,9 +652,83 @@ namespace FastData.Core.Context
                 Task.Factory.StartNew(() =>
                 {
                     if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException(config, ex, "GetJson", result.Sql);
+                        DbLogTable.LogException(config, ex, "GetDic", result.Sql);
                     else
-                        DbLog.LogException(item.Config.IsOutError, item.Config.DbType, ex, "GetJson", result.Sql);
+                        DbLog.LogException(item.Config.IsOutError, item.Config.DbType, ex, "GetDic", result.Sql);
+                });
+                return result;
+            }
+        }
+        #endregion
+
+        #region 获取DataTable
+        /// <summary>
+        /// 获取DataTable
+        /// </summary>
+        /// <returns></returns>
+        public DataReturn GetDataTable(DataQuery item)
+        {
+            var param = new List<DbParameter>();
+            var result = new DataReturn();
+            var sql = new StringBuilder();
+
+            try
+            {
+                //是否前几条或单条
+                if (item.Config.DbType == DataDbType.SqlServer && item.Take != 0)
+                    sql.AppendFormat("select top {2} {0} from {1}", string.Join(",", item.Field), item.Table[0], item.Take);
+                else
+                    sql.AppendFormat("select {0} from {1}", string.Join(",", item.Field), item.Table[0]);
+
+                for (var i = 1; i < item.Predicate.Count; i++)
+                {
+                    sql.AppendFormat(" {0} on {1}", item.Table[i], item.Predicate[i].Where);
+
+                    if (item.Predicate[i].Param.Count != 0)
+                        param.AddRange(Parameter.ReNewParam(item.Predicate[i].Param, item.Config));
+                }
+
+                sql.AppendFormat(" where {0}", item.Predicate[0].Where);
+
+                //是否前几条或单条
+                if (item.Config.DbType == DataDbType.Oracle && item.Take != 0)
+                    sql.AppendFormat(" and rownum <={0}", item.Take);
+                else if (item.Config.DbType == DataDbType.DB2 && item.Take != 0)
+                    sql.AppendFormat(" and fetch first {0} rows only", item.Take);
+                else if (item.Config.DbType == DataDbType.PostgreSql && item.Take != 0)
+                    sql.AppendFormat(" and limit {0}", item.Take);
+                else if (item.Config.DbType == DataDbType.MySql && item.Take != 0)
+                    sql.AppendFormat(" and limit {0}", item.Take);
+                else if (item.Config.DbType == DataDbType.SQLite && item.Take != 0)
+                    sql.AppendFormat(" and limit 0 offset {0}", item.Take);
+
+                if (item.Predicate[0].Param.Count != 0)
+                    param.AddRange(Parameter.ReNewParam(item.Predicate[0].Param, item.Config));
+
+                result.Sql = ParameterToSql.ObjectParamToSql(param, sql.ToString(), item.Config);
+
+                cmd.Parameters.Clear();
+
+                if (param.Count != 0)
+                    cmd.Parameters.AddRange(param.ToArray());
+
+                var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
+
+                result.Table.Load(dr);
+
+                dr.Close();
+                dr.Dispose();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                        DbLogTable.LogException(config, ex, "GetDataTable", result.Sql);
+                    else
+                        DbLog.LogException(item.Config.IsOutError, item.Config.DbType, ex, "GetDataTable", result.Sql);
                 });
                 return result;
             }

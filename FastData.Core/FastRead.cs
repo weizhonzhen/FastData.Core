@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using FastUntility.Core.Page;
+using System.Data;
 
 namespace FastData.Core
 {
@@ -624,6 +625,83 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<PageResult>(() => ToPage(item, pModel, db));
+            });
+        }
+        #endregion
+
+
+        #region DataTable
+        /// <summary>
+        /// DataTable
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static DataTable ToDataTable(this DataQuery item, DataContext db = null)
+        {
+            var result = new DataReturn();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+            item.Take = 1;
+
+            if (db == null)
+            {
+                var tempDb = BaseContext.GetContext(item);
+                result = tempDb.GetDataTable(item);
+                tempDb.Dispose();
+            }
+            else
+                result = db.GetDataTable(item);
+
+            stopwatch.Stop();
+
+            Task.Factory.StartNew(() =>
+            {
+                DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            });
+
+            return result.Table;
+        }
+        #endregion
+
+        #region DataTable asy
+        /// <summary>
+        /// DataTable asy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static async Task<DataTable> ToDataTableAsy(this DataQuery item, DataContext db = null)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                return ToDataTable(item, db);
+            });
+        }
+        #endregion
+
+        #region DataTable lazy
+        /// <summary>
+        /// DataTable lazy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static Lazy<DataTable> ToLazyDataTable(this DataQuery item, DataContext db = null)
+        {
+            return new Lazy<DataTable>(() => ToDataTable(item, db));
+        }
+        #endregion
+
+        #region DataTable lazy asy
+        /// <summary>
+        /// DataTable lazy asy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static async Task<Lazy<DataTable>> ToLazyDataTableAsy(this DataQuery item, DataContext db = null)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                return new Lazy<DataTable>(() => ToDataTable(item, db));
             });
         }
         #endregion
