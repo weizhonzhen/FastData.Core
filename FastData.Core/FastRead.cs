@@ -60,10 +60,13 @@ namespace FastData.Core
         /// <param name="field">字段</param>
         /// <param name="Key"></param>
         /// <returns></returns>
-        public static DataQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null)
+        public static DataQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null,ConfigModel config=null)
         {
             var result = new DataQuery();
-            result.Config = DataConfig.Get(key);
+            if (config == null)
+                result.Config = DataConfig.Get(key);
+            else
+                result.Config = config;
             result.Key = key;
 
             var taskField = Task.Factory.StartNew(delegate
