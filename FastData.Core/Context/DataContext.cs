@@ -38,11 +38,11 @@ namespace FastData.Core.Context
         /// <summary>
         /// 初始化
         /// </summary>
-        public DataContext(string key = null, ConfigModel config = null)
+        public DataContext(string key = null)
         {
             try
             {
-                this.config = config == null ? DataConfig.Get(key) : config;
+                this.config = DataConfig.Get(key);
                 conn = DbProviderFactories.GetFactory(this.config).CreateConnection();
                 conn.ConnectionString = this.config.ConnStr;
                 conn.Open();

@@ -104,7 +104,7 @@ namespace FastData.Core
         {
             var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map,"map.json");
             var config = DataConfig.Get(dbKey);
-            var db = new DataContext(dbKey, config);
+            var db = new DataContext(dbKey);
             var query = new DataQuery { Config = config, Key = dbKey };
 
             foreach (var item in list.Path)

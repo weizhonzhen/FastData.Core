@@ -16,7 +16,7 @@ namespace FastData.Core.Base
         /// <returns></returns>
         public static DataContext GetContext(DataQuery item)
         {
-            return new DataContext(item.Key, item.Config);
+            return new DataContext(item.Key);
         }
         #endregion
 
