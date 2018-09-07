@@ -32,8 +32,8 @@ in db.json
                 "FactoryClient": "MySql.Data.MySqlClient.MySqlClientFactory",
                 "Key": "Write",
                 "DesignModel": "CodeFirst",
-                "":"",
-                "":""
+                "SqlErrorType ":"db",--db,file
+                "CacheType":"web"--redis,web
               }
             ]
       
