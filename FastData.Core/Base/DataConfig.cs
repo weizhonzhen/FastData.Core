@@ -22,7 +22,7 @@ namespace FastData.Core.Base
                 item.DesignModel = Config.DbFirst;
 
             if (item.SqlErrorType == "")
-                item.SqlErrorType = SqlErrorType.Db;
+                item.SqlErrorType = SqlErrorType.File;
 
             if (item.CacheType == "")
                 item.CacheType = CacheType.Web;

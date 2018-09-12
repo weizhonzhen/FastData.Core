@@ -26,6 +26,40 @@ namespace FastData.Core
     /// </summary>
     public static class FastMap
     {
+        #region 初始化建日记表
+        /// <summary>
+        /// 初始化建日记表
+        /// </summary>
+        /// <param name="query"></param>
+        private static void CreateLogTable(DataQuery query)
+        {
+            if (query.Config.SqlErrorType.ToLower() == SqlErrorType.Db)
+            {
+                query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
+                if (query.Config.DbType == DataDbType.Oracle)
+                {
+                    var listInfo = typeof(FastData.Core.DataModel.Oracle.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.Core.DataModel.Oracle.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
+                }
+
+                if (query.Config.DbType == DataDbType.MySql)
+                {
+                    var listInfo = typeof(FastData.Core.DataModel.MySql.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.Core.DataModel.MySql.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
+                }
+
+                if (query.Config.DbType == DataDbType.SqlServer)
+                {
+                    var listInfo = typeof(FastData.Core.DataModel.SqlServer.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.Core.DataModel.SqlServer.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
+                }
+            }
+        }
+        #endregion
+
         #region 初始化model成员 1
         /// <summary>
         /// 初始化model成员 1
@@ -79,6 +113,8 @@ namespace FastData.Core
             var query = new DataQuery();
             query.Config = DataConfig.Get(dbKey);
             query.Key = dbKey;
+            
+            CreateLogTable(query);
 
             foreach (var item in list)
             {
@@ -135,6 +171,8 @@ namespace FastData.Core
                 }
             }
 
+            CreateLogTable(query);
+
             if (config.IsMapSave)
             {
                 query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
@@ -159,32 +197,7 @@ namespace FastData.Core
                     BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
                 }
             }
-
-            if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
-            {
-                query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
-                if (query.Config.DbType == DataDbType.Oracle)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.Oracle.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.Oracle.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
-                }
-
-                if (query.Config.DbType == DataDbType.MySql)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.MySql.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.MySql.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
-                }
-
-                if (query.Config.DbType == DataDbType.SqlServer)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.SqlServer.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.SqlServer.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
-                }
-            }
-
+            
             db.Dispose();
         }
         #endregion
