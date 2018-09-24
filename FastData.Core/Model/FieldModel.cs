@@ -6,8 +6,6 @@ namespace FastData.Core.Model
     /// </summary>
     internal class FieldModel
     {
-        private List<string> _asName = new List<string>();
-
         /// <summary>
         /// 字段名
         /// </summary>
@@ -16,10 +14,6 @@ namespace FastData.Core.Model
         /// <summary>
         /// 字段别名
         /// </summary>
-        public List<string> AsName
-        {
-            set { _asName = value; }
-            get { return _asName; }
-        }
+        public List<string> AsName { set; get; } = new List<string>();
     }
 }

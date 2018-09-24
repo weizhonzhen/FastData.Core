@@ -8,16 +8,11 @@ namespace FastData.Core.Model
     /// </summary>
     internal class OptionModel
     {
-        private List<DbParameter> _Param = new List<DbParameter>();
 
         /// <summary>
         /// 参数
         /// </summary>
-        public List<DbParameter> Param
-        {
-            set { _Param = value; }
-            get { return _Param; }
-        }
+        public List<DbParameter> Param { set; get; } = new List<DbParameter>();
 
         /// <summary>
         /// sql

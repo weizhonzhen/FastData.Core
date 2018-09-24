@@ -9,11 +9,6 @@ namespace FastData.Core.Model
     /// </summary>
     public sealed class DataReturn<T> where T : class,new()
     {
-        private T _item = new T();
-        private List<T> _list = new List<T>();
-        private PageResult<T> _page = new PageResult<T>();
-        private WriteReturn _writeReturn = new WriteReturn();
-
         /// <summary>
         /// 条数
         /// </summary>
@@ -22,43 +17,27 @@ namespace FastData.Core.Model
         /// <summary>
         /// 实体
         /// </summary>
-        public T item 
-        {
-            set { _item = value; }
-            get { return _item; }
-        }
+        public T item { set; get; } = new T();
 
         /// <summary>
         /// 列表
         /// </summary>
-        public List<T> list
-        {
-            set { _list = value; }
-            get { return _list; }
-        }
-        
+        public List<T> list { set; get; } = new List<T>();
+
         /// <summary>
         /// sql
         /// </summary>
         public string sql { get; set; }
-        
+
         /// <summary>
         /// 分页
         /// </summary>
-        public PageResult<T> pageResult
-        {
-            set { _page = value; }
-            get { return _page; }
-        }
+        public PageResult<T> pageResult { set; get; } = new PageResult<T>();
 
         /// <summary>
         /// 写返回结果
         /// </summary>
-        public WriteReturn writeReturn
-        {
-            set { _writeReturn = value; }
-            get { return _writeReturn; }
-        }
+        public WriteReturn writeReturn { set; get; } = new WriteReturn();
     }
 
      /// <summary>
