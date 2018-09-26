@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FastUntility.Core.Cache;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -6,6 +7,104 @@ using System.Reflection;
 
 namespace FastUntility.Core.Base
 {
+    /// <summary>
+    /// dic to t/list
+    /// </summary>
+    public static class BaseDic
+    {
+        #region dic to T
+        /// <summary>
+        ///  dic to T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static T DicToModel<T>(Dictionary<string, object> dic, bool isCache = true) where T : class, new()
+        {
+            var result = new T();
+
+            foreach (var item in PropertyInfo<T>(isCache))
+            {
+                var info = new DynamicSet<T>();
+                if (dic.ContainsKey(item.Name.ToLower()) && !string.IsNullOrEmpty(dic[item.Name.ToLower()].ToStr()))
+                    info.SetValue(result, item.Name, Convert.ChangeType(dic[item.Name.ToLower()], item.PropertyType), isCache);
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region T to dic
+        /// <summary>
+        ///  T to dic
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<string, object> ModelToDic<T>(T model, bool isCache = true) where T : class, new()
+        {
+            var dic = new Dictionary<string, object>();
+
+            foreach (var item in PropertyInfo<T>(isCache))
+            {
+                var info = new DynamicGet<T>();
+                dic.Add(item.Name, info.GetValue(model, item.Name, isCache));
+            }
+
+            return dic;
+        }
+        #endregion
+
+        #region List<dic> to List<T>
+        /// <summary>
+        ///  dic to T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static List<T> DicToModel<T>(List<Dictionary<string, object>> dic, bool isCache = true) where T : class, new()
+        {
+            var result = new List<T>();
+
+            foreach (var item in dic)
+            {
+                result.Add(DicToModel<T>(item, isCache));
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region 泛型缓存属性成员
+        /// <summary>
+        /// 泛型缓存属性成员
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static List<PropertyInfo> PropertyInfo<T>(bool IsCache = true)
+        {
+            var key = string.Format("{0}.to.{1}", typeof(T).Namespace, typeof(T).Name);
+
+            if (IsCache)
+            {
+                if (BaseCache.Exists(key))
+                    return BaseCache.Get<List<PropertyInfo>>(key);
+                else
+                {
+                    var info = typeof(T).GetProperties().ToList();
+
+                    BaseCache.Set<List<PropertyInfo>>(key, info);
+                    return info;
+                }
+            }
+            else
+            {
+                return typeof(T).GetProperties().ToList();
+            }
+        }
+        #endregion
+    }
+
+
     /// <summary>
     /// 动态属性setvalue
     /// </summary>
@@ -61,7 +160,7 @@ namespace FastUntility.Core.Base
         }
         #endregion
     }
-    
+
     /// <summary>
     /// 动态属性getvalue
     /// </summary>
@@ -117,105 +216,9 @@ namespace FastUntility.Core.Base
         }
         #endregion      
     }
-
-    /// <summary>
-    /// dic to t/list
-    /// </summary>
-    public static class BaseDic
-    {
-        #region dic to T
-        /// <summary>
-        ///  dic to T
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public static T DicToModel<T>(Dictionary<string, object> dic, bool isCache=true) where T : class, new()
-        {
-            var result = new T();
-
-            foreach (var item in PropertyInfo<T>(isCache))
-            {
-                    var info = new DynamicSet<T>();
-                if (dic.ContainsKey(item.Name.ToLower()) && !string.IsNullOrEmpty(dic[item.Name.ToLower()].ToStr()))
-                    info.SetValue(result, item.Name, Convert.ChangeType(dic[item.Name.ToLower()], item.PropertyType), isCache);
-            }
-            
-            return result;
-        }
-        #endregion
-
-        #region T to dic
-        /// <summary>
-        ///  T to dic
-        /// </summary>
-        /// <returns></returns>
-        public static Dictionary<string, object> ModelToDic<T>(T model, bool isCache = true) where T : class, new()
-        {
-            var dic = new Dictionary<string, object>();
-
-            foreach (var item in PropertyInfo<T>(isCache))
-            {
-                    var info = new DynamicGet<T>();
-                    dic.Add(item.Name, info.GetValue(model, item.Name, isCache));
-            }
-            
-            return dic;
-        }
-        #endregion
-
-        #region List<dic> to List<T>
-        /// <summary>
-        ///  dic to T
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public static List<T> DicToModel<T>(List<Dictionary<string, object>> dic, bool isCache=true) where T : class, new()
-        {
-            var result = new List<T>();
-
-            foreach (var item in dic)
-            {
-                    result.Add(DicToModel<T>(item, isCache));
-            }
-            
-            return result;
-        }
-        #endregion
-
-        #region 泛型缓存属性成员
-        /// <summary>
-        /// 泛型缓存属性成员
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public static List<PropertyInfo> PropertyInfo<T>(bool IsCache = true)
-        {
-            var key = typeof(T).Namespace + "." + typeof(T).Name;
-
-            if (IsCache)
-            {
-                //if (BaseCache.Exists(key))
-                //    return BaseCache.Get<List<PropertyInfo>>(key);
-                //else
-                //{
-                    var info = typeof(T).GetProperties().ToList();
-
-                    //BaseCache.Set<List<PropertyInfo>>(key, info);
-                    return info;
-                //}
-            }
-            else
-            {
-                //BaseCache.Clear(key);
-                return typeof(T).GetProperties().ToList();
-            }
-        }
-        #endregion
-    }
 }
+
+
 
 namespace System.Collections.Generic
 {
@@ -238,23 +241,25 @@ namespace System.Collections.Generic
             return "";
         }
 
-        public static void SetValue(this Dictionary<string, object> item, string key, object value)
+        public static Dictionary<string, object> SetValue(this Dictionary<string, object> item, string key, object value)
         {
-
             if (string.IsNullOrEmpty(key))
-                return;
+                return item;
 
             if (item == null)
-                return;
+                return item;
 
             foreach (var temp in item.Keys)
             {
                 if (temp.ToLower() == key.ToLower())
                 {
                     item[temp] = value;
-                    return;
+                    return item;
                 }
             }
+
+            item.Add(key, value);
+            return item;
         }
     }
 }
