@@ -6,7 +6,6 @@ in Startup.cs Startup mothod
             Configuration = configuration;
 
             //init model Properties cahce
-            var test = new DataModel.Base.Base_Api();
             FastMap.InstanceProperties(AppDomain.CurrentDomain.GetAssemblies(), "DataModel", "Model.dll");
 
             //init code first
@@ -67,7 +66,7 @@ in db.json
                      
                  FastWrite.Add(info);
                  
-                 FastMap.ExecuteMapPage(pageModel, "getuser", param.ToArray());
+                 FastMap.QueryPage(pageModel, "getuser", param.ToArray());
 
 
 
