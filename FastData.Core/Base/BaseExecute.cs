@@ -131,7 +131,7 @@ namespace FastData.Core.Base
                     sb = new StringBuilder();
                     if (item.Predicate.Count > 0)
                     {
-                        sb.AppendFormat("select * from(select field.*,ROWNUM RN from(select {0} from {1} and {2}) field where rownum<={3}) where rn>={4}"
+                        sb.AppendFormat("select * from(select field.*,ROWNUM RN from(select {0} from {1} where {2}) field where rownum<={3}) where rn>={4}"
                                         , string.Join(",", item.Field)
                                         , table
                                         , item.Predicate[0].Where
