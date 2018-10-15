@@ -168,8 +168,8 @@ namespace FastData.Core.Context
                     else
                         pModel.TotalPage = (pModel.TotalRecord / pModel.PageSize) + 1;
 
-                    if (pModel.StarId > pModel.TotalPage)
-                        pModel.StarId = pModel.TotalPage;
+                    if (pModel.PageId > pModel.TotalPage)
+                        pModel.PageId = pModel.TotalPage;
 
                     var dr = BaseExecute.ToPageDataReader(item, cmd, pModel, ref sql);
                     result.pageResult.list = BaseDataReader.ToList<T>(dr, item.Config, item.AsName);
