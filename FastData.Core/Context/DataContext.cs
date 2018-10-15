@@ -221,7 +221,10 @@ namespace FastData.Core.Context
                         pModel.TotalPage = pModel.TotalRecord / pModel.PageSize;
                     else
                         pModel.TotalPage = (pModel.TotalRecord / pModel.PageSize) + 1;
-
+ 
+                    if (pModel.PageId > pModel.TotalPage)
+                        pModel.PageId = pModel.TotalPage;
+                    
                     var dr = BaseExecute.ToPageDataReader(item, cmd, pModel, ref sql);
                     result.PageResult.list = BaseJson.DataReaderToDic(dr);
                     result.Sql = sql;
@@ -272,6 +275,9 @@ namespace FastData.Core.Context
                         pModel.TotalPage = pModel.TotalRecord / pModel.PageSize;
                     else
                         pModel.TotalPage = (pModel.TotalRecord / pModel.PageSize) + 1;
+
+                    if (pModel.PageId > pModel.TotalPage)
+                        pModel.PageId = pModel.TotalPage;
 
                     var dr = BaseExecute.ToPageDataReaderSql(param, cmd, pModel, sql, config, ref pageSql);
 
@@ -325,8 +331,8 @@ namespace FastData.Core.Context
                     else
                         pModel.TotalPage = (pModel.TotalRecord / pModel.PageSize) + 1;
 
-                    if (pModel.StarId > pModel.TotalPage)
-                        pModel.StarId = pModel.TotalPage;
+                    if (pModel.PageId > pModel.TotalPage)
+                        pModel.PageId = pModel.TotalPage;
 
                     var dr = BaseExecute.ToPageDataReaderSql(param, cmd, pModel, sql, config, ref pageSql);
 
