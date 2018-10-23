@@ -209,7 +209,7 @@ namespace FastData.Core
         public static List<T> Query<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             InstanceMap(key);
-            var config = DataConfig.Get(key);
+            var config = db == null ? DataConfig.Get(key) : db.config;
             if (DbCache.Exists(config.CacheType,name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
@@ -263,7 +263,7 @@ namespace FastData.Core
         /// </summary>
         public static List<Dictionary<string, object>> Query(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            var config = DataConfig.Get(key);
+            var config = db == null ? DataConfig.Get(key) : db.config;
             InstanceMap(key);
 
             if (DbCache.Exists(config.CacheType,name.ToLower()))
@@ -320,7 +320,7 @@ namespace FastData.Core
         /// </summary>
         public static WriteReturn Write(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            var config = DataConfig.Get(key);
+            var config = db == null ? DataConfig.Get(key) : db.config;
             InstanceMap(key);
 
             if (DbCache.Exists(config.CacheType,name.ToLower()))
@@ -409,7 +409,7 @@ namespace FastData.Core
         /// </summary>
         public static PageResult QueryPage(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            var config = DataConfig.Get(key);
+            var config = db == null ? DataConfig.Get(key) : db.config;
             InstanceMap(key);
 
             if (DbCache.Exists(config.CacheType,name.ToLower()))
@@ -498,7 +498,7 @@ namespace FastData.Core
         /// </summary>
         public static PageResult<T> QueryPage<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            var config = DataConfig.Get(key);
+            var config = db == null ? DataConfig.Get(key) : db.config;
             InstanceMap(key);
 
             if (DbCache.Exists(config.CacheType,name.ToLower()))
