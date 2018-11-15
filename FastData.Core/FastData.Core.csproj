@@ -4,6 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>orm(db first,code frist) for sqlserver mysql etl.
+https://github.com/weizhonzhen/FastData.Core</Description>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
