@@ -67,9 +67,10 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceProperties(Assembly[] list, string nameSpace, string dll)
+        public static void InstanceProperties(string nameSpace, string dll)
         {
             var config = DataConfig.Get();
+            var list = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var item in list)
             {
                 if (item.ManifestModule.Name == dll)
@@ -108,7 +109,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceTable(Assembly[] list, string nameSpace, string dll, string dbKey = null)
+        public static void InstanceTable(string nameSpace, string dll, string dbKey = null)
         {
             var query = new DataQuery();
             query.Config = DataConfig.Get(dbKey);
@@ -116,6 +117,7 @@ namespace FastData.Core
             
             CreateLogTable(query);
 
+            var list = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var item in list)
             {
                 if (item.ManifestModule.Name == dll)
