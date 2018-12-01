@@ -6,11 +6,11 @@ in Startup.cs Startup mothod
             Configuration = configuration;
 
             //init model Properties cahce
-            FastMap.InstanceProperties(AppDomain.CurrentDomain.GetAssemblies(), "DataModel", "Model.dll");
+            FastMap.InstanceProperties("DataModel", "Model.dll");
 
             //init code first
-            FastMap.InstanceTable(AppDomain.CurrentDomain.GetAssemblies(), "DataModel.Base", "Model.dll");
-            FastMap.InstanceTable(AppDomain.CurrentDomain.GetAssemblies(), "DataModel.Report", "Model.dll");
+            FastMap.InstanceTable("DataModel.Base", "Model.dll");
+            FastMap.InstanceTable("DataModel.Report", "Model.dll");
 
             // init map cache
             FastMap.InstanceMap();
@@ -20,7 +20,7 @@ in db.json
           "SqlMap" :{"Path": [ "map/admin/Api.xml", "map/admin/Area.xml"]},          
            "DataConfig": [
               {
-                "ProviderName": "MySql.Data.MySqlClient",
+                "ProviderName": "MySql.Data",
                 "DbType": "MySql",
                 "ConnStr": "Database=Cloud;Data Source=127.0.0.1;User Id=root;Password=22;CharSet=utf8;port=3306;Allow User Variables=True;pooling=true;Min Pool Size=10;Max Pool Size=100;",
                 "IsOutSql": true,
