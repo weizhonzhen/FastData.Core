@@ -2,11 +2,10 @@
 using System.Data.Common;
 using System.Reflection;
 using FastData.Core.Model;
-using FastData.Core.Type;
 
 namespace FastData.Core.Base
 {
-    internal class DbProviderFactories: DbProviderFactory
+    internal class DbProviderFactories : DbProviderFactory
     {
         /// <summary>
         /// 动态加载数据库工厂
@@ -16,14 +15,21 @@ namespace FastData.Core.Base
         /// <returns></returns>
         public static DbProviderFactory GetFactory(ConfigModel config)
         {
-            if (config.DbType.ToLower() == DataDbType.SqlServer.ToLower())
-                return System.Data.SqlClient.SqlClientFactory.Instance;
-            else if (config.DbType.ToLower() == DataDbType.MySql.ToLower())
-                return MySql.Data.MySqlClient.MySqlClientFactory.Instance;
-            else
+            try
             {
-                var assembly = Assembly.LoadFile(string.Format("{0}{1}", AppDomain.CurrentDomain.BaseDirectory, config.ProviderName));
-                return assembly.CreateInstance(config.FactoryClient) as DbProviderFactory;
+                var assembly = Assembly.Load(config.ProviderName);
+                var type = assembly.GetType(config.FactoryClient, false);
+                object instance = null;
+
+                if (type != null)
+                    instance = type.InvokeMember("Instance", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.GetProperty, null, type, null);
+
+                return instance as DbProviderFactory;
+            }
+            catch (Exception ex)
+            {
+                DbLog.LogException(config.IsOutError, config.DbType, ex, "GetFactory", "");
+                return null;
             }
         }
     }
