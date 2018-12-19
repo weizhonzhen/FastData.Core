@@ -235,7 +235,7 @@ namespace System.Collections.Generic
             foreach (var temp in item.Keys)
             {
                 if (temp.ToLower() == key.ToLower())
-                    return item[temp];
+                    return item[temp.ToLower()];
             }
 
             return "";
@@ -253,7 +253,7 @@ namespace System.Collections.Generic
             {
                 if (temp.ToLower() == key.ToLower())
                 {
-                    item[temp] = value;
+                    item[temp.ToLower()] = value;
                     return item;
                 }
             }
