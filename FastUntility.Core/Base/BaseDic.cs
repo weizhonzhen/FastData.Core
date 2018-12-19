@@ -232,10 +232,10 @@ namespace System.Collections.Generic
             if (item == null)
                 return "";
 
-            foreach (var temp in item.Keys)
+           foreach(KeyValuePair<string,object> temp in item)
             {
-                if (temp.ToLower() == key.ToLower())
-                    return item[temp.ToLower()];
+                if (temp.Key.ToLower() == key.ToLower())
+                    return temp.Value;
             }
 
             return "";
@@ -253,7 +253,7 @@ namespace System.Collections.Generic
             {
                 if (temp.ToLower() == key.ToLower())
                 {
-                    item[temp.ToLower()] = value;
+                    item[temp] = value;
                     return item;
                 }
             }
