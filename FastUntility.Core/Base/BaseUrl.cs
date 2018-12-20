@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
@@ -41,7 +41,7 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post url(insert)
         /// </summary>
-        public static string PostUrl(string url, Dictionary<string, object> dic, string name = "")
+        public static string PostUrl(string url, Dictionary<string, object> dic, string name = "", string mediaType = "application/json")
         {
             try
             {
@@ -55,7 +55,7 @@ namespace FastUntility.Core.Base
                     count++;
                 }
 
-                var content = new StringContent("", Encoding.UTF8, "application/json");
+                var content = new StringContent("", Encoding.UTF8, mediaType);
                 var http = httpClientFactory.CreateClient(name);
                 http.DefaultRequestHeaders.Connection.Add("keep-alive");
                 var response = http.PostAsync(new Uri(url), content).Result;
@@ -74,11 +74,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post content(insert)
         /// </summary>
-        public static string PostContent(string url, Dictionary<string, object> dic, string name = "")
+        public static string PostContent(string url, Dictionary<string, object> dic, string name = "", string mediaType = "application/json")
         {
             try
             {
-                var content = new StringContent(BaseJson.ModelToJson(dic), Encoding.UTF8, "application/json");
+                var content = new StringContent(BaseJson.ModelToJson(dic), Encoding.UTF8, mediaType);
                 var http = httpClientFactory.CreateClient(name);
                 http.DefaultRequestHeaders.Connection.Add("keep-alive");
                 var response = http.PostAsync(new Uri(url), content).Result;
@@ -97,7 +97,7 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// put url(update)
         /// </summary>
-        public static string PutUrl(string url, Dictionary<string, object> dic, string name = "")
+        public static string PutUrl(string url, Dictionary<string, object> dic, string name = "", string mediaType = "application/json")
         {
             try
             {
@@ -111,7 +111,7 @@ namespace FastUntility.Core.Base
                     count++;
                 }
 
-                var content = new StringContent("", Encoding.UTF8, "application/json");
+                var content = new StringContent("", Encoding.UTF8, mediaType);
                 var http = httpClientFactory.CreateClient(name);
                 http.DefaultRequestHeaders.Connection.Add("keep-alive");
                 var response = http.PostAsync(new Uri(url), content).Result;
@@ -130,11 +130,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// put content(update)
         /// </summary>
-        public static string PutContent(string url, Dictionary<string, object> dic, string name = "")
+        public static string PutContent(string url, Dictionary<string, object> dic, string name = "", string mediaType = "application/json")
         {
             try
             {
-                var content = new StringContent(BaseJson.ModelToJson(dic), Encoding.UTF8, "application/json");
+                var content = new StringContent(BaseJson.ModelToJson(dic), Encoding.UTF8, mediaType);
                 var http = httpClientFactory.CreateClient(name);
                 http.DefaultRequestHeaders.Connection.Add("keep-alive");
                 var response = http.PostAsync(new Uri(url), content).Result;
