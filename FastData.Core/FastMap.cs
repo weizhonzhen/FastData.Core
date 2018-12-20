@@ -1,65 +1,30 @@
-﻿using FastData.Core.Base;
-using FastData.Core.CacheModel;
-using FastData.Core.Check;
-using FastData.Core.Context;
-using FastData.Core.Model;
-using FastData.Core.Type;
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.Common;
+using FastUntility.Page;
+using FastData.Base;
+using FastData.Config;
+using FastData.Type;
+using FastData.Model;
+using System.Diagnostics;
+using System.IO;
 using System.Xml;
-using FastUntility.Core.Base;
-using FastUntility.Core.Page;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using FastUntility.Core.Cache;
+using FastUntility.Base;
+using FastData.CacheModel;
+using FastData.Check;
+using System.Reflection;
+using FastData.Context;
 
-namespace FastData.Core
+namespace FastData
 {
     /// <summary>
     /// map
     /// </summary>
     public static class FastMap
     {
-        #region 初始化建日记表
-        /// <summary>
-        /// 初始化建日记表
-        /// </summary>
-        /// <param name="query"></param>
-        private static void CreateLogTable(DataQuery query)
-        {
-            if (query.Config.SqlErrorType.ToLower() == SqlErrorType.Db)
-            {
-                query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
-                if (query.Config.DbType == DataDbType.Oracle)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.Oracle.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.Oracle.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
-                }
-
-                if (query.Config.DbType == DataDbType.MySql)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.MySql.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.MySql.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
-                }
-
-                if (query.Config.DbType == DataDbType.SqlServer)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.SqlServer.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.SqlServer.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
-                }
-            }
-        }
-        #endregion
-
         #region 初始化model成员 1
         /// <summary>
         /// 初始化model成员 1
@@ -67,9 +32,10 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceProperties(string nameSpace, string dll)
+        public static void InstanceProperties( string nameSpace, string dll)
         {
-            var config = DataConfig.Get();
+            var config = DataConfig.GetConfig();
+
             var list = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var item in list)
             {
@@ -80,7 +46,7 @@ namespace FastData.Core
                         Task.Factory.StartNew(() =>
                         {
                             var typeInfo = (temp as TypeInfo);
-                            if (typeInfo.Namespace!=null&&typeInfo.Namespace.Contains(nameSpace))
+                            if (typeInfo.Namespace != null && typeInfo.Namespace.Contains(nameSpace))
                             {
                                 var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
 
@@ -93,10 +59,44 @@ namespace FastData.Core
                                     cacheList.Add(model);
                                 }
 
-                                DbCache.Set<List<PropertyModel>>(config.CacheType,key, cacheList);
+                                DbCache.Set<List<PropertyModel>>(config.CacheType, key, cacheList);
                             }
                         });
                     }
+                }
+            }
+        }
+        #endregion
+
+        #region 初始化建日记表
+        /// <summary>
+        /// 初始化建日记表
+        /// </summary>
+        /// <param name="query"></param>
+        private static void CreateLogTable(DataQuery query)
+        {
+            if (query.Config.SqlErrorType.ToLower() == SqlErrorType.Db)
+            {
+                query.Config.DesignModel = FastData.Base.Config.CodeFirst;
+                if (query.Config.DbType == DataDbType.Oracle)
+                {
+                    var listInfo = typeof(FastData.DataModel.Oracle.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.DataModel.Oracle.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
+                }
+
+                if (query.Config.DbType == DataDbType.MySql)
+                {
+                    var listInfo = typeof(FastData.DataModel.MySql.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.DataModel.MySql.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
+                }
+
+                if (query.Config.DbType == DataDbType.SqlServer)
+                {
+                    var listInfo = typeof(FastData.DataModel.SqlServer.Data_LogError).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.DataModel.SqlServer.Data_LogError).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_LogError", listInfo, listAttribute);
                 }
             }
         }
@@ -112,9 +112,9 @@ namespace FastData.Core
         public static void InstanceTable(string nameSpace, string dll, string dbKey = null)
         {
             var query = new DataQuery();
-            query.Config = DataConfig.Get(dbKey);
+            query.Config = DataConfig.GetConfig(dbKey);
             query.Key = dbKey;
-            
+
             CreateLogTable(query);
 
             var list = AppDomain.CurrentDomain.GetAssemblies();
@@ -140,23 +140,50 @@ namespace FastData.Core
         /// <returns></returns>
         public static void InstanceMap(string dbKey = null)
         {
-            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map,"map.json");
-            var config = DataConfig.Get(dbKey);
+            var list = MapConfig.GetConfig();
+            var config = DataConfig.GetConfig(dbKey);
             var db = new DataContext(dbKey);
             var query = new DataQuery { Config = config, Key = dbKey };
+
+            if (config.IsMapSave)
+            {
+                query.Config.DesignModel = FastData.Base.Config.CodeFirst;
+                if (query.Config.DbType == DataDbType.Oracle)
+                {
+                    var listInfo = typeof(FastData.DataModel.Oracle.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.DataModel.Oracle.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
+                }
+
+                if (query.Config.DbType == DataDbType.MySql)
+                {
+                    var listInfo = typeof(FastData.DataModel.MySql.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.DataModel.MySql.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
+                }
+
+                if (query.Config.DbType == DataDbType.SqlServer)
+                {
+                    var listInfo = typeof(FastData.DataModel.SqlServer.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                    var listAttribute = typeof(FastData.DataModel.SqlServer.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
+                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
+                }
+            }
+
+            CreateLogTable(query);
 
             foreach (var item in list.Path)
             {
                 var info = new FileInfo(item);
-                var key = BaseSymmetric.Generate(info.FullName);
+                var key = BaseSymmetric.md5(32, info.FullName);
 
-                if (!DbCache.Exists(config.CacheType,key))
+                if (!DbCache.Exists(config.CacheType, key))
                 {
                     var temp = new MapXmlModel();
                     temp.LastWrite = info.LastWriteTime;
-                    temp.FileKey = ReadXml(info.FullName, config);
+                    temp.FileKey = ReadXml(item, config);
                     temp.FileName = info.FullName;
-                    if (SaveXml(dbKey, key, info, config, db))
+                    if (SaveXml(key, info, config, db))
                         DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
                 }
                 else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Minutes != 0)
@@ -166,40 +193,13 @@ namespace FastData.Core
 
                     var model = new MapXmlModel();
                     model.LastWrite = info.LastWriteTime;
-                    model.FileKey = ReadXml(info.FullName, config);
+                    model.FileKey = ReadXml(item, config);
                     model.FileName = info.FullName;
-                    if (SaveXml(dbKey, key, info, config, db))
+                    if (SaveXml(key, info, config, db))
                         DbCache.Set<MapXmlModel>(config.CacheType, key, model);
                 }
             }
 
-            CreateLogTable(query);
-
-            if (config.IsMapSave)
-            {
-                query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
-                if (query.Config.DbType == DataDbType.Oracle)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.Oracle.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.Oracle.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
-                }
-
-                if (query.Config.DbType == DataDbType.MySql)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.MySql.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.MySql.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
-                }
-
-                if (query.Config.DbType == DataDbType.SqlServer)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.SqlServer.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.SqlServer.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
-                }
-            }
-            
             db.Dispose();
         }
         #endregion
@@ -210,12 +210,17 @@ namespace FastData.Core
         /// </summary>
         public static List<T> Query<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            InstanceMap(key);
-            var config = db == null ? DataConfig.Get(key) : db.config;
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
+            if (db != null)
+                InstanceMap(db.config.Key);
+            else
+                InstanceMap(key);
+
+            var config = db == null ? DataConfig.GetConfig(key) : db.config;
+
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
-                return FastRead.ExecuteSql<T>(sql, param, db, key);
+                return FastRead.ExecuteSql<T>(sql, param,db,key);
             }
             else
                 return new List<T>();
@@ -230,7 +235,7 @@ namespace FastData.Core
         {
             return await Task.Factory.StartNew(() =>
             {
-                return Query<T>(name, param, db, key);
+                return Query<T>(name, param,db,key);
             });
         }
         #endregion
@@ -241,7 +246,7 @@ namespace FastData.Core
         /// </summary>
         public static Lazy<List<T>> QueryLazy<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            return new Lazy<List<T>>(() => Query<T>(name, param, db, key));
+            return new Lazy<List<T>>(() => Query<T>( name, param,db,key));
         }
         #endregion
 
@@ -253,64 +258,7 @@ namespace FastData.Core
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<List<T>>(() => Query<T>(name, param, db, key));
-            });
-        }
-        #endregion
-
-
-        #region maq 执行返回 List<Dictionary<string, object>>
-        /// <summary>
-        /// maq 执行返回 List<Dictionary<string, object>>
-        /// </summary>
-        public static List<Dictionary<string, object>> Query(string name, DbParameter[] param, DataContext db = null, string key = null)
-        {
-            var config = db == null ? DataConfig.Get(key) : db.config;
-            InstanceMap(key);
-
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
-            {
-                var sql = GetMapSql(name, ref param,db,key);
-
-                return FastRead.ExecuteSql(sql, param, db, key);
-            }
-            else
-                return new List<Dictionary<string, object>>();
-        }
-        #endregion
-
-        #region maq 执行返回 List<Dictionary<string, object>> asy
-        /// <summary>
-        /// 执行sql List<Dictionary<string, object>> asy
-        /// </summary>
-        public static async Task<List<Dictionary<string, object>>> QueryAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                return Query(name, param, db, key);
-            });
-        }
-        #endregion
-
-        #region maq 执行返回 List<Dictionary<string, object>> lazy
-        /// <summary>
-        /// maq 执行返回 List<Dictionary<string, object>> lazy
-        /// </summary>
-        public static Lazy<List<Dictionary<string, object>>> QueryLazy(string name, DbParameter[] param, DataContext db = null, string key = null)
-        {
-            return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key));
-        }
-        #endregion
-
-        #region maq 执行返回 List<Dictionary<string, object>> lazy asy
-        /// <summary>
-        /// maq 执行返回 List<Dictionary<string, object>> lazy asy
-        /// </summary>
-        public static async Task<Lazy<List<Dictionary<string, object>>>> QueryLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key));
+                return new Lazy<List<T>>(() => Query<T>(name, param,db,key));
             });
         }
         #endregion
@@ -322,13 +270,17 @@ namespace FastData.Core
         /// </summary>
         public static WriteReturn Write(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            var config = db == null ? DataConfig.Get(key) : db.config;
-            InstanceMap(key);
+            if (db != null)
+                InstanceMap(db.config.Key);
+            else
+                InstanceMap(key);
 
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
+            var config = db == null ? DataConfig.GetConfig(key) : db.config;
+
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
-
+                
                 return FastWrite.ExecuteSql(sql, param, db, key);
             }
             else
@@ -373,6 +325,67 @@ namespace FastData.Core
         #endregion
 
 
+        #region maq 执行返回 List<Dictionary<string, object>>
+        /// <summary>
+        /// maq 执行返回 List<Dictionary<string, object>>
+        /// </summary>
+        public static List<Dictionary<string, object>> Query(string name, DbParameter[] param, DataContext db = null, string key = null)
+        {
+            if (db != null)
+                InstanceMap(db.config.Key);
+            else
+                InstanceMap(key);
+
+            var config = db == null ? DataConfig.GetConfig(key) : db.config;
+
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
+            {
+                var sql = GetMapSql(name, ref param,db,key);
+
+                return FastRead.ExecuteSql(sql, param,db,key);
+            }
+            else
+                return new List<Dictionary<string, object>>();
+        }
+        #endregion
+
+        #region maq 执行返回 List<Dictionary<string, object>> asy
+        /// <summary>
+        /// 执行sql List<Dictionary<string, object>> asy
+        /// </summary>
+        public static async Task<List<Dictionary<string, object>>> QueryAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                return Query(name, param,db,key);
+            });
+        }
+        #endregion
+
+        #region maq 执行返回 List<Dictionary<string, object>> lazy
+        /// <summary>
+        /// maq 执行返回 List<Dictionary<string, object>> lazy
+        /// </summary>
+        public static Lazy<List<Dictionary<string, object>>> QueryLazy(string name, DbParameter[] param, DataContext db = null, string key = null)
+        {
+            return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param,db,key));
+        }
+        #endregion
+
+        #region maq 执行返回 List<Dictionary<string, object>> lazy asy
+        /// <summary>
+        /// maq 执行返回 List<Dictionary<string, object>> lazy asy
+        /// </summary>
+        public static async Task<Lazy<List<Dictionary<string, object>>>> ExecuteLazyMapAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param,db,key));
+            });
+        }
+        #endregion
+
+
         #region 执行分页
         /// <summary>
         /// 执行分页 
@@ -383,7 +396,7 @@ namespace FastData.Core
         private static PageResult ExecuteSqlPage(PageModel pModel, string sql, DbParameter[] param, DataContext db = null, string key = null)
         {
             var result = new DataReturn();
-            var config = DataConfig.Get(key);
+            var config = DataConfig.GetConfig(key);
             var stopwatch = new Stopwatch();
 
             stopwatch.Start();
@@ -411,14 +424,17 @@ namespace FastData.Core
         /// </summary>
         public static PageResult QueryPage(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            var config = db == null ? DataConfig.Get(key) : db.config;
-            InstanceMap(key);
+            if (db != null)
+                InstanceMap(db.config.Key);
+            else
+                InstanceMap(key);
 
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
+            var config = db == null ? DataConfig.GetConfig(key) : db.config;
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
 
-                return ExecuteSqlPage(pModel, sql, param, db, key);
+                return ExecuteSqlPage(pModel, sql, param,db,key);
             }
             else
                 return new PageResult();
@@ -433,7 +449,7 @@ namespace FastData.Core
         {
             return await Task.Factory.StartNew(() =>
             {
-                return QueryPage(pModel, name, param, db, key);
+                return QueryPage(pModel, name, param,db,key);
             });
         }
         #endregion
@@ -444,7 +460,7 @@ namespace FastData.Core
         /// </summary>
         public static Lazy<PageResult> QueryPageLazy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key));
+            return new Lazy<PageResult>(() => QueryPage(pModel, name, param,db,key));
         }
         #endregion
 
@@ -456,11 +472,11 @@ namespace FastData.Core
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key));
+                return new Lazy<PageResult>(() => QueryPage(pModel, name, param,db,key));
             });
         }
         #endregion
-
+        
 
         #region 执行分页
         /// <summary>
@@ -472,7 +488,7 @@ namespace FastData.Core
         private static PageResult<T> ExecuteSqlPage<T>(PageModel pModel, string sql, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
             var result = new DataReturn<T>();
-            var config = DataConfig.Get(key);
+            var config = DataConfig.GetConfig(key);
             var stopwatch = new Stopwatch();
 
             stopwatch.Start();
@@ -500,14 +516,17 @@ namespace FastData.Core
         /// </summary>
         public static PageResult<T> QueryPage<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            var config = db == null ? DataConfig.Get(key) : db.config;
-            InstanceMap(key);
+            if (db != null)
+                InstanceMap(db.config.Key);
+            else
+                InstanceMap(key);
 
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
+            var config = db == null ? DataConfig.GetConfig(key) : db.config;
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
 
-                return ExecuteSqlPage<T>(pModel, sql, param, db, key);
+                return ExecuteSqlPage<T>(pModel, sql, param,db,key);
             }
             else
                 return new PageResult<T>();
@@ -522,7 +541,7 @@ namespace FastData.Core
         {
             return await Task.Factory.StartNew(() =>
             {
-                return QueryPage<T>(pModel, name, param, db, key);
+                return QueryPage<T>(pModel, name, param,db,key);
             });
         }
         #endregion
@@ -533,7 +552,7 @@ namespace FastData.Core
         /// </summary>
         public static Lazy<PageResult<T>> QueryPageLazy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key));
+            return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param,db,key));
         }
         #endregion
 
@@ -545,7 +564,7 @@ namespace FastData.Core
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key));
+                return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param,db,key));
             });
         }
         #endregion
@@ -555,14 +574,14 @@ namespace FastData.Core
         /// <summary>
         /// 读取xml map并缓存
         /// </summary>
-        private static List<string> ReadXml(string path, ConfigModel config)
+        private static List<string> ReadXml(string path,ConfigModel config)
         {
             var key = new List<string>();
             var sql = new List<string>();
-            GetXmlList(path, "sqlMap", ref key, ref sql, config);
+            GetXmlList(path, "sqlMap", ref key, ref sql,config);
 
             for (var i = 0; i < key.Count; i++)
-                DbCache.Set(config.CacheType,key[i].ToLower(), sql[i]);
+                DbCache.Set(config.CacheType, key[i].ToLower(), sql[i]);
 
             return key;
         }
@@ -575,7 +594,7 @@ namespace FastData.Core
         /// <param name="path">文件名</param>
         /// <param name="xmlNode">结点</param>
         /// <returns></returns>
-        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql, ConfigModel config)
+        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql,ConfigModel config)
         {
             try
             {
@@ -586,7 +605,7 @@ namespace FastData.Core
 
                 //载入xml
                 if (config.IsEncrypt)
-                {
+                {                    
                     var temp = BaseSymmetric.DecodeGB2312(File.ReadAllText(path));
                     if (temp != "")
                         xmlDoc.LoadXml(temp);
@@ -612,7 +631,7 @@ namespace FastData.Core
                             tempKey = temp.Attributes["id"].Value.ToLower();
 
                             //节点数
-                            if (Array.Exists(key.ToArray(), element => element == tempKey))
+                            if (Array.Exists(key.ToArray(), element=> element== tempKey))
                                 Task.Factory.StartNew(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
                             key.Add(tempKey);
                             sql.Add(temp.ChildNodes.Count.ToString());
@@ -635,13 +654,13 @@ namespace FastData.Core
 
                                     foreach (XmlNode dyn in node.ChildNodes)
                                     {
-                                        if (dyn.Name == "isPropertyAvailable")
+                                        if (dyn.Name.ToLower() == "ispropertyavailable")
                                         {
                                             //属性和值
                                             key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
                                             sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
                                         }
-                                        else if (dyn.Name != "choose")
+                                        else if(dyn.Name.ToLower() != "choose")
                                         {
                                             //属性和值
                                             key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
@@ -650,7 +669,7 @@ namespace FastData.Core
                                             //条件类型
                                             key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
                                             sql.Add(dyn.Name);
-
+                                            
                                             //判断条件内容
                                             if (dyn.Attributes["condition"] != null)
                                             {
@@ -674,16 +693,16 @@ namespace FastData.Core
                                             if (dyn is XmlElement)
                                             {
                                                 var count = 0;
-                                                key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(),i));
                                                 sql.Add(dyn.ChildNodes.Count.ToStr());
                                                 foreach (XmlNode child in dyn.ChildNodes)
                                                 {
                                                     //条件
-                                                    key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                    key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(),i, count));
                                                     sql.Add(child.Attributes["property"].Value.ToLower());
 
                                                     //内容
-                                                    key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                    key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(),i, count));
                                                     sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
 
                                                     count++;
@@ -698,7 +717,7 @@ namespace FastData.Core
                             }
                             #endregion
                         }
-                        else if (temp is XmlText)
+                        else if(temp is XmlText)
                         {
                             #region XmlText
                             key.Add(string.Format("{0}.{1}", item.Attributes["id"].Value.ToLower(), i));
@@ -715,10 +734,10 @@ namespace FastData.Core
             {
                 Task.Factory.StartNew(() =>
                 {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException(config, ex, "InstanceMap", "GetXmlList");
+                    if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                        DbLogTable.LogException(config, ex, "GetXmlList","");
                     else
-                        DbLog.LogException(true, "InstanceMap", ex, "GetXmlList", ""); 
+                        DbLog.LogException(true, "InstanceMap", ex, "GetXmlList", "");
                 });
             }
         }
@@ -737,10 +756,18 @@ namespace FastData.Core
             var sql = new StringBuilder();
             var flag = "";
             var cacheType = "";
-            if (db != null) { flag = db.config.Flag;cacheType = db.config.CacheType; }
-            if (key != null) { flag = BaseContext.GetContext(key).config.Flag; cacheType = db.config.CacheType; }
+            if (db != null)
+            {
+                flag = db.config.Flag;
+                cacheType = db.config.CacheType;
+            }
+            else if (key != null)
+            {
+                flag = DataConfig.GetConfig(key).Flag;
+                cacheType = DataConfig.GetConfig(key).CacheType;
+            }
 
-            for (var i = 0; i <= DbCache.Get(cacheType,name.ToLower()).ToInt(0); i++)
+            for (var i = 0; i <= DbCache.Get(cacheType, name.ToLower()).ToInt(0); i++)
             {
                 #region 文本
                 var txtKey = string.Format("{0}.{1}", name.ToLower(), i);
@@ -758,20 +785,20 @@ namespace FastData.Core
                         foreach (var temp in param)
                         {
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
-                            var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+                            var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(),i);
                             var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
-                            if (DbCache.Exists(cacheType, paramKey))
+                            if (DbCache.Exists(DataConfig.GetConfig(key).CacheType, paramKey))
                             {
-                                var flagParam = string.Format("{0}{1}", flag, temp.ParameterName.ToLower());
+                                var flagParam= string.Format("{0}{1}", flag, temp.ParameterName.ToLower());
                                 var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
                                 var paramSql = DbCache.Get(cacheType, paramKey).ToLower();
                                 var condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
                                 var conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
                                 switch (condition)
                                 {
-                                    case "isEqual":
+                                    case "isequal":
                                         {
-                                            if (conditionValue == temp.Value.ToStr())
+                                            if (conditionValue == temp.Value.ToStr().ToLower())
                                             {
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
@@ -790,9 +817,9 @@ namespace FastData.Core
                                                 tempParam.Remove(temp);
                                             break;
                                         }
-                                    case "isNotEqual":
+                                    case "isnotequal":
                                         {
-                                            if (conditionValue != temp.Value.ToStr().ToLower())
+                                            if (conditionValue != temp.Value.ToStr())
                                             {
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
@@ -811,7 +838,7 @@ namespace FastData.Core
                                                 tempParam.Remove(temp);
                                             break;
                                         }
-                                    case "isGreaterThan":
+                                    case "isgreaterthan":
                                         {
                                             if (temp.Value.ToStr().ToDecimal(0) > conditionValue.ToDecimal(0))
                                             {
@@ -832,7 +859,7 @@ namespace FastData.Core
                                                 tempParam.Remove(temp);
                                             break;
                                         }
-                                    case "isLessThan":
+                                    case "islessthan":
                                         {
                                             if (temp.Value.ToStr().ToDecimal(0) < conditionValue.ToDecimal(0))
                                             {
@@ -853,7 +880,7 @@ namespace FastData.Core
                                                 tempParam.Remove(temp);
                                             break;
                                         }
-                                    case "isNullOrEmpty":
+                                    case "isnullorempty":
                                         {
                                             if (string.IsNullOrEmpty(temp.Value.ToStr()))
                                             {
@@ -874,7 +901,7 @@ namespace FastData.Core
                                                 tempParam.Remove(temp);
                                             break;
                                         }
-                                    case "isNotNullOrEmpty":
+                                    case "isnotnullorempty":
                                         {
                                             if (!string.IsNullOrEmpty(temp.Value.ToStr()))
                                             {
@@ -898,7 +925,7 @@ namespace FastData.Core
                                     case "if":
                                         {
                                             conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
-                                            if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
+                                            if (BaseCodeDom.GetResult(conditionValue))
                                             {
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
@@ -928,7 +955,7 @@ namespace FastData.Core
                                                 conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
                                                 conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
                                                 conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
-                                                if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
+                                                if (BaseCodeDom.GetResult(conditionValue))
                                                 {
                                                     isSuccess = true;
                                                     if (condition.IndexOf(tempKey) >= 0)
@@ -993,10 +1020,10 @@ namespace FastData.Core
         /// <summary>
         /// map xml 存数据库
         /// </summary>
-        /// <param name="dbKey"></param>
+        /// <param name="dbReadKey"></param>
         /// <param name="key"></param>
         /// <param name="info"></param>
-        private static bool SaveXml(string dbKey, string key, FileInfo info, ConfigModel config, DataContext db)
+        private static bool SaveXml(string key, FileInfo info, ConfigModel config, DataContext db)
         {
             if (config.IsMapSave)
             {
@@ -1017,30 +1044,30 @@ namespace FastData.Core
 
                 if (config.DbType == DataDbType.MySql)
                 {
-                    var model = new DataModel.MySql.Data_MapFile();
+                    var model = new FastData.DataModel.MySql.Data_MapFile();
                     model.MapId = key;
-                    var query = FastRead.Query<DataModel.MySql.Data_MapFile>(a => a.MapId == key, null, dbKey);
+                    var query = FastRead.Query<FastData.DataModel.MySql.Data_MapFile>(a => a.MapId == key, null);
 
-                    if (query.ToCount() == 0)
+                    if (query.ToCount(db) == 0)
                     {
                         model.FileName = info.Name;
                         model.FilePath = info.FullName;
                         model.LastTime = info.LastWriteTime;
                         model.EnFileContent = enContent;
                         model.DeFileContent = deContent;
-                       return db.Add(model).writeReturn.IsSuccess;
+                        return db.Add(model).writeReturn.IsSuccess;
                     }
                     else
-                       return db.Update<DataModel.MySql.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                        return db.Update<FastData.DataModel.MySql.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
                 }
 
                 if (config.DbType == DataDbType.Oracle)
                 {
-                    var model = new DataModel.Oracle.Data_MapFile();
+                    var model = new FastData.DataModel.Oracle.Data_MapFile();
                     model.MapId = key;
-                    var query = FastRead.Query<DataModel.Oracle.Data_MapFile>(a => a.MapId == key, null, dbKey);
+                    var query = FastRead.Query<FastData.DataModel.Oracle.Data_MapFile>(a => a.MapId == key, null);
 
-                    if (query.ToCount() == 0)
+                    if (query.ToCount(db) == 0)
                     {
                         model.FileName = info.Name;
                         model.FilePath = info.FullName;
@@ -1050,16 +1077,16 @@ namespace FastData.Core
                         return db.Add(model).writeReturn.IsSuccess;
                     }
                     else
-                       return db.Update<DataModel.Oracle.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                        return db.Update<FastData.DataModel.Oracle.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
                 }
 
                 if (config.DbType == DataDbType.SqlServer)
                 {
-                    var model = new DataModel.SqlServer.Data_MapFile();
+                    var model = new FastData.DataModel.SqlServer.Data_MapFile();
                     model.MapId = key;
-                    var query = FastRead.Query<DataModel.SqlServer.Data_MapFile>(a => a.MapId == key, null, dbKey);
+                    var query = FastRead.Query<FastData.DataModel.SqlServer.Data_MapFile>(a => a.MapId == key, null);
 
-                    if (query.ToCount() == 0)
+                    if (query.ToCount(db) == 0)
                     {
                         model.FileName = info.Name;
                         model.FilePath = info.FullName;
@@ -1069,7 +1096,7 @@ namespace FastData.Core
                         return db.Add(model).writeReturn.IsSuccess;
                     }
                     else
-                        return db.Update<DataModel.SqlServer.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                        return db.Update<FastData.DataModel.SqlServer.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
                 }
             }
 
@@ -1078,3 +1105,4 @@ namespace FastData.Core
         #endregion
     }
 }
+
