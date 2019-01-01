@@ -1,4 +1,4 @@
-﻿using FastData.Core.Model;
+using FastData.Core.Model;
 using FastUntility.Core.Base;
 
 namespace FastData.Core.Base
@@ -14,7 +14,7 @@ namespace FastData.Core.Base
         {
             var item = new ConfigModel();
             if (key != null)
-                item = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config,"db.json").Find(a => a.Key == key);
+                item = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config,"db.json").Find(a => a.Key.ToLower() == key.ToLower());
             else
                 item = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config,"db.json")[0] ?? new ConfigModel();
 
