@@ -17,9 +17,8 @@ in Startup.cs Startup mothod
             // init map cache
             FastMap.InstanceMap();
        
-in db.json 
-        
-          "SqlMap" :{"Path": [ "map/admin/Api.xml", "map/admin/Area.xml"]},          
+in db.json         
+           {      
            "DataConfig": [
               {
                 "ProviderName": "MySql.Data",
@@ -37,6 +36,10 @@ in db.json
                 "CacheType":"web"--redis,web
               }
             ]
+      }
+      
+      in map.json
+      "SqlMap" :{"Path": [ "map/admin/Api.xml", "map/admin/Area.xml"]},   
       
     map xml
           <?xml version="1.0" encoding="utf-8" ?>
