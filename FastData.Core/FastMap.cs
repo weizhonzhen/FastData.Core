@@ -737,8 +737,17 @@ namespace FastData.Core
             var sql = new StringBuilder();
             var flag = "";
             var cacheType = "";
-            if (db != null) { flag = db.config.Flag;cacheType = db.config.CacheType; }
-            if (key != null) { flag = BaseContext.GetContext(key).config.Flag; cacheType = db.config.CacheType; }
+            
+            if (db != null)
+            {
+                flag = db.config.Flag;
+                cacheType = db.config.CacheType;
+            }
+            else if (key != null)
+            {
+                flag = DataConfig.Get(key).Flag;
+                cacheType = DataConfig.Get(key).CacheType;
+            }
 
             for (var i = 0; i <= DbCache.Get(cacheType,name.ToLower()).ToInt(0); i++)
             {
