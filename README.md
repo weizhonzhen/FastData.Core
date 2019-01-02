@@ -18,7 +18,8 @@ in Startup.cs Startup mothod
             FastMap.InstanceMap();
        
 in db.json         
-           {      
+```csharp
+ {      
            "DataConfig": [
               {
                 "ProviderName": "MySql.Data",
@@ -37,12 +38,16 @@ in db.json
               }
             ]
       }
-      
-      in map.json
-      "SqlMap" :{"Path": [ "map/admin/Api.xml", "map/admin/Area.xml"]},   
-      
-    map xml
-          <?xml version="1.0" encoding="utf-8" ?>
+```
+  in map.json
+```csharp
+"SqlMap" :{"Path": [ "map/admin/Api.xml", "map/admin/Area.xml"]}
+```
+ 
+
+       map xml
+      ```xml
+    <?xml version="1.0" encoding="utf-8" ?>
             <sqlMap>
               <select id="GetUser">
                 select a.* from base_user a
@@ -64,6 +69,7 @@ in db.json
           </sqlMap>
   
   
+```
   
              db option
                  FastWrite.Update<Base_LogLogin>(new Base_LogLogin { LoginOutTime = DateTime.Now }, 
