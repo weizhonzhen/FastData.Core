@@ -320,6 +320,17 @@ namespace FastData.Core.Base
                                
                  if (left is MemberExpression)
                      sb.AppendFormat("{2}.{0} {1} ", leftPar, rightPar, ((left as MemberExpression).Expression as ParameterExpression).Name);
+                
+                 if (left is MethodCallExpression)
+                    {
+                        var meExp = (MethodCallExpression)(left.ReduceExtensions().Reduce());
+
+                        if (meExp.Method.Name.ToLower() == "substring" || meExp.Method.Name.ToLower() == "toupper" || meExp.Method.Name.ToLower() == "tolower")
+                        {
+                            rightList.Add(rightPar);
+                            i++;
+                        }
+                    }
             }
             else
             {
