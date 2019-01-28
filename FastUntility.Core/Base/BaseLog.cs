@@ -16,9 +16,9 @@ namespace FastUntility.Core.Base
         /// </summary>
         /// <param name="StrContent">日志内容</param>
         public static void SaveLog(string logContent, string fileName)
-        {
-            var path = string.Format("{0}/App_Data/log/{1}", AppDomain.CurrentDomain.BaseDirectory, DateTime.Now.ToString("yyyy-MM-dd"));
-
+        {            
+            var path = string.Format("{0}/App_Data/log/{1}/{2}", AppDomain.CurrentDomain.BaseDirectory
+                                    , DateTime.Now.ToString("yyyy-MM"), DateTime.Now.ToString("yyyy-MM-dd"));
             try
             {
                 lockSlim.EnterWriteLock();
