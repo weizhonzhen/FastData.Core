@@ -17,7 +17,7 @@ namespace FastUntility.Core.Base
         /// <param name="StrContent">日志内容</param>
         public static void SaveLog(string logContent, string fileName)
         {
-            var path = string.Format("{0}/App_Data/log/{1}", AppDomain.CurrentDomain.BaseDirectory, DateTime.Now.ToString("yyyy-MM"));
+            var path = string.Format("{0}/App_Data/log/{1}", AppDomain.CurrentDomain.BaseDirectory, DateTime.Now.ToString("yyyy-MM-dd"));
 
             try
             {
