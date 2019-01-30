@@ -1,4 +1,4 @@
-﻿using FastData.Core.Property;
+using FastData.Core.Property;
 using System;
 
 namespace FastData.Core.DataModel.SqlServer
@@ -13,19 +13,19 @@ namespace FastData.Core.DataModel.SqlServer
         /// <summary>
         /// error id
         /// </summary>
-        [Column(Comments = "Error id", DataType = "Char", Length = 64, IsNull = false, IsKey = true)]
+        [Column(Comments = "Error id", DataType = "varchar", Length = 64, IsNull = false, IsKey = true)]
         public string ErrorId { get; set; }
 
         /// <summary>
         /// 出错方法
         /// </summary>
-        [Column(Comments = "出错的方法", DataType = "Char", IsNull = true, Length = 32)]
+        [Column(Comments = "出错的方法", DataType = "varchar", IsNull = true, Length = 32)]
         public string Method { get; set; }
 
         /// <summary>
         /// 出错对象
         /// </summary>
-        [Column(Comments = "出错对象", DataType = "Char", IsNull = true, Length = 32)]
+        [Column(Comments = "出错对象", DataType = "varchar", IsNull = true, Length = 32)]
         public string Type { get; set; }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace FastData.Core.DataModel.SqlServer
         /// <summary>
         /// 增加时间
         /// </summary>
-        [Column(Comments = "增加时间", DataType = "Date", IsNull = false)]
+        [Column(Comments = "增加时间", DataType = "DateTime", IsNull = false)]
         public DateTime AddTime { get; set; }
     }
 }
