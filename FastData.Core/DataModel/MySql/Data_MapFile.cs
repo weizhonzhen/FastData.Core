@@ -1,4 +1,4 @@
-﻿using FastData.Core.Property;
+using FastData.Core.Property;
 using System;
 
 namespace FastData.Core.DataModel.MySql
@@ -44,7 +44,7 @@ namespace FastData.Core.DataModel.MySql
         /// <summary>
         /// 最后修改时间
         /// </summary>
-        [Column(Comments = "最后修改时间", DataType = "Date", IsNull = true)]
+        [Column(Comments = "最后修改时间", DataType = "DateTime", IsNull = true)]
         public DateTime LastTime { get; set; }
     }
 }
