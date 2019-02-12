@@ -1,4 +1,4 @@
-﻿using FastData.Core.Base;
+using FastData.Core.Base;
 using FastData.Core.Context;
 using FastData.Core.Model;
 using System;
@@ -30,22 +30,14 @@ namespace FastData.Core
         /// <returns></returns>
         private static DataQuery JoinType<T, T1>(string joinType, DataQuery item, Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false)
         {
-            var taskField = Task.Factory.StartNew(delegate
-            {
-                var queryField = BaseField.QueryField<T, T1>(predicate, field, item.Config);
-                item.Field.Add(queryField.Field);
-                item.AsName.AddRange(queryField.AsName);
-            });
+            var queryField = BaseField.QueryField<T, T1>(predicate, field, item.Config);
+            item.Field.Add(queryField.Field);
+            item.AsName.AddRange(queryField.AsName);
 
-            var taskCon = Task.Factory.StartNew(delegate
-            {
-                var condtion = VisitExpression.LambdaWhere<T, T1>(predicate, item.Config);
-                item.Predicate.Add(condtion);
-                item.Table.Add(string.Format("{2} {0}{3} {1}", typeof(T1).Name, predicate.Parameters[1].Name
-                , joinType, isDblink && !string.IsNullOrEmpty(item.Config.DbLinkName) ? string.Format("@", item.Config.DbLinkName) : ""));
-            });
-
-            Task.WaitAll(taskField, taskCon);
+            var condtion = VisitExpression.LambdaWhere<T, T1>(predicate, item.Config);
+            item.Predicate.Add(condtion);
+            item.Table.Add(string.Format("{2} {0}{3} {1}", typeof(T1).Name, predicate.Parameters[1].Name
+            , joinType, isDblink && !string.IsNullOrEmpty(item.Config.DbLinkName) ? string.Format("@", item.Config.DbLinkName) : ""));
 
             return item;
         }
@@ -66,22 +58,13 @@ namespace FastData.Core
             result.Config = DataConfig.Get(key);
             result.Key = key;
 
-            var taskField = Task.Factory.StartNew(delegate
-            {
-                var queryField = BaseField.QueryField<T>(predicate, field, result.Config);
-                result.Field.Add(queryField.Field);
-                result.AsName.AddRange(queryField.AsName);
-            });
+            var queryField = BaseField.QueryField<T>(predicate, field, result.Config);
+            result.Field.Add(queryField.Field);
+            result.AsName.AddRange(queryField.AsName);
 
-            var taskCon = Task.Factory.StartNew(delegate
-            {
-                var condtion = VisitExpression.LambdaWhere<T>(predicate, result.Config);
-                result.Predicate.Add(condtion);
-                result.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
-
-            });
-
-            Task.WaitAll(taskField, taskCon);
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, result.Config);
+            result.Predicate.Add(condtion);
+            result.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
 
             return result;
         }
@@ -208,10 +191,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.list;
         }
         #endregion
@@ -286,10 +266,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.Json;
         }
         #endregion
@@ -364,10 +341,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.item;
         }
@@ -443,10 +417,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.Count;
         }
@@ -494,10 +465,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.pageResult;
         }
@@ -577,7 +545,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() => { DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds); });
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds); 
 
             return result.PageResult;
         }
@@ -655,10 +623,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.Table;
         }
@@ -738,10 +703,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.list;
         }
@@ -820,10 +782,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.DicList;
         }
@@ -897,10 +856,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() =>
-            {
-                DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            });
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.Dic;
         }
@@ -979,7 +935,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() => { DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds); });
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.DicList;
         }
