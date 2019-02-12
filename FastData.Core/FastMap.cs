@@ -77,7 +77,7 @@ namespace FastData.Core
                 {
                     foreach (var temp in item.ExportedTypes)
                     {
-                        Task.Factory.StartNew(() =>
+                        Task.Run(() =>
                         {
                             var typeInfo = (temp as TypeInfo);
                             if (typeInfo.Namespace.Contains(nameSpace))
@@ -228,7 +228,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<List<T>> QueryAsy<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return Query<T>(name, param, db, key);
             });
@@ -251,7 +251,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<Lazy<List<T>>> QueryLazyAsy<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return new Lazy<List<T>>(() => Query<T>(name, param, db, key));
             });
@@ -285,7 +285,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<List<Dictionary<string, object>>> QueryAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return Query(name, param, db, key);
             });
@@ -308,7 +308,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<Lazy<List<Dictionary<string, object>>>> QueryLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key));
             });
@@ -342,7 +342,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<WriteReturn> WriteAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return Write(name, param, db, key);
             });
@@ -365,7 +365,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<Lazy<WriteReturn>> WriteLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return new Lazy<WriteReturn>(() => Write(name, param, db, key));
             });
@@ -399,7 +399,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() => { DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds); });
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.PageResult;
         }
@@ -431,7 +431,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<PageResult> QueryPageAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return QueryPage(pModel, name, param, db, key);
             });
@@ -454,7 +454,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<Lazy<PageResult>> QueryPageLazyAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key));
             });
@@ -488,7 +488,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
-            Task.Factory.StartNew(() => { DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds); });
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.pageResult;
         }
@@ -520,7 +520,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<PageResult<T>> QueryPageAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return QueryPage<T>(pModel, name, param, db, key);
             });
@@ -543,7 +543,7 @@ namespace FastData.Core
         /// </summary>
         public static async Task<Lazy<PageResult<T>>> QueryPageLazyAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key));
             });
@@ -613,7 +613,7 @@ namespace FastData.Core
 
                             //节点数
                             if (Array.Exists(key.ToArray(), element => element == tempKey))
-                                Task.Factory.StartNew(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
+                                Task.Run(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
                             key.Add(tempKey);
                             sql.Add(temp.ChildNodes.Count.ToString());
 
@@ -713,7 +713,7 @@ namespace FastData.Core
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (config.SqlErrorType == SqlErrorType.Db)
                         DbLogTable.LogException(config, ex, "InstanceMap", "GetXmlList");
