@@ -258,13 +258,13 @@ namespace FastData.Core
             if (db == null)
             {
                 var tempDb = BaseContext.GetContext(key);
-                result = tempDb.ExecuteSql(sql, param,true);
+                result = tempDb.ExecuteSql(sql, param, false);
                 config = tempDb.config;
                 tempDb.Dispose();
             }
             else
             {
-                result = db.ExecuteSql(sql, param,true);
+                result = db.ExecuteSql(sql, param, false);
                 config = db.config;
             }
 
