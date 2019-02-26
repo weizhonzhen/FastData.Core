@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data;
 using FastUntility.Core.Page;
 
@@ -108,8 +108,8 @@ namespace FastData.Core.Model
         public bool IsSuccess { get; set; }
 
         /// <summary>
-        /// 是否出错
+        /// 出错信息
         /// </summary>
-        public bool IsError { get; set; }
+        public string Message { get; set; }
     }
 }
