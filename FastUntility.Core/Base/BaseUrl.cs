@@ -52,10 +52,15 @@ namespace FastUntility.Core.Base
                 var count = 0;
                 foreach (var item in dic)
                 {
-                    if (count == 0)
-                        url = string.Format("{0}?{1}={2}", url, item.Key, item.Value);
-                    else
+                    if (url.Contains("?"))
                         url = string.Format("{0}&{1}={2}", url, item.Key, item.Value);
+                    else
+                    {
+                        if (count == 0)
+                            url = string.Format("{0}?{1}={2}", url, item.Key, item.Value);
+                        else
+                            url = string.Format("{0}&{1}={2}", url, item.Key, item.Value);
+                    }
                     count++;
                 }
 
@@ -76,11 +81,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post content(insert)
         /// </summary>
-        public static string PostContent(string url, Dictionary<string, object> dic, string mediaType = "application/json")
+        public static string PostContent(string url, string param, string mediaType = "application/json")
         {
             try
             {
-                var content = new StringContent(BaseJson.ModelToJson(dic), Encoding.UTF8, mediaType);
+                var content = new StringContent(param, Encoding.UTF8, mediaType);
                 var response = http.PostAsync(new Uri(url), content).Result;
                 response.EnsureSuccessStatusCode();
                 return response.Content.ReadAsStringAsync().Result;
@@ -88,6 +93,50 @@ namespace FastUntility.Core.Base
             catch (Exception ex)
             {
                 Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostUrl_exp"); });
+                return null;
+            }
+        }
+        #endregion
+
+        #region post soap
+        /// <summary>
+        /// post content(insert)
+        /// </summary>
+        public static string PostSoap(string url, string method, Dictionary<string, object> param)
+        {
+            try
+            {
+                var xml = new StringBuilder();
+                xml.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                xml.Append("<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">");
+                xml.Append("<soap:Body>");
+                xml.AppendFormat("<{0} xmlns=\"http://openmas.chinamobile.com/pulgin\">", method);
+
+                foreach (KeyValuePair<string, object> item in param)
+                {
+                    xml.AppendFormat("<{0}>{1}</{0}>", item.Key, item.Value);
+                }
+
+                xml.AppendFormat("</{0}>", method);
+                xml.Append("</soap:Body>");
+                xml.Append("</soap:Envelope>");
+
+                var content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
+                var response = http.PostAsync(new Uri(url), content).Result;
+                response.EnsureSuccessStatusCode();
+                var result = response.Content.ReadAsStringAsync().Result;
+
+                result = result.Replace("soap:Envelope", "Envelope");
+                result = result.Replace("soap:Body", "Body");
+                result = result.Replace(" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"", "");
+                result = result.Replace(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"", "");
+                result = result.Replace(" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"", "");
+                result = result.Replace(" xmlns=\"http://openmas.chinamobile.com/pulgin\"", "");
+                return BaseXml.GetXmlString(result, string.Format("Envelope/Body/{0}Response/{0}Result", method)).Replace("&lt;", "<").Replace("&gt;", ">");
+            }
+            catch (Exception ex)
+            {
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostSoap_exp"); });
                 return null;
             }
         }
@@ -104,10 +153,15 @@ namespace FastUntility.Core.Base
                 var count = 0;
                 foreach (var item in dic)
                 {
-                    if (count == 0)
-                        url = string.Format("{0}?{1}={2}", url, item.Key, item.Value);
-                    else
+                    if (url.Contains("?"))
                         url = string.Format("{0}&{1}={2}", url, item.Key, item.Value);
+                    else
+                    {
+                        if (count == 0)
+                            url = string.Format("{0}?{1}={2}", url, item.Key, item.Value);
+                        else
+                            url = string.Format("{0}&{1}={2}", url, item.Key, item.Value);
+                    }
                     count++;
                 }
 
@@ -128,11 +182,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// put content(update)
         /// </summary>
-        public static string PutContent(string url, Dictionary<string, object> dic, string mediaType = "application/json")
+        public static string PutContent(string url, string param, string mediaType = "application/json")
         {
             try
             {
-                var content = new StringContent(BaseJson.ModelToJson(dic), Encoding.UTF8, mediaType);
+                var content = new StringContent(param, Encoding.UTF8, mediaType);
                 var response = http.PostAsync(new Uri(url), content).Result;
                 response.EnsureSuccessStatusCode();
                 return response.Content.ReadAsStringAsync().Result;
@@ -182,50 +236,6 @@ namespace FastUntility.Core.Base
             catch (Exception ex)
             {
                 Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "SendUrl_exp"); });
-                return null;
-            }
-        }
-        #endregion
-        
-        #region post soap
-        /// <summary>
-        /// post content(insert)
-        /// </summary>
-        public static string PostSoap(string url, string method, Dictionary<string, object> param)
-        {
-            try
-            {
-                var xml = new StringBuilder();
-                xml.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-                xml.Append("<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">");
-                xml.Append("<soap:Body>");
-                xml.AppendFormat("<{0} xmlns=\"http://openmas.chinamobile.com/pulgin\">", method);
-
-                foreach (KeyValuePair<string, object> item in param)
-                {
-                    xml.AppendFormat("<{0}>{1}</{0}>", item.Key, item.Value);
-                }
-
-                xml.AppendFormat("</{0}>", method);
-                xml.Append("</soap:Body>");
-                xml.Append("</soap:Envelope>");
-
-                var content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
-                var response = http.PostAsync(new Uri(url), content).Result;
-                response.EnsureSuccessStatusCode();
-                var result = response.Content.ReadAsStringAsync().Result;
-
-                result = result.Replace("soap:Envelope", "Envelope");
-                result = result.Replace("soap:Body", "Body");
-                result = result.Replace(" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"", "");
-                result = result.Replace(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"", "");
-                result = result.Replace(" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"", "");
-                result = result.Replace(" xmlns=\"http://openmas.chinamobile.com/pulgin\"", "");
-                return BaseXml.GetXmlString(result, string.Format("Envelope/Body/{0}Response/{0}Result", method)).Replace("&lt;", "<").Replace("&gt;", ">");
-            }
-            catch (Exception ex)
-            {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostSoap_exp"); });
                 return null;
             }
         }
