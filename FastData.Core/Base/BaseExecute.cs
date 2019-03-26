@@ -75,7 +75,7 @@ namespace FastData.Core.Base
             }
 
             cmd.CommandText = sql;
-            return cmd.ExecuteNonQuery() > 0;
+            return cmd.ExecuteNonQuery() > -1;
         }
         #endregion
                 
