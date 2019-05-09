@@ -80,7 +80,7 @@ namespace FastData.Core
                         Task.Run(() =>
                         {
                             var typeInfo = (temp as TypeInfo);
-                            if (typeInfo.Namespace.Contains(nameSpace))
+                            if (typeInfo.Namespace != null && typeInfo.Namespace.Contains(nameSpace))
                             {
                                 var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
 
