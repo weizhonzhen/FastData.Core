@@ -11,7 +11,7 @@ namespace FastUntility.Core.Cache
     /// </summary>
     public static class BaseCache
     {
-        public static ObjectCache cache = new MemoryCache(Guid.NewGuid().ToString());
+        public static ObjectCache cache =MemoryCache.Default;
 
         /// <summary>
         /// 设置缓存
