@@ -17,7 +17,6 @@ using System.Xml;
 using FastUntility.Core.Base;
 using FastUntility.Core.Page;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
-using FastUntility.Core.Cache;
 
 namespace FastData.Core
 {
@@ -70,33 +69,31 @@ namespace FastData.Core
         public static void InstanceProperties(string nameSpace, string dll)
         {
             var config = DataConfig.Get();
-            var list = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var item in list)
+
+            var assembly = Assembly.Load(dll.Replace(".dll", ""));
+            if (assembly != null)
             {
-                if (item.ManifestModule.Name == dll)
+                foreach (var temp in assembly.ExportedTypes)
                 {
-                    foreach (var temp in item.ExportedTypes)
+                    Task.Factory.StartNew(() =>
                     {
-                        Task.Run(() =>
+                        var typeInfo = (temp as TypeInfo);
+                        if (typeInfo.Namespace != null && typeInfo.Namespace.Contains(nameSpace))
                         {
-                            var typeInfo = (temp as TypeInfo);
-                            if (typeInfo.Namespace != null && typeInfo.Namespace.Contains(nameSpace))
+                            var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
+
+                            var cacheList = new List<PropertyModel>();
+                            foreach (var info in typeInfo.DeclaredProperties)
                             {
-                                var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
-
-                                var cacheList = new List<PropertyModel>();
-                                foreach (var info in typeInfo.DeclaredProperties)
-                                {
-                                    var model = new PropertyModel();
-                                    model.Name = info.Name;
-                                    model.PropertyType = info.PropertyType;
-                                    cacheList.Add(model);
-                                }
-
-                                DbCache.Set<List<PropertyModel>>(config.CacheType,key, cacheList);
+                                var model = new PropertyModel();
+                                model.Name = info.Name;
+                                model.PropertyType = info.PropertyType;
+                                cacheList.Add(model);
                             }
-                        });
-                    }
+
+                            DbCache.Set<List<PropertyModel>>(config.CacheType, key, cacheList);
+                        }
+                    });
                 }
             }
         }
@@ -114,20 +111,17 @@ namespace FastData.Core
             var query = new DataQuery();
             query.Config = DataConfig.Get(dbKey);
             query.Key = dbKey;
-            
+
             CreateLogTable(query);
 
-            var list = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var item in list)
+            var assembly = Assembly.Load(dll.Replace(".dll", ""));
+            if (assembly != null)
             {
-                if (item.ManifestModule.Name == dll)
+                foreach (var temp in assembly.ExportedTypes)
                 {
-                    foreach (var temp in item.ExportedTypes)
-                    {
-                        var typeInfo = (temp as TypeInfo);
-                        if (typeInfo.Namespace!=null&&typeInfo.Namespace.Contains(nameSpace))
-                            BaseTable.Check(query, temp.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
-                    }
+                    var typeInfo = (temp as TypeInfo);
+                    if (typeInfo.Namespace != null && typeInfo.Namespace.Contains(nameSpace))
+                        BaseTable.Check(query, temp.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
                 }
             }
         }
