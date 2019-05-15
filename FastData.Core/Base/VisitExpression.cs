@@ -112,7 +112,7 @@ namespace FastData.Core.Base
                     var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                     temp.ParameterName = leftList[i] + i.ToString();
                     temp.Value = rightList[i];
-                    
+
                     if (typeList[i].Name == "DateTime")
                     {
                         if (config.DbType == DataDbType.Oracle)
@@ -121,7 +121,7 @@ namespace FastData.Core.Base
                             temp.DbType = DbType.DateTime;
 
                         temp.Value = rightList[i].ToDate();
-                    }                     
+                    }
 
                     result.Param.Add(temp);
                 }
@@ -185,6 +185,7 @@ namespace FastData.Core.Base
                 }
                 else
                 {
+                    typeList.Add("".GetType());
                     isRight = false;
                     try
                     {
@@ -289,6 +290,7 @@ namespace FastData.Core.Base
             }
             else if (exp is ConstantExpression)
             {
+                typeList.Add("".GetType());
                 ConstantExpression cExp = (ConstantExpression)exp;
                 if (cExp.Value == null)
                     return "null";
