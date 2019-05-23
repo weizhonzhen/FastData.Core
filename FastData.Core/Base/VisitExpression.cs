@@ -161,9 +161,15 @@ namespace FastData.Core.Base
             else if (exp is MemberExpression)
             {
                 if ((exp as MemberExpression).Expression is ParameterExpression)
+                {
+                    typeList.Add("".GetType());
                     return (exp as MemberExpression).Member.Name;
+                }
                 else
-                    return Expression.Lambda(exp).Compile().DynamicInvoke() + "";
+                {
+                    typeList.Add(Expression.Lambda(exp).Compile().DynamicInvoke().GetType());
+                    return Expression.Lambda(exp).Compile().DynamicInvoke().ToStr();
+                }
             }
             else if (exp is NewArrayExpression)
             {
@@ -181,7 +187,7 @@ namespace FastData.Core.Base
                 if (isRight)
                 {
                     typeList.Add(Expression.Lambda(exp).Compile().DynamicInvoke().GetType());
-                    return Expression.Lambda(exp).Compile().DynamicInvoke() + "";
+                    return Expression.Lambda(exp).Compile().DynamicInvoke().ToStr();
                 }
                 else
                 {
