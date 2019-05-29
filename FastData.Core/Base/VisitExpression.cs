@@ -162,7 +162,7 @@ namespace FastData.Core.Base
             {
                 if ((exp as MemberExpression).Expression is ParameterExpression)
                 {
-                    typeList.Add("".GetType());
+                    //typeList.Add("".GetType());
                     return (exp as MemberExpression).Member.Name;
                 }
                 else
@@ -191,7 +191,7 @@ namespace FastData.Core.Base
                 }
                 else
                 {
-                    typeList.Add("".GetType());
+                    //typeList.Add("".GetType());
                     isRight = false;
                     try
                     {
