@@ -649,7 +649,7 @@ namespace FastData.Core
                                             if (dyn.Attributes["condition"] != null)
                                             {
                                                 key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                sql.Add(dyn.Attributes["condition"].Value.ToLower());
+                                                sql.Add(dyn.Attributes["condition"].Value);
                                             }
 
                                             //比较条件值
@@ -674,7 +674,7 @@ namespace FastData.Core
                                                 {
                                                     //条件
                                                     key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                    sql.Add(child.Attributes["property"].Value.ToLower());
+                                                    sql.Add(child.Attributes["property"].Value);
 
                                                     //内容
                                                     key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
@@ -900,7 +900,9 @@ namespace FastData.Core
                                         }
                                     case "if":
                                         {
-                                            conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
+                                            //conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
+                                            conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
+                                            conditionValue = conditionValue.Replace("#", "\"");
                                             if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
                                             {
                                                 if (paramSql.IndexOf(tempKey) >= 0)
@@ -930,7 +932,9 @@ namespace FastData.Core
 
                                                 conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
                                                 conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
-                                                conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
+                                                //conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
+                                                conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
+                                                conditionValue = conditionValue.Replace("#", "\"");
                                                 if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
                                                 {
                                                     isSuccess = true;
