@@ -50,7 +50,7 @@ namespace FastData.Core.Base
                     temp.ParameterName = leftList[i] + i.ToString();
                     temp.Value = rightList[i];
 
-                    if (typeList[i].Name == "DateTime")
+                    if (typeList.Count >= i + 1 && typeList[i].Name == "DateTime")
                     {
                         if (config.DbType == DataDbType.Oracle)
                             temp.DbType = DbType.Date;
@@ -113,7 +113,7 @@ namespace FastData.Core.Base
                     temp.ParameterName = leftList[i] + i.ToString();
                     temp.Value = rightList[i];
 
-                    if (typeList[i].Name == "DateTime")
+                    if (typeList.Count >= i + 1 && typeList[i].Name == "DateTime")
                     {
                         if (config.DbType == DataDbType.Oracle)
                             temp.DbType = DbType.Date;
