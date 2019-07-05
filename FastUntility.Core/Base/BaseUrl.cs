@@ -6,28 +6,20 @@ using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace FastUntility.Core.Base
-{
-    /// <summary>
-    /// post、get、put到url
-    /// </summary>
+{ /// <summary>
+  /// post、get、put到url
+  /// </summary>
     public static class BaseUrl
     {
-        private static readonly HttpClient http;
-
-        static BaseUrl()
-        {
-            http = new HttpClient(new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip });
-            http.DefaultRequestHeaders.Connection.Add("keep-alive");
-        }
-
         #region get url(select)
         /// <summary>
         /// get url(select)
         /// </summary>
-        public static string GetUrl(string url)
+        public static string GetUrl(IHttpClientFactory client,string url)
         {
             try
             {
+                var http = client.CreateClient();
                 var response = http.GetAsync(new Uri(url)).Result;
                 response.EnsureSuccessStatusCode();
                 return response.Content.ReadAsStringAsync().Result;
@@ -45,10 +37,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post url(insert)
         /// </summary>
-        public static string PostUrl(string url, Dictionary<string, object> dic, string mediaType = "application/json")
+        public static string PostUrl(IHttpClientFactory client, string url, Dictionary<string, object> dic, string mediaType = "application/json")
         {
             try
             {
+                var http = client.CreateClient();
                 var count = 0;
                 foreach (var item in dic)
                 {
@@ -81,10 +74,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post content(insert)
         /// </summary>
-        public static string PostContent(string url, string param, string mediaType = "application/json")
+        public static string PostContent(IHttpClientFactory client, string url, string param, string mediaType = "application/json")
         {
             try
             {
+                var http = client.CreateClient();
                 var content = new StringContent(param, Encoding.UTF8, mediaType);
                 var response = http.PostAsync(new Uri(url), content).Result;
                 response.EnsureSuccessStatusCode();
@@ -98,58 +92,15 @@ namespace FastUntility.Core.Base
         }
         #endregion
 
-        #region post soap
-        /// <summary>
-        /// post content(insert)
-        /// </summary>
-        public static string PostSoap(string url, string method, Dictionary<string, object> param)
-        {
-            try
-            {
-                var xml = new StringBuilder();
-                xml.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-                xml.Append("<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">");
-                xml.Append("<soap:Body>");
-                xml.AppendFormat("<{0} xmlns=\"http://openmas.chinamobile.com/pulgin\">", method);
-
-                foreach (KeyValuePair<string, object> item in param)
-                {
-                    xml.AppendFormat("<{0}>{1}</{0}>", item.Key, item.Value);
-                }
-
-                xml.AppendFormat("</{0}>", method);
-                xml.Append("</soap:Body>");
-                xml.Append("</soap:Envelope>");
-
-                var content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
-                var response = http.PostAsync(new Uri(url), content).Result;
-                response.EnsureSuccessStatusCode();
-                var result = response.Content.ReadAsStringAsync().Result;
-
-                result = result.Replace("soap:Envelope", "Envelope");
-                result = result.Replace("soap:Body", "Body");
-                result = result.Replace(" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"", "");
-                result = result.Replace(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"", "");
-                result = result.Replace(" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"", "");
-                result = result.Replace(" xmlns=\"http://openmas.chinamobile.com/pulgin\"", "");
-                return BaseXml.GetXmlString(result, string.Format("Envelope/Body/{0}Response/{0}Result", method)).Replace("&lt;", "<").Replace("&gt;", ">");
-            }
-            catch (Exception ex)
-            {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostSoap_exp"); });
-                return null;
-            }
-        }
-        #endregion
-
         #region put url (update)
         /// <summary>
         /// put url(update)
         /// </summary>
-        public static string PutUrl(string url, Dictionary<string, object> dic, string mediaType = "application/json")
+        public static string PutUrl(IHttpClientFactory client, string url, Dictionary<string, object> dic, string mediaType = "application/json")
         {
             try
             {
+                var http = client.CreateClient();
                 var count = 0;
                 foreach (var item in dic)
                 {
@@ -182,10 +133,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// put content(update)
         /// </summary>
-        public static string PutContent(string url, string param, string mediaType = "application/json")
+        public static string PutContent(IHttpClientFactory client, string url, string param, string mediaType = "application/json")
         {
             try
             {
+                var http = client.CreateClient();
                 var content = new StringContent(param, Encoding.UTF8, mediaType);
                 var response = http.PostAsync(new Uri(url), content).Result;
                 response.EnsureSuccessStatusCode();
@@ -203,10 +155,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// delete url (delete)
         /// </summary>
-        public static string DeleteUrl(string url)
+        public static string DeleteUrl(IHttpClientFactory client, string url)
         {
             try
             {
+                var http = client.CreateClient();
                 var response = http.DeleteAsync(new Uri(url)).Result;
                 response.EnsureSuccessStatusCode();
                 return response.Content.ReadAsStringAsync().Result;
@@ -224,10 +177,11 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// send url
         /// </summary>
-        public static string SendUrl(string url, HttpMethod mothod)
+        public static string SendUrl(IHttpClientFactory client, string url, HttpMethod mothod)
         {
             try
             {
+                var http = client.CreateClient();
                 HttpRequestMessage mes = new HttpRequestMessage(mothod, new Uri(url));
                 var response = http.SendAsync(mes).Result;
                 response.EnsureSuccessStatusCode();
@@ -236,6 +190,51 @@ namespace FastUntility.Core.Base
             catch (Exception ex)
             {
                 Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "SendUrl_exp"); });
+                return null;
+            }
+        }
+        #endregion
+
+        #region post soap
+        /// <summary>
+        /// post content(insert)
+        /// </summary>
+        public static string PostSoap(IHttpClientFactory client, string url, string method, Dictionary<string, object> param)
+        {
+            try
+            {
+                var http = client.CreateClient();
+                var xml = new StringBuilder();
+                xml.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                xml.Append("<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">");
+                xml.Append("<soap:Body>");
+                xml.AppendFormat("<{0} xmlns=\"http://openmas.chinamobile.com/pulgin\">", method);
+
+                foreach (KeyValuePair<string, object> item in param)
+                {
+                    xml.AppendFormat("<{0}>{1}</{0}>", item.Key, item.Value);
+                }
+
+                xml.AppendFormat("</{0}>", method);
+                xml.Append("</soap:Body>");
+                xml.Append("</soap:Envelope>");
+
+                var content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
+                var response = http.PostAsync(new Uri(url), content).Result;
+                response.EnsureSuccessStatusCode();
+                var result = response.Content.ReadAsStringAsync().Result;
+
+                result = result.Replace("soap:Envelope", "Envelope");
+                result = result.Replace("soap:Body", "Body");
+                result = result.Replace(" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"", "");
+                result = result.Replace(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"", "");
+                result = result.Replace(" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"", "");
+                result = result.Replace(" xmlns=\"http://openmas.chinamobile.com/pulgin\"", "");
+                return BaseXml.GetXmlString(result, string.Format("Envelope/Body/{0}Response/{0}Result", method)).Replace("&lt;", "<").Replace("&gt;", ">");
+            }
+            catch (Exception ex)
+            {
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostSoap_exp"); });
                 return null;
             }
         }
