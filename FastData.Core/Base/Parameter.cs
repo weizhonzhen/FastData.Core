@@ -20,6 +20,7 @@ namespace FastData.Core.Base
         /// <returns></returns>
         public static List<DbParameter> ReNewParam(List<DbParameter> param, ConfigModel config)
         {
+            return param;
             var list = new List<DbParameter>();
 
             if (param != null)
