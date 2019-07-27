@@ -1,6 +1,7 @@
 ﻿using FastData.Core.Property;
 using FastData.Core.Model;
 using FastUntility.Core.Base;
+using FastUntility.Core.Base;
 
 namespace FastData.Core.Check
 {
