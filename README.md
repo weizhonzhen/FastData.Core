@@ -34,7 +34,8 @@ in db.json
                 "Key": "Write",
                 "DesignModel": "CodeFirst",
                 "SqlErrorType ":"db",--db,file
-                "CacheType":"web"--redis,web
+                "CacheType":"web",--redis,web
+                "IsUpdateCache": false --is auto update cache
               }
             ]
       }
