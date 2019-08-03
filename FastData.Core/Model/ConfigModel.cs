@@ -79,5 +79,10 @@
         /// 缓存类型 web,redis
         /// </summary>
         public string CacheType { get; set; }
+        
+        /// <summary>
+        /// 是否更新缓存
+        /// </summary>
+        public bool IsUpdateCache { get; set; }
     }
 }
