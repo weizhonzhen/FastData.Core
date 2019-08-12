@@ -17,5 +17,10 @@ namespace FastData.Core.Model
         /// 条件
         /// </summary>
         public string Where { get; set; }
+        
+        /// <summary>
+        /// 解析是否成功
+        /// </summary>
+        public bool IsSuccess { get; set; }
     }
 }
