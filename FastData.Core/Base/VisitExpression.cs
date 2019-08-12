@@ -63,6 +63,7 @@ namespace FastData.Core.Base
                     result.Param.Add(temp);
                 }
 
+                result.IsSuccess = true;
                 return result;
             }
             catch (Exception ex)
@@ -74,6 +75,7 @@ namespace FastData.Core.Base
                     else
                         DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "LambdaWhere<T>", "");
                 });
+                result.IsSuccess = false;
                 return result;
             }
         }
@@ -126,6 +128,7 @@ namespace FastData.Core.Base
                     result.Param.Add(temp);
                 }
 
+                result.IsSuccess = true;
                 return result;
             }
             catch (Exception ex)
@@ -137,6 +140,7 @@ namespace FastData.Core.Base
                     else
                         DbLog.LogException(config.IsOutError, config.DbType, ex, "LambdaWhere<T1, T2>", "");
                 });
+                result.IsSuccess = false;
                 return result;
             }
         }
