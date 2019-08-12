@@ -795,7 +795,10 @@ namespace FastData.Core.Context
                 if (visitModel.Param.Count != 0)
                     cmd.Parameters.AddRange(Parameter.ReNewParam(visitModel.Param, config).ToArray());
 
-                result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, sql.ToString());
+                 if (visitModel.IsSuccess)
+                    result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, sql.ToString());
+                else
+                    result.writeReturn.IsSuccess = false;
 
                 if (isTrans)
                     SubmitTrans();
@@ -859,7 +862,10 @@ namespace FastData.Core.Context
 
                     result.sql = ParameterToSql.ObjectParamToSql(Parameter.ParamMerge(update.Param, visitModel.Param), sql, config);
 
-                    result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, sql);
+                   if (visitModel.IsSuccess)
+                        result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, sql);
+                    else
+                        result.writeReturn.IsSuccess = false;
                 }
                 else
                     result.writeReturn.IsSuccess = false;
