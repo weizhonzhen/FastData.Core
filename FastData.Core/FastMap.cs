@@ -70,7 +70,10 @@ namespace FastData.Core
         {
             var config = DataConfig.Get();
 
-            var assembly = Assembly.Load(dll.Replace(".dll", ""));
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == dll.Replace(".dll", ""));
+            if (assembly == null)
+                assembly = Assembly.Load(dll.Replace(".dll", ""));
+
             if (assembly != null)
             {
                 foreach (var temp in assembly.ExportedTypes)
@@ -113,8 +116,11 @@ namespace FastData.Core
             query.Key = dbKey;
 
             CreateLogTable(query);
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == dll.Replace(".dll", ""));
 
-            var assembly = Assembly.Load(dll.Replace(".dll", ""));
+            if (assembly == null)
+                assembly = Assembly.Load(dll.Replace(".dll", ""));
+
             if (assembly != null)
             {
                 foreach (var temp in assembly.ExportedTypes)
