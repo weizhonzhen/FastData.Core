@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Data.Common;
 using System.Reflection;
 using FastData.Core.Model;
+using System.Linq;
 
 namespace FastData.Core.Base
 {
@@ -17,13 +18,16 @@ namespace FastData.Core.Base
         {
             try
             {
-                var assembly = Assembly.Load(config.ProviderName);
+                var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == config.ProviderName);
+                if (assembly == null)
+                    assembly = Assembly.Load(config.ProviderName);
+
                 var type = assembly.GetType(config.FactoryClient, false);
                 object instance = null;
 
                 if (type != null)
                     instance = type.InvokeMember("Instance", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.GetProperty, null, type, null);
-
+                
                 return instance as DbProviderFactory;
             }
             catch (Exception ex)
