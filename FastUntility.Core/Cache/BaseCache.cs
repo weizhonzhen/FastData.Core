@@ -1,8 +1,6 @@
-﻿using FastUntility.Core.Base;
+using FastUntility.Core.Base;
+using Microsoft.Extensions.Caching.Memory;
 using System;
-using System.Collections.Generic;
-using System.Runtime.Caching;
-using System.Text;
 
 namespace FastUntility.Core.Cache
 {
@@ -11,7 +9,7 @@ namespace FastUntility.Core.Cache
     /// </summary>
     public static class BaseCache
     {
-        public static ObjectCache cache =MemoryCache.Default;
+        public static MemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
         /// <summary>
         /// 设置缓存
@@ -23,10 +21,9 @@ namespace FastUntility.Core.Cache
         {
             if (!string.IsNullOrEmpty(key))
             {
+                var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(Hours));
                 cache.Remove(key);
-                var policy = new CacheItemPolicy();
-                policy.AbsoluteExpiration = DateTime.Now.AddHours(Hours);
-                cache.Set(key, value, policy);
+                cache.Set(key, value, options);
             }
         }
 
@@ -40,10 +37,9 @@ namespace FastUntility.Core.Cache
         {
             if (!string.IsNullOrEmpty(key))
             {
+                var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(Hours));
                 cache.Remove(key);
-                var policy = new CacheItemPolicy();
-                policy.AbsoluteExpiration = DateTime.Now.AddHours(Hours);
-                cache.Set(key, value, policy);
+                cache.Set(key, value, options);
             }
         }
 
@@ -107,8 +103,9 @@ namespace FastUntility.Core.Cache
         /// <param name="key">键</param>
         public static bool Exists(string key)
         {
+            object result;
             if (!string.IsNullOrEmpty(key))
-                return cache.Contains(key);
+                return cache.TryGetValue(key, out result);
             else
                 return false;
         }
