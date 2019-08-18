@@ -22,9 +22,6 @@ namespace FastUntility.Core.Base
         {            
             var build = new ConfigurationBuilder();
 
-            //内存
-            build.AddInMemoryCollection();
-
             //目录
             build.SetBasePath(Directory.GetCurrentDirectory());
 
@@ -48,9 +45,6 @@ namespace FastUntility.Core.Base
         public static List<T> GetListValue<T>(string key, string fileName = "appsettings.json") where T : class, new()
         {
             var build = new ConfigurationBuilder();
-
-            //内存
-            build.AddInMemoryCollection();
 
             //目录
             build.SetBasePath(Directory.GetCurrentDirectory());
