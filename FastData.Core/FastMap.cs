@@ -210,6 +210,7 @@ namespace FastData.Core
         /// </summary>
         public static List<T> Query<T>(string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
+            key = key == null ? MapDb(name) : key;
             var config = db == null ? DataConfig.Get(key) : db.config;
             if (config.IsUpdateCache)
                 InstanceMap(key);
@@ -266,6 +267,7 @@ namespace FastData.Core
         /// </summary>
         public static List<Dictionary<string, object>> Query(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
+            key = key == null ? MapDb(name) : key;
             var config = db == null ? DataConfig.Get(key) : db.config;
             if (config.IsUpdateCache)
                 InstanceMap(key);
@@ -324,6 +326,7 @@ namespace FastData.Core
         /// </summary>
         public static WriteReturn Write(string name, DbParameter[] param, DataContext db = null, string key = null)
         {
+            key = key == null ? MapDb(name) : key;
             var config = db == null ? DataConfig.Get(key) : db.config;
             if (config.IsUpdateCache)
                 InstanceMap(key);
@@ -414,6 +417,7 @@ namespace FastData.Core
         /// </summary>
         public static PageResult QueryPage(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null)
         {
+            key = key == null ? MapDb(name) : key;
             var config = db == null ? DataConfig.Get(key) : db.config;
             if (config.IsUpdateCache)
                 InstanceMap(key);
@@ -504,6 +508,7 @@ namespace FastData.Core
         /// </summary>
         public static PageResult<T> QueryPage<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
         {
+            key = key == null ? MapDb(name) : key;
             var config = db == null ? DataConfig.Get(key) : db.config;
             if (config.IsUpdateCache)
                 InstanceMap(key);
@@ -564,11 +569,16 @@ namespace FastData.Core
         {
             var key = new List<string>();
             var sql = new List<string>();
-            GetXmlList(path, "sqlMap", ref key, ref sql, config);
-
+            var db = new List<string>(); 
+            var param = new Dictionary<string,object>();
+            GetXmlList(path, "sqlMap", ref key, ref sql,ref db,ref param, config);
+            
             for (var i = 0; i < key.Count; i++)
-                DbCache.Set(config.CacheType,key[i].ToLower(), sql[i]);
-
+            {
+                DbCache.Set(config.CacheType, key[i].ToLower(), sql[i]);
+                DbCache.Set(config.CacheType, string.Format("{0}.db", key[i]), db[i]);
+                DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", key[i].ToLower()), param.GetValue(key[i].ToLower()) as List<string>);
+            }
             return key;
         }
         #endregion
@@ -580,7 +590,7 @@ namespace FastData.Core
         /// <param name="path">文件名</param>
         /// <param name="xmlNode">结点</param>
         /// <returns></returns>
-        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql, ConfigModel config)
+        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql,ref List<string> db,ref Dictionary<string, object> param, ConfigModel config)
         {
             try
             {
@@ -613,6 +623,7 @@ namespace FastData.Core
                         var i = 0;
                         if (temp is XmlElement)
                         {
+                            var tempParam = new List<string>();
                             #region XmlElement
                             tempKey = temp.Attributes["id"].Value.ToLower();
 
@@ -620,7 +631,8 @@ namespace FastData.Core
                             if (Array.Exists(key.ToArray(), element => element == tempKey))
                                 Task.Run(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
                             key.Add(tempKey);
-                            sql.Add(temp.ChildNodes.Count.ToString());
+                            sql.Add(temp.ChildNodes.Count.ToString());                            
+                            db.Add(temp.Attributes["db"].Value.ToStr().ToLower());
 
                             foreach (XmlNode node in temp.ChildNodes)
                             {
@@ -640,6 +652,9 @@ namespace FastData.Core
 
                                     foreach (XmlNode dyn in node.ChildNodes)
                                     {
+                                        //参数
+                                        tempParam.Add(dyn.Attributes["property"].Value.ToLower());
+
                                         if (dyn.Name.ToLower() == "ispropertyavailable")
                                         {
                                             //属性和值
@@ -701,6 +716,8 @@ namespace FastData.Core
 
                                 i++;
                             }
+
+                            param.Add(tempKey, tempParam);
                             #endregion
                         }
                         else if (temp is XmlText)
@@ -1092,6 +1109,30 @@ namespace FastData.Core
             }
 
             return true;
+        }
+        #endregion
+
+        #region map 参数列表
+        /// <summary>
+        /// map 参数列表
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static List<string> MapParam(string name)
+        {
+            return DbCache.Get<List<string>>(DataConfig.Get().CacheType, string.Format("{0}.param", name.ToLower()));
+        }
+        #endregion
+
+        #region map db
+        /// <summary>
+        /// map db
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private static string MapDb(string name)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower()));
         }
         #endregion
     }
