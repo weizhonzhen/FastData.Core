@@ -1135,5 +1135,17 @@ namespace FastData.Core
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower()));
         }
         #endregion
+
+        #region 是否存在map id
+        /// <summary>
+        /// 是否存在map id
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static bool IsExists(string name)
+        {
+            return DbCache.Exists(DataConfig.Get().CacheType, name.ToLower());
+        }
+        #endregion
     }
 }
