@@ -569,16 +569,25 @@ namespace FastData.Core
         {
             var key = new List<string>();
             var sql = new List<string>();
-            var db = new List<string>(); 
+            var db = new Dictionary<string, object>(); 
             var param = new Dictionary<string,object>();
             GetXmlList(path, "sqlMap", ref key, ref sql,ref db,ref param, config);
             
             for (var i = 0; i < key.Count; i++)
             {
                 DbCache.Set(config.CacheType, key[i].ToLower(), sql[i]);
-                DbCache.Set(config.CacheType, string.Format("{0}.db", key[i]), db[i]);
-                DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", key[i].ToLower()), param.GetValue(key[i].ToLower()) as List<string>);
             }
+
+            foreach (KeyValuePair<string,object> item in db)
+            {
+                DbCache.Set(config.CacheType, string.Format("{0}.db", item.Key.ToLower()),item.Value);
+            }
+
+            foreach (KeyValuePair<string, object> item in param)
+            {
+                DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", item.Key.ToLower()), item.Value as List<string>);
+            }
+
             return key;
         }
         #endregion
@@ -590,7 +599,7 @@ namespace FastData.Core
         /// <param name="path">文件名</param>
         /// <param name="xmlNode">结点</param>
         /// <returns></returns>
-        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql,ref List<string> db,ref Dictionary<string, object> param, ConfigModel config)
+        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql,ref Dictionary<string, object> db,ref Dictionary<string, object> param, ConfigModel config)
         {
             try
             {
@@ -631,8 +640,7 @@ namespace FastData.Core
                             if (Array.Exists(key.ToArray(), element => element == tempKey))
                                 Task.Run(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
                             key.Add(tempKey);
-                            sql.Add(temp.ChildNodes.Count.ToString());                            
-                            db.Add(temp.Attributes["db"].Value.ToStr().ToLower());
+                            sql.Add(temp.ChildNodes.Count.ToString());                  
 
                             foreach (XmlNode node in temp.ChildNodes)
                             {
@@ -653,7 +661,7 @@ namespace FastData.Core
                                     foreach (XmlNode dyn in node.ChildNodes)
                                     {
                                         //参数
-                                        tempParam.Add(dyn.Attributes["property"].Value.ToLower());
+                                        tempParam.Add(dyn.Attributes["property"].Value);
 
                                         if (dyn.Name.ToLower() == "ispropertyavailable")
                                         {
@@ -717,6 +725,7 @@ namespace FastData.Core
                                 i++;
                             }
 
+                            db.Add(tempKey, temp.Attributes["db"].Value.ToStr());
                             param.Add(tempKey, tempParam);
                             #endregion
                         }
