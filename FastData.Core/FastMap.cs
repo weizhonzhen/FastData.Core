@@ -1130,7 +1130,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        private static string MapDb(string name)
+        public static string MapDb(string name)
         {
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower()));
         }
