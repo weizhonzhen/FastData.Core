@@ -171,7 +171,10 @@ namespace FastData.Core.Base
                 }
                 else
                 {
-                    typeList.Add(Expression.Lambda(exp).Compile().DynamicInvoke().GetType());
+                    if (Expression.Lambda(exp).Compile().DynamicInvoke() == null)
+                        typeList.Add("".GetType());
+                    else
+                        typeList.Add(Expression.Lambda(exp).Compile().DynamicInvoke().GetType());
                     return Expression.Lambda(exp).Compile().DynamicInvoke() + "";
                 }
             }
