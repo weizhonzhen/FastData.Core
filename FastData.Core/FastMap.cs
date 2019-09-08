@@ -796,8 +796,12 @@ namespace FastData.Core
                     if (param != null)
                     {
                         var tempSql = new StringBuilder();
-                        foreach (var temp in param)
+                        foreach (var item in MapParam(name))
                         {
+                            if (!param.ToList().Exists(a => a.ParameterName.ToLower() == item.ToLower()))
+                                continue;
+                            var temp = param.ToList().Find(a => a.ParameterName.ToLower() == item.ToLower());
+
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
