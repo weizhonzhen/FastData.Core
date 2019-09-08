@@ -25,7 +25,7 @@ namespace FastData.Core.Base
                 DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
             }
 
-            if (key == null)
+            if (string.IsNullOrEmpty(key))
                 item = list[0];
             else
                 item = list.Find(a => a.Key.ToLower() == key.ToLower());
