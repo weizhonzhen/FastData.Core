@@ -569,9 +569,10 @@ namespace FastData.Core
         {
             var key = new List<string>();
             var sql = new List<string>();
-            var db = new Dictionary<string, object>(); 
+            var db = new Dictionary<string, object>();
+            var type = new Dictionary<string, object>();
             var param = new Dictionary<string,object>();
-            GetXmlList(path, "sqlMap", ref key, ref sql,ref db,ref param, config);
+            GetXmlList(path, "sqlMap", ref key, ref sql,ref db, ref type, ref param, config);
             
             for (var i = 0; i < key.Count; i++)
             {
@@ -581,6 +582,11 @@ namespace FastData.Core
             foreach (KeyValuePair<string,object> item in db)
             {
                 DbCache.Set(config.CacheType, string.Format("{0}.db", item.Key.ToLower()),item.Value);
+            }
+
+            foreach (KeyValuePair<string, object> item in type)
+            {
+                DbCache.Set(config.CacheType, string.Format("{0}.type", item.Key.ToLower()), item.Value);
             }
 
             foreach (KeyValuePair<string, object> item in param)
@@ -599,7 +605,7 @@ namespace FastData.Core
         /// <param name="path">文件名</param>
         /// <param name="xmlNode">结点</param>
         /// <returns></returns>
-        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql,ref Dictionary<string, object> db,ref Dictionary<string, object> param, ConfigModel config)
+        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql,ref Dictionary<string, object> db, ref Dictionary<string, object> type, ref Dictionary<string, object> param, ConfigModel config)
         {
             try
             {
@@ -727,6 +733,10 @@ namespace FastData.Core
 
                             if (temp.Attributes["db"] != null)
                                 db.Add(tempKey, temp.Attributes["db"].Value.ToStr());
+
+                            if (temp.Attributes["type"] != null)
+                                type.Add(tempKey, temp.Attributes["type"].Value.ToStr());
+
                             param.Add(tempKey, tempParam);
                             #endregion
                         }
@@ -1147,6 +1157,18 @@ namespace FastData.Core
         public static string MapDb(string name)
         {
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower()));
+        }
+        #endregion
+
+        #region map type
+        /// <summary>
+        /// map db
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string MapType(string name)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.type", name.ToLower()));
         }
         #endregion
 
