@@ -567,6 +567,7 @@ namespace FastData.Core
         /// </summary>
         private static List<string> ReadXml(string path, ConfigModel config)
         {
+            var map = Api ?? new List<string>();
             var key = new List<string>();
             var sql = new List<string>();
             var db = new Dictionary<string, object>();
@@ -582,6 +583,9 @@ namespace FastData.Core
             foreach (KeyValuePair<string,object> item in db)
             {
                 DbCache.Set(config.CacheType, string.Format("{0}.db", item.Key.ToLower()),item.Value);
+
+                if (!map.Exists(a => a.ToLower() == item.Key.ToLower()))
+                    map.Add(item.Key.ToLower());
             }
 
             foreach (KeyValuePair<string, object> item in type)
@@ -594,6 +598,7 @@ namespace FastData.Core
                 DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", item.Key.ToLower()), item.Value as List<string>);
             }
 
+            DbCache.Set<List<string>>(config.CacheType, "FastMap.Api", map);
             return key;
         }
         #endregion
@@ -1181,6 +1186,19 @@ namespace FastData.Core
         public static bool IsExists(string name)
         {
             return DbCache.Exists(DataConfig.Get().CacheType, name.ToLower());
+        }
+        #endregion
+
+        #region  获取api接口key
+        /// <summary>
+        /// 获取api接口key
+        /// </summary>
+        public static List<string> Api
+        {
+            get
+            {
+                return DbCache.Get<List<string>>(DataConfig.Get().CacheType, "FastMap.Api");
+            }
         }
         #endregion
     }
