@@ -590,20 +590,24 @@ namespace FastData.Core
                     map.Add(item.Key.ToLower());
             }
             DbCache.Set<List<string>>(config.CacheType, "FastMap.Api", map);
+            key.Add("FastMap.Api");
 
             foreach (KeyValuePair<string, object> item in type)
             {
                 DbCache.Set(config.CacheType, string.Format("{0}.type", item.Key.ToLower()), item.Value);
+                key.Add(string.Format("{0}.type", item.Key.ToLower()));
             }
 
             foreach (KeyValuePair<string, object> item in param)
             {
                 DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", item.Key.ToLower()), item.Value as List<string>);
+                key.Add(string.Format("{0}.param", item.Key.ToLower()));
             }
 
             foreach (KeyValuePair<string, object> item in check)
             {
                 DbCache.Set(config.CacheType, item.Key, item.Value);
+                key.Add(item.Key);
             }
 
             return key;
