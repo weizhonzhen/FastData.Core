@@ -573,7 +573,9 @@ namespace FastData.Core
             var db = new Dictionary<string, object>();
             var type = new Dictionary<string, object>();
             var param = new Dictionary<string,object>();
-            GetXmlList(path, "sqlMap", ref key, ref sql,ref db, ref type, ref param, config);
+            var check = new Dictionary<string, object>();
+            
+            GetXmlList(path, "sqlMap", ref key, ref sql,ref db, ref type, ref check, ref param, config);
             
             for (var i = 0; i < key.Count; i++)
             {
@@ -587,6 +589,7 @@ namespace FastData.Core
                 if (!map.Exists(a => a.ToLower() == item.Key.ToLower()))
                     map.Add(item.Key.ToLower());
             }
+            DbCache.Set<List<string>>(config.CacheType, "FastMap.Api", map);
 
             foreach (KeyValuePair<string, object> item in type)
             {
@@ -598,7 +601,11 @@ namespace FastData.Core
                 DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", item.Key.ToLower()), item.Value as List<string>);
             }
 
-            DbCache.Set<List<string>>(config.CacheType, "FastMap.Api", map);
+            foreach (KeyValuePair<string, object> item in check)
+            {
+                DbCache.Set(config.CacheType, item.Key, item.Value);
+            }
+
             return key;
         }
         #endregion
@@ -610,7 +617,10 @@ namespace FastData.Core
         /// <param name="path">文件名</param>
         /// <param name="xmlNode">结点</param>
         /// <returns></returns>
-        private static void GetXmlList(string path, string xmlNode, ref List<string> key, ref List<string> sql,ref Dictionary<string, object> db, ref Dictionary<string, object> type, ref Dictionary<string, object> param, ConfigModel config)
+        private static void GetXmlList(string path, string xmlNode, 
+            ref List<string> key, ref List<string> sql,ref Dictionary<string, object> db, 
+            ref Dictionary<string, object> type, ref Dictionary<string, object> check,
+            ref Dictionary<string, object> param, ConfigModel config)
         {
             try
             {
@@ -649,6 +659,614 @@ namespace FastData.Core
 
                             //节点数
                             if (Array.Exists(key.ToArray(), element => element == tempKey))
+                                Task.Run(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
+                            key.Add(tempKey);
+                            sql.Add(temp.ChildNodes.Count.ToString());                  
+
+                            foreach (XmlNode node in temp.ChildNodes)
+                            {
+                                #region XmlText
+                                if (node is XmlText)
+                                {
+                                    key.Add(string.Format("{0}.{1}", tempKey, i));
+                                    sql.Add(node.InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
+                                }
+                                #endregion
+
+                                #region XmlElement 动态条件
+                                if (node is XmlElement)
+                                {
+                                    key.Add(string.Format("{0}.format.{1}", tempKey, i));
+                                    sql.Add(node.Attributes["prepend"].Value.ToLower());
+
+                                    foreach (XmlNode dyn in node.ChildNodes)
+                                    {
+                                        //check required
+                                        if (dyn.Attributes["required"].Value != null)
+                                            check.Add(string.Format("{0}.{1}.required", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["required"].Value.ToStr());
+
+                                        //check maxlength
+                                        if (dyn.Attributes["maxlength"].Value != null)
+                                            check.Add(string.Format("{0}.{1}.maxlength", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["maxlength"].Value.ToStr());
+
+                                        //check map
+                                        if (dyn.Attributes["map"].Value != null)
+                                            check.Add(string.Format("{0}.{1}.map", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["map"].Value.ToStr());
+
+                                        //参数
+                                        tempParam.Add(dyn.Attributes["property"].Value);
+
+                                        if (dyn.Name.ToLower() == "ispropertyavailable")
+                                        {
+                                            //属性和值
+                                            key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
+                                        }
+                                        else if (dyn.Name.ToLower() != "choose")
+                                        {
+                                            //属性和值
+                                            key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
+
+                                            //条件类型
+                                            key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            sql.Add(dyn.Name);
+
+                                            //判断条件内容
+                                            if (dyn.Attributes["condition"] != null)
+                                            {
+                                                key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                sql.Add(dyn.Attributes["condition"].Value);
+                                            }
+
+                                            //比较条件值
+                                            if (dyn.Attributes["compareValue"] != null)
+                                            {
+                                                key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //条件类型
+                                            key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            sql.Add(dyn.Name);
+
+                                            if (dyn is XmlElement)
+                                            {
+                                                var count = 0;
+                                                key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                sql.Add(dyn.ChildNodes.Count.ToStr());
+                                                foreach (XmlNode child in dyn.ChildNodes)
+                                                {
+                                                    //条件
+                                                    key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                    sql.Add(child.Attributes["property"].Value);
+
+                                                    //内容
+                                                    key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                    sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
+
+                                                    count++;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                #endregion
+
+                                i++;
+                            }
+
+                            //db
+                            if (temp.Attributes["db"] != null)
+                                db.Add(tempKey, temp.Attributes["db"].Value.ToStr());
+
+                            //type
+                            if (temp.Attributes["type"] != null)
+                                type.Add(tempKey, temp.Attributes["type"].Value.ToStr());
+                            
+                            param.Add(tempKey, tempParam);
+                            #endregion
+                        }
+                        else if (temp is XmlText)
+                        {
+                            #region XmlText
+                            key.Add(string.Format("{0}.{1}", item.Attributes["id"].Value.ToLower(), i));
+                            sql.Add(temp.InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
+
+                            key.Add(item.Attributes["id"].Value.ToLower());
+                            sql.Add("0");
+                            #endregion
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Task.Run(() =>
+                {
+                    if (config.SqlErrorType == SqlErrorType.Db)
+                        DbLogTable.LogException(config, ex, "InstanceMap", "GetXmlList");
+                    else
+                        DbLog.LogException(true, "InstanceMap", ex, "GetXmlList", ""); 
+                });
+            }
+        }
+        #endregion
+
+        #region 获取map sql语句
+        /// <summary>
+        /// 获取map sql语句
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        private static string GetMapSql(string name, ref DbParameter[] param, DataContext db, string key)
+        {
+            var tempParam = param.ToList();
+            var sql = new StringBuilder();
+            var flag = "";
+            var cacheType = "";
+            
+            if (db != null)
+            {
+                flag = db.config.Flag;
+                cacheType = db.config.CacheType;
+            }
+            else if (key != null)
+            {
+                flag = DataConfig.Get(key).Flag;
+                cacheType = DataConfig.Get(key).CacheType;
+            }
+
+            for (var i = 0; i <= DbCache.Get(cacheType,name.ToLower()).ToInt(0); i++)
+            {
+                #region 文本
+                var txtKey = string.Format("{0}.{1}", name.ToLower(), i);
+                if (DbCache.Exists(cacheType, txtKey))
+                    sql.Append(DbCache.Get(cacheType, txtKey));
+                #endregion
+
+                #region 动态
+                var dynKey = string.Format("{0}.format.{1}", name.ToLower(), i);
+                if (DbCache.Exists(cacheType, dynKey))
+                {
+                    if (param != null)
+                    {
+                        var tempSql = new StringBuilder();
+                        foreach (var item in MapParam(name))
+                        {
+                            if (!param.ToList().Exists(a => a.ParameterName.ToLower() == item.ToLower()))
+                                continue;
+                            var temp = param.ToList().Find(a => a.ParameterName.ToLower() == item.ToLower());
+
+                            var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+                            var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+                            var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+                            if (DbCache.Exists(cacheType, paramKey))
+                            {
+                                var flagParam = string.Format("{0}{1}", flag, temp.ParameterName.ToLower());
+                                var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
+                                var paramSql = DbCache.Get(cacheType, paramKey).ToLower();
+                                var condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
+                                var conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
+                                switch (condition)
+                                {
+                                    case "isequal":
+                                        {
+                                            if (conditionValue == temp.Value.ToStr())
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                                }
+                                                else
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isnotequal":
+                                        {
+                                            if (conditionValue != temp.Value.ToStr())
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(temp.ParameterName.ToLower(), temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                                }
+                                                else
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isgreaterthan":
+                                        {
+                                            if (temp.Value.ToStr().ToDecimal(0) > conditionValue.ToDecimal(0))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                                }
+                                                else
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "islessthan":
+                                        {
+                                            if (temp.Value.ToStr().ToDecimal(0) < conditionValue.ToDecimal(0))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                                }
+                                                else
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isnullorempty":
+                                        {
+                                            if (string.IsNullOrEmpty(temp.Value.ToStr()))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                                }
+                                                else
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "isnotnullorempty":
+                                        {
+                                            if (!string.IsNullOrEmpty(temp.Value.ToStr()))
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                                }
+                                                else
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "if":
+                                        {
+                                            //conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
+                                            conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
+                                            conditionValue = conditionValue.Replace("#", "\"");
+                                            if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
+                                            {
+                                                if (paramSql.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                }
+                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                                }
+                                                else
+                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                            }
+                                            else
+                                                tempParam.Remove(temp);
+                                            break;
+                                        }
+                                    case "choose":
+                                        {
+                                            var isSuccess = false;
+                                            for (int j = 0; j < DbCache.Get(cacheType, paramKey).ToStr().ToInt(0); j++)
+                                            {
+                                                conditionKey = string.Format("{0}.choose.{1}", paramKey, j);
+                                                condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
+
+                                                conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
+                                                conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
+                                                //conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
+                                                conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
+                                                conditionValue = conditionValue.Replace("#", "\"");
+                                                if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
+                                                {
+                                                    isSuccess = true;
+                                                    if (condition.IndexOf(tempKey) >= 0)
+                                                    {
+                                                        tempParam.Remove(temp);
+                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToString()));
+                                                    }
+                                                    else if (condition.IndexOf(flagParam) < 0 && flag != "")
+                                                    {
+                                                        tempParam.Remove(temp);
+                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToString()));
+                                                    }
+                                                    else
+                                                        tempSql.Append(condition);
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!isSuccess)
+                                                tempParam.Remove(temp);
+
+                                            break;
+                                        }
+                                    default:
+                                        {
+                                            //isPropertyAvailable
+                                            if (paramSql.IndexOf(tempKey) >= 0)
+                                            {
+                                                tempParam.Remove(temp);
+                                                tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                            }
+                                            else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
+                                            {
+                                                tempParam.Remove(temp);
+                                                tempSql.Append(DbCache.Get(cacheType, paramKey));
+                                            }
+                                            else
+                                                tempSql.Append(DbCache.Get(cacheType, paramKey));
+
+                                            break;
+                                        }
+                                }
+                            }
+                        }
+
+                        if (tempSql.ToString() != "")
+                        {
+                            sql.Append(DbCache.Get(cacheType, dynKey));
+                            sql.Append(tempSql.ToString());
+                        }
+                    }
+                }
+                #endregion
+            }
+
+            param = tempParam.ToArray();
+            return sql.ToString();
+        }
+        #endregion
+
+        #region map xml 存数据库
+        /// <summary>
+        /// map xml 存数据库
+        /// </summary>
+        /// <param name="dbKey"></param>
+        /// <param name="key"></param>
+        /// <param name="info"></param>
+        private static bool SaveXml(string dbKey, string key, FileInfo info, ConfigModel config, DataContext db)
+        {
+            if (config.IsMapSave)
+            {
+                //加密
+                var enContent = File.ReadAllText(info.FullName);
+
+                //明文
+                var deContent = "";
+
+                if (config.IsEncrypt)
+                {
+                    deContent = BaseSymmetric.DecodeGB2312(deContent);
+                    if (deContent == "")
+                        deContent = enContent;
+                }
+                else
+                    deContent = enContent;
+
+                if (config.DbType == DataDbType.MySql)
+                {
+                    var model = new DataModel.MySql.Data_MapFile();
+                    model.MapId = key;
+                    var query = FastRead.Query<DataModel.MySql.Data_MapFile>(a => a.MapId == key, null, dbKey);
+
+                    if (query.ToCount() == 0)
+                    {
+                        model.FileName = info.Name;
+                        model.FilePath = info.FullName;
+                        model.LastTime = info.LastWriteTime;
+                        model.EnFileContent = enContent;
+                        model.DeFileContent = deContent;
+                       return db.Add(model).writeReturn.IsSuccess;
+                    }
+                    else
+                       return db.Update<DataModel.MySql.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                }
+
+                if (config.DbType == DataDbType.Oracle)
+                {
+                    var model = new DataModel.Oracle.Data_MapFile();
+                    model.MapId = key;
+                    var query = FastRead.Query<DataModel.Oracle.Data_MapFile>(a => a.MapId == key, null, dbKey);
+
+                    if (query.ToCount() == 0)
+                    {
+                        model.FileName = info.Name;
+                        model.FilePath = info.FullName;
+                        model.LastTime = info.LastWriteTime;
+                        model.EnFileContent = enContent;
+                        model.DeFileContent = deContent;
+                        return db.Add(model).writeReturn.IsSuccess;
+                    }
+                    else
+                       return db.Update<DataModel.Oracle.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                }
+
+                if (config.DbType == DataDbType.SqlServer)
+                {
+                    var model = new DataModel.SqlServer.Data_MapFile();
+                    model.MapId = key;
+                    var query = FastRead.Query<DataModel.SqlServer.Data_MapFile>(a => a.MapId == key, null, dbKey);
+
+                    if (query.ToCount() == 0)
+                    {
+                        model.FileName = info.Name;
+                        model.FilePath = info.FullName;
+                        model.LastTime = info.LastWriteTime;
+                        model.EnFileContent = enContent;
+                        model.DeFileContent = deContent;
+                        return db.Add(model).writeReturn.IsSuccess;
+                    }
+                    else
+                        return db.Update<DataModel.SqlServer.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                }
+            }
+
+            return true;
+        }
+        #endregion
+
+        #region map 参数列表
+        /// <summary>
+        /// map 参数列表
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static List<string> MapParam(string name)
+        {
+            return DbCache.Get<List<string>>(DataConfig.Get().CacheType, string.Format("{0}.param", name.ToLower()));
+        }
+        #endregion
+
+        #region map db
+        /// <summary>
+        /// map db
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string MapDb(string name)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower()));
+        }
+        #endregion
+
+        #region map type
+        /// <summary>
+        /// map db
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string MapType(string name)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.type", name.ToLower()));
+        }
+        #endregion
+
+        #region 是否存在map id
+        /// <summary>
+        /// 是否存在map id
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static bool IsExists(string name)
+        {
+            return DbCache.Exists(DataConfig.Get().CacheType, name.ToLower());
+        }
+        #endregion
+
+        #region  获取api接口key
+        /// <summary>
+        /// 获取api接口key
+        /// </summary>
+        public static List<string> Api
+        {
+            get
+            {
+                return DbCache.Get<List<string>>(DataConfig.Get().CacheType, "FastMap.Api");
+            }
+        }
+        #endregion
+
+        #region 获取map验证必填
+        /// <summary>
+        /// 获取map验证必填
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static string MapRequired(string name,string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.required", name.ToLower(), param.ToLower()));
+        }
+        #endregion
+
+        #region 获取map验证长度
+        /// <summary>
+        /// 获取map验证长度
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static string MapMaxlength(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.maxlength", name.ToLower(), param.ToLower()));
+        }
+        #endregion
+
+        #region 获取map验证map
+        /// <summary>
+        /// 获取map验证map
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static string MapCheckMap(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.map", name.ToLower(), param.ToLower()));
+        }
+        #endregion
+    }
+}
+if (Array.Exists(key.ToArray(), element => element == tempKey))
                                 Task.Run(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); });
                             key.Add(tempKey);
                             sql.Add(temp.ChildNodes.Count.ToString());                  
