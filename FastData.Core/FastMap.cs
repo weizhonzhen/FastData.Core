@@ -682,15 +682,15 @@ namespace FastData.Core
                                     foreach (XmlNode dyn in node.ChildNodes)
                                     {
                                         //check required
-                                        if (dyn.Attributes["required"].Value != null)
+                                        if (dyn.Attributes["required"] != null)
                                             check.Add(string.Format("{0}.{1}.required", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["required"].Value.ToStr());
 
                                         //check maxlength
-                                        if (dyn.Attributes["maxlength"].Value != null)
+                                        if (dyn.Attributes["maxlength"] != null)
                                             check.Add(string.Format("{0}.{1}.maxlength", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["maxlength"].Value.ToStr());
 
                                         //check map
-                                        if (dyn.Attributes["map"].Value != null)
+                                        if (dyn.Attributes["map"] != null)
                                             check.Add(string.Format("{0}.{1}.map", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["map"].Value.ToStr());
 
                                         //参数
