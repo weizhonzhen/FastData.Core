@@ -693,9 +693,13 @@ namespace FastData.Core
                                         if (dyn.Attributes["maxlength"] != null)
                                             check.Add(string.Format("{0}.{1}.maxlength", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["maxlength"].Value.ToStr());
 
-                                        //check map
-                                        if (dyn.Attributes["map"] != null)
-                                            check.Add(string.Format("{0}.{1}.map", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["map"].Value.ToStr());
+                                        //check existsmap
+                                        if (dyn.Attributes["existsmap"] != null)
+                                            check.Add(string.Format("{0}.{1}.existsmap", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["existsmap"].Value.ToStr());
+
+                                        //check checkmap
+                                        if (dyn.Attributes["existsmap"] != null)
+                                            check.Add(string.Format("{0}.{1}.checkmap", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["checkmap"].Value.ToStr());
 
                                         //check date
                                         if (dyn.Attributes["date"] != null)
@@ -1283,7 +1287,20 @@ namespace FastData.Core
         /// <returns></returns>
         public static string MapCheckMap(string name, string param)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.map", name.ToLower(), param.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.checkmap", name.ToLower(), param.ToLower()));
+        }
+        #endregion
+
+        #region 获取map验证map
+        /// <summary>
+        /// 获取map验证map
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static string MapExistsMap(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.existsmap", name.ToLower(), param.ToLower()));
         }
         #endregion
     }
