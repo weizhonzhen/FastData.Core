@@ -248,7 +248,7 @@ namespace FastUntility.Core.Base
         /// </summary>
         /// <param name="dr"></param>
         /// <returns></returns>
-        public static List<Dictionary<string, object>> DataReaderToDic(DbDataReader reader, string delCol = "")
+        public static List<Dictionary<string, object>> DataReaderToDic(DbDataReader reader)
         {
             var result = new List<Dictionary<string, object>>();
             var cols = new List<string>();
@@ -256,7 +256,7 @@ namespace FastUntility.Core.Base
             //列名
             for (var i = 0; i < reader.FieldCount; i++)
             {
-                if (reader.GetName(i).ToLower() != delCol.ToLower())
+                 if (!cols.Exists(a => a.ToLower() == reader.GetName(i).ToLower()))
                     cols.Add(reader.GetName(i));
             }
 
