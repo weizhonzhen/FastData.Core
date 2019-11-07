@@ -64,7 +64,10 @@ in db.json
                   <choose property="userNo">
                      <condition prepend=" and " property="userNo>5">a.userNo=:userNo and a.userNo=5</condition>
                      <condition prepend=" and " property="userNo>6">a.userNo=:userNo and a.userNo=6</condition>
-                  </choose>
+                  </choose>                  
+                 <foreach name="data" field="userId">
+                    select ypxh from base_role where userId=:userId
+                 </foreach>
                 </dynamic>
               </select>
           </sqlMap>
