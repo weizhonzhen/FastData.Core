@@ -70,6 +70,16 @@ in db.json
                  </foreach>
                 </dynamic>
               </select>
+              
+              <select id="Patient.NowAuditList">
+                select cfsb,brxm from ms_cf01 where 1=1
+                <dynamic prepend="">
+                  <isNotNullOrEmpty prepend=" and " property="brid">brid = :brid</isNotNullOrEmpty>
+                </dynamic>
+                <foreach name="data" field="cfsb" type="Test1.Model.MS_CF02,Test1">
+                  select ypxh from ms_cf02 where cfsb=:cfsb
+                </foreach>
+            </select>
           </sqlMap>
   
   
@@ -84,6 +94,25 @@ in db.json
                  FastMap.QueryPage(pageModel, "getuser", param.ToArray());
 
 
+                 var param = new List<OracleParameter>();
+                    param.Add(new OracleParameter { ParameterName = "brid", Value = "550010" });
+                    var tt = FastMap.Query<TestResult>("Patient.NowAuditList", param.ToArray(), null, "test");
 
+                    namespace Test1.Model
+                    {
+                        public class TestResult
+                        {
+                            public decimal? CFSB { get; set; }
+
+                            public string BRXM { get; set; }
+
+                            public List<MS_CF02> leaf { get; set; }
+                        }
+
+                        public class MS_CF02
+                        {
+                            public decimal? YPXH{ get; set; }
+                        }
+                    }
 
   
