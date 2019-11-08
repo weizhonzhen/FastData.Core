@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using FastData.Core.CacheModel;
 using FastData.Core.Base;
-using FastUntility.Core.Cache;
 
 namespace FastData.Core.Property
 {
@@ -23,7 +22,7 @@ namespace FastData.Core.Property
         {
             var config = DataConfig.Get();
             var list = new List<PropertyModel>();
-            var key = string.Format("Core.{0}.{1}", typeof(T).Namespace, typeof(T).Name);
+            var key = string.Format("{0}.{1}", typeof(T).Namespace, typeof(T).Name);
 
             if (IsCache)
             {
@@ -32,19 +31,18 @@ namespace FastData.Core.Property
                 else
                 {
                     typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
-                    {
-                        var temp = new PropertyModel();
-                        temp.Name = a.Name;
-                        temp.PropertyType = a.PropertyType;
-                        list.Add(temp);
-                    });
+                      {
+                          var temp = new PropertyModel();
+                          temp.Name = a.Name;
+                          temp.PropertyType = a.PropertyType;
+                          list.Add(temp);
+                      });
 
                     DbCache.Set<List<PropertyModel>>(config.CacheType, key, list);
                 }
             }
             else
             {
-                DbCache.Remove(config.CacheType, key);
                 typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                 {
                     var temp = new PropertyModel();
