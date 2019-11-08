@@ -217,7 +217,18 @@ namespace FastData.Core
             if (DbCache.Exists(config.CacheType,name.ToLower()))
             {
                 var sql = GetMapSql(name, ref param,db,key);
-                return FastRead.ExecuteSql<T>(sql, param, db, key);
+                var result = FastRead.ExecuteSql<T>(sql, param, db, key);
+                {
+                    if (db == null)
+                    {
+                        var tempDb = BaseContext.GetContext(key);
+                        result = MapForEach<T>(result, name, tempDb, key, config);
+                        tempDb.Dispose();
+                    }
+                    else
+                        result = MapForEach<T>(result, name, db, key, config);
+                }
+                return result;
             }
             else
                 return new List<T>();
@@ -545,7 +556,21 @@ namespace FastData.Core
             {
                 var sql = GetMapSql(name, ref param,db,key);
 
-                return ExecuteSqlPage<T>(pModel, sql, param, db, key);
+                var result = ExecuteSqlPage<T>(pModel, sql, param, db, key);
+
+                if (MapIsForEach(name, config))
+                {
+                    if (db == null)
+                    {
+                        var tempDb = BaseContext.GetContext(key);
+                        result.list = MapForEach<T>(result.list, name, tempDb, key, config);
+                        tempDb.Dispose();
+                    }
+                    else
+                        result.list = MapForEach<T>(result.list, name, db, key, config);
+                }
+
+                return result;
             }
             else
                 return new PageResult<T>();
@@ -717,6 +742,13 @@ namespace FastData.Core
                                     //foreach
                                     if (node.Name.ToLower() == "foreach")
                                     {
+                                        //type
+                                        if (node.Attributes["type"] != null)
+                                        {
+                                            sql.Add(node.Attributes["type"].Value);
+                                            key.Add(string.Format("{0}.foreach.type", tempKey));
+                                        }
+
                                         //result name
                                         key.Add(string.Format("{0}.foreach.name", tempKey));
                                         if (node.Attributes["name"] != null)
@@ -727,8 +759,8 @@ namespace FastData.Core
                                         //field
                                         if (node.Attributes["field"] != null)
                                         {
-                                            sql.Add(node.Attributes["field"].Value.ToLower());
                                             key.Add(string.Format("{0}.foreach.field", tempKey));
+                                            sql.Add(node.Attributes["field"].Value.ToLower());
                                         }
 
                                         //sql
@@ -1422,6 +1454,92 @@ namespace FastData.Core
             }
 
             return result;
+        }
+        #endregion
+
+        #region  foreach数据
+        /// <summary>
+        /// foreach数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="name"></param>
+        /// <param name="db"></param>
+        /// <param name="key"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        private static List<T> MapForEach<T>(List<T> data, string name, DataContext db, string key, ConfigModel config) where T : class, new()
+        {
+            var result = new List<T>();
+            var param = new List<DbParameter>();
+            var dicName = DbCache.Get(config.CacheType, string.Format("{0}.foreach.name", name.ToLower()));
+            var type = DbCache.Get(config.CacheType, string.Format("{0}.foreach.type", name.ToLower()));
+            var field = DbCache.Get(config.CacheType, string.Format("{0}.foreach.field", name.ToLower()));
+            var sql = DbCache.Get(config.CacheType, string.Format("{0}.foreach.sql", name.ToLower()));
+            Assembly assembly;
+
+            if (type.IndexOf(',') > 0)
+            {
+                assembly = Assembly.Load(type.Split(',')[1]);
+                if (assembly == null)
+                    return data;
+                else
+                {
+                    if (assembly.GetType(type.Split(',')[0]) == null)
+                        return data;
+                    
+                    foreach (var item in data)
+                    {
+                        var model = Activator.CreateInstance(assembly.GetType(type.Split(',')[0]));
+                        var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(assembly.GetType(type.Split(',')[0])));
+                        var infoResult = BaseDic.PropertyInfo<T>().Find(a => a.PropertyType.IsGenericType == true && a.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>));
+
+                        //param
+                        param.Clear();
+                        if (field.IndexOf(',') > 0)
+                        {
+                            foreach (var split in field.Split(','))
+                            {
+                                var infoField = BaseDic.PropertyInfo<T>().Find(a => a.Name.ToLower() == split);
+                                var tempParam = DbProviderFactories.GetFactory(config).CreateParameter();
+                                tempParam.ParameterName = split;
+                                tempParam.Value = infoField.GetValue(item,null);
+                                param.Add(tempParam);
+                            }
+                        }
+                        else
+                        {
+                            var infoField = BaseDic.PropertyInfo<T>().Find(a => a.Name.ToLower() == field);
+                            var tempParam = DbProviderFactories.GetFactory(config).CreateParameter();
+                            tempParam.ParameterName = field;
+                            tempParam.Value = infoField.GetValue(item, null);
+                            param.Add(tempParam);
+                        }
+
+                        var tempData = db.ExecuteSql(sql, param.ToArray(), true);
+
+                        foreach (var temp in tempData.DicList)
+                        {
+                            foreach (var info in model.GetType().GetProperties())
+                            {
+                                if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                                    info.SetValue(model, Convert.ChangeType(temp.GetValue(info.Name), Nullable.GetUnderlyingType(info.PropertyType)), null);
+                                else
+                                    info.SetValue(model, Convert.ChangeType(temp.GetValue(info.Name), info.PropertyType), null);                                
+                            }
+
+                            var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
+                            method.Invoke(list, new object[] { model });
+                        }
+
+                        infoResult.SetValue(item, list);
+                        result.Add(item);
+                    }
+                    return result;
+                }
+            }
+            else
+                return data;           
         }
         #endregion
     }
