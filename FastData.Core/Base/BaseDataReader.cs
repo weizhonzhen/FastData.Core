@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using FastData.Core.Property;
 using FastData.Core.Type;
 using FastData.Core.Model;
-using FastUntility.Core.Base;
 
 namespace FastData.Core.Base
 {
@@ -39,6 +38,9 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
+                        if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
+                            continue;
+
                         try
                         {
                             var id = dr.GetOrdinal(config.DbType == DataDbType.Oracle ? info.Name.ToUpper() : info.Name);
