@@ -71,15 +71,18 @@ in db.json
                 </dynamic>
               </select>
               
-              <select id="Patient.NowAuditList">
-                select cfsb,brxm from ms_cf01 where 1=1
+              <select id="Patient.Test">
+                select * from base_user where 1=1
                 <dynamic prepend="">
-                  <isNotNullOrEmpty prepend=" and " property="brid">brid = :brid</isNotNullOrEmpty>
+                  <isNotNullOrEmpty prepend=" and " property="userid">userid = :userid</isNotNullOrEmpty>
                 </dynamic>
-                <foreach name="data" field="cfsb" type="Test1.Model.MS_CF02,Test1">
-                  select ypxh from ms_cf02 where cfsb=:cfsb
+                <foreach name="data1" field="areaid" type="Test1.Model.BASE_AREA,Test1">
+                  select * from base_area where areaid=:areaid
                 </foreach>
-            </select>
+                <foreach name="data2" field="roleid" type="Test1.Model.BASE_ROLE,Test1">
+                  select * from base_role where roleid=:roleid
+                </foreach>
+              </select>
           </sqlMap>
   
   
@@ -95,24 +98,61 @@ in db.json
 
 
                  var param = new List<OracleParameter>();
-                    param.Add(new OracleParameter { ParameterName = "brid", Value = "550010" });
-                    var tt = FastMap.Query<TestResult>("Patient.NowAuditList", param.ToArray(), null, "test");
-
-                    namespace Test1.Model
-                    {
-                        public class TestResult
-                        {
-                            public decimal? CFSB { get; set; }
-
-                            public string BRXM { get; set; }
-
-                            public List<MS_CF02> leaf { get; set; }
-                        }
-
-                        public class MS_CF02
-                        {
-                            public decimal? YPXH{ get; set; }
-                        }
-                    }
+        param.Add(new OracleParameter { ParameterName = "userid", Value = "dd5c99f2-0892-4179-83db-c2ccf243104c" });
+        var tt = FastMap.Query<TestResult>("Patient.Test", param.ToArray(), null, "test");
+        
+        namespace Test1.Model
+        {
+            public class TestResult
+            {
+                public string USERID { get; set; }
+                public string USERPASS { get; set; }
+                public string FULLNAME { get; set; }
+                public string ORGID { get; set; }
+                public string EXTENDORGID { get; set; }
+                public string HOSPITALID { get; set; }
+                public string EXTENDHOSPITALID { get; set; }
+                public string AREAID { get; set; }
+                public string EXTENDAREAID { get; set; }
+                public string USERNO { get; set; }
+                public string ROLEID { get; set; }
+                public string EXTENDROLEID { get; set; }
+                public string ISADMIN { get; set; }
+                public string ISDEL { get; set; }
+                public DateTime? ADDTIME { get; set; }
+                public string ADDUSERID { get; set; }
+                public string ADDUSERNAME { get; set; }
+                public DateTime? DELTIME { get; set; }
+                public string DELUSERID { get; set; }
+                public string DELUSERNAME { get; set; }
+                public List<BASE_AREA> area { get; set; }
+                public List<BASE_ROLE> role { get; set; }
+            }
+            
+            public class BASE_ROLE
+            {
+                public string ROLEID{ get; set; }
+                public string ROLENAME{ get; set; }
+                public string ROLEREMARK{ get; set; }
+                public string DEFAULTPAGE{ get; set; }
+                public DateTime? ADDTIME{ get; set; }
+                public string ADDUSERID{ get; set; }
+                public string ADDUSERNAME{ get; set; }      
+            }
+            
+            public class BASE_AREA
+            {
+                public string AREAID{ get; set; }
+                public string HOSPITALID{ get; set; }
+                public string AREANAME{ get; set; }
+                public DateTime? ADDTIME{ get; set; }
+                public string ADDUSERID{ get; set; }
+                public string ADDUSERNAME{ get; set; }
+                public DateTime? DELTIME{ get; set; }
+                public string DELUSERID{ get; set; }
+                public string DELUSERNAME{ get; set; }
+                public string ISDEL{ get; set; }      
+            }
+        }
 
   
