@@ -4,6 +4,7 @@ using FastData.Core.Check;
 using FastData.Core.Context;
 using FastData.Core.Model;
 using FastData.Core.Type;
+using FastData.Core.Property;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -1530,7 +1531,8 @@ namespace FastData.Core
                         var model = Activator.CreateInstance(assembly.GetType(type.Split(',')[0]));
                         var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(assembly.GetType(type.Split(',')[0])));
                         var infoResult = BaseDic.PropertyInfo<T>().Find(a => a.PropertyType.FullName == list.GetType().FullName);
-                        
+                        var dynSet = new DynamicSet(model);
+
                         //param
                         param.Clear();
                         if (field.IndexOf(',') > 0)
@@ -1563,9 +1565,9 @@ namespace FastData.Core
                                     continue;
                                     
                                 if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                                    info.SetValue(model, Convert.ChangeType(temp.GetValue(info.Name), Nullable.GetUnderlyingType(info.PropertyType)), null);
+                                    dynSet.SetValue(model,info.Name, Convert.ChangeType(temp.GetValue(info.Name), Nullable.GetUnderlyingType(info.PropertyType)), config.IsPropertyCache);
                                 else
-                                    info.SetValue(model, Convert.ChangeType(temp.GetValue(info.Name), info.PropertyType), null);                                
+                                    dynSet.SetValue(model,info.Name, Convert.ChangeType(temp.GetValue(info.Name), info.PropertyType), config.IsPropertyCache);                                
                             }
 
                             var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
