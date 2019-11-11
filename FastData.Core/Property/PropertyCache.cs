@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -44,6 +44,45 @@ namespace FastData.Core.Property
             else
             {
                 typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
+                {
+                    var temp = new PropertyModel();
+                    temp.Name = a.Name;
+                    temp.PropertyType = a.PropertyType;
+                    list.Add(temp);
+                });
+            }
+
+            return list;
+        }
+        #endregion
+
+        #region 缓存发属性成员
+        public static List<PropertyModel> GetPropertyInfo(object model,bool IsCache=true)
+        {
+            var config = DataConfig.Get();
+            var list = new List<PropertyModel>();
+            var key = string.Format("{0}.{1}", model.GetType().Namespace, model.GetType().Name);
+
+            if (IsCache)
+            {
+                if (DbCache.Exists(config.CacheType, key))
+                    return DbCache.Get<List<PropertyModel>>(config.CacheType, key);
+                else
+                {
+                    model.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
+                    {
+                        var temp = new PropertyModel();
+                        temp.Name = a.Name;
+                        temp.PropertyType = a.PropertyType;
+                        list.Add(temp);
+                    });
+
+                    DbCache.Set<List<PropertyModel>>(config.CacheType, key, list);
+                }
+            }
+            else
+            {
+                model.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                 {
                     var temp = new PropertyModel();
                     temp.Name = a.Name;
