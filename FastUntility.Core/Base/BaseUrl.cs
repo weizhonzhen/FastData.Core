@@ -15,13 +15,17 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// get url(select)
         /// </summary>
-        public static string GetUrl(IHttpClientFactory client,string url)
+        public static string GetUrl(IHttpClientFactory client,string url, string mediaType = "application/json")
         {
             try
             {
                 var http = client.CreateClient();
-                var response = http.GetAsync(new Uri(url)).Result;
-                response.EnsureSuccessStatusCode();
+                var handle = new HttpRequestMessage();
+                handle.Version = new Version(2, 0);
+                handle.Content = new StringContent("", Encoding.UTF8, mediaType);
+                handle.Method = HttpMethod.Get;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -57,9 +61,12 @@ namespace FastUntility.Core.Base
                     count++;
                 }
 
-                var content = new StringContent("", Encoding.UTF8, mediaType);
-                var response = http.PostAsync(new Uri(url), content).Result;
-                response.EnsureSuccessStatusCode();
+                var handle = new HttpRequestMessage();
+                handle.Version = new Version(2, 0);
+                handle.Content = new StringContent("", Encoding.UTF8, mediaType);
+                handle.Method = HttpMethod.Post;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -79,14 +86,17 @@ namespace FastUntility.Core.Base
             try
             {
                 var http = client.CreateClient();
-                var content = new StringContent(param, Encoding.UTF8, mediaType);
-                var response = http.PostAsync(new Uri(url), content).Result;
-                response.EnsureSuccessStatusCode();
+                var handle = new HttpRequestMessage();
+                handle.Version = new Version(2, 0);
+                handle.Content = new StringContent(param, Encoding.UTF8, mediaType);
+                handle.Method = HttpMethod.Post;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostUrl_exp"); });
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostContent_exp"); });
                 return null;
             }
         }
@@ -115,10 +125,13 @@ namespace FastUntility.Core.Base
                     }
                     count++;
                 }
-
-                var content = new StringContent("", Encoding.UTF8, mediaType);
-                var response = http.PostAsync(new Uri(url), content).Result;
-                response.EnsureSuccessStatusCode();
+                
+                var handle = new HttpRequestMessage();
+                handle.Version = new Version(2, 0);
+                handle.Content = new StringContent("", Encoding.UTF8, mediaType);
+                handle.Method = HttpMethod.Put;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -138,9 +151,12 @@ namespace FastUntility.Core.Base
             try
             {
                 var http = client.CreateClient();
-                var content = new StringContent(param, Encoding.UTF8, mediaType);
-                var response = http.PostAsync(new Uri(url), content).Result;
-                response.EnsureSuccessStatusCode();
+                var handle = new HttpRequestMessage();
+                handle.Version = new Version(2, 0);
+                handle.Content = new StringContent(param, Encoding.UTF8, mediaType);
+                handle.Method = HttpMethod.Put;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -155,13 +171,17 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// delete url (delete)
         /// </summary>
-        public static string DeleteUrl(IHttpClientFactory client, string url)
+        public static string DeleteUrl(IHttpClientFactory client, string url, string mediaType = "application/json")
         {
             try
             {
                 var http = client.CreateClient();
-                var response = http.DeleteAsync(new Uri(url)).Result;
-                response.EnsureSuccessStatusCode();
+                var handle = new HttpRequestMessage();
+                handle.Version = new Version(2, 0);
+                handle.Content = new StringContent("", Encoding.UTF8, mediaType);
+                handle.Method = HttpMethod.Delete;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -172,29 +192,7 @@ namespace FastUntility.Core.Base
             }
         }
         #endregion
-
-        #region send url
-        /// <summary>
-        /// send url
-        /// </summary>
-        public static string SendUrl(IHttpClientFactory client, string url, HttpMethod mothod)
-        {
-            try
-            {
-                var http = client.CreateClient();
-                HttpRequestMessage mes = new HttpRequestMessage(mothod, new Uri(url));
-                var response = http.SendAsync(mes).Result;
-                response.EnsureSuccessStatusCode();
-                return response.Content.ReadAsStringAsync().Result;
-            }
-            catch (Exception ex)
-            {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "SendUrl_exp"); });
-                return null;
-            }
-        }
-        #endregion
-
+        
         #region post soap
         /// <summary>
         /// post content(insert)
@@ -217,10 +215,14 @@ namespace FastUntility.Core.Base
 
                 xml.AppendFormat("</{0}>", method);
                 xml.Append("</soap:Body>");
-                xml.Append("</soap:Envelope>");
+                xml.Append("</soap:Envelope>");;
 
-                var content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
-                var response = http.PostAsync(new Uri(url), content).Result;
+                var handle = new HttpRequestMessage();
+                handle.Version = new Version(2, 0);
+                handle.Content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
+                handle.Method = HttpMethod.Post;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
                 response.EnsureSuccessStatusCode();
                 var result = response.Content.ReadAsStringAsync().Result;
 
