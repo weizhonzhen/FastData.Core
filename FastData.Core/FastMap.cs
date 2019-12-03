@@ -1429,9 +1429,9 @@ namespace FastData.Core
             var keyField = string.Format("{0}.foreach.field.{1}", name.ToLower(), i);
             var keySql = string.Format("{0}.foreach.sql.{1}", name.ToLower(), i);
 
-            return DbCache.Get(config.CacheType, keyName) != "" &&
-                DbCache.Get(config.CacheType, keyField) != "" &&
-                DbCache.Get(config.CacheType, keySql) != "";
+            return !string.IsNullOrEmpty(DbCache.Get(config.CacheType, keyName)) &&
+                !string.IsNullOrEmpty(DbCache.Get(config.CacheType, keyField)) &&
+                !string.IsNullOrEmpty(DbCache.Get(config.CacheType, keySql));
         }
         #endregion
 
