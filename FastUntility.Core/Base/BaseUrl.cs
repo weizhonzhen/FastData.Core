@@ -15,13 +15,13 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// get url(select)
         /// </summary>
-        public static string GetUrl(IHttpClientFactory client,string url, string mediaType = "application/json")
+        public static string GetUrl(IHttpClientFactory client,string url, int version = 1, string mediaType = "application/json")
         {
             try
             {
                 var http = client.CreateClient();
                 var handle = new HttpRequestMessage();
-                handle.Version = new Version(2, 0);
+                handle.Version = new Version(version, 0);
                 handle.Content = new StringContent("", Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Get;
                 handle.RequestUri = new Uri(url);
@@ -41,7 +41,7 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post url(insert)
         /// </summary>
-        public static string PostUrl(IHttpClientFactory client, string url, Dictionary<string, object> dic, string mediaType = "application/json")
+        public static string PostUrl(IHttpClientFactory client, string url, Dictionary<string, object> dic, int version = 1, string mediaType = "application/json")
         {
             try
             {
@@ -62,7 +62,7 @@ namespace FastUntility.Core.Base
                 }
 
                 var handle = new HttpRequestMessage();
-                handle.Version = new Version(2, 0);
+                handle.Version = new Version(version, 0);
                 handle.Content = new StringContent("", Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Post;
                 handle.RequestUri = new Uri(url);
@@ -81,13 +81,13 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post content(insert)
         /// </summary>
-        public static string PostContent(IHttpClientFactory client, string url, string param, string mediaType = "application/json")
+        public static string PostContent(IHttpClientFactory client, string url, string param, int version = 1, string mediaType = "application/json")
         {
             try
             {
                 var http = client.CreateClient();
                 var handle = new HttpRequestMessage();
-                handle.Version = new Version(2, 0);
+                handle.Version = new Version(version, 0);
                 handle.Content = new StringContent(param, Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Post;
                 handle.RequestUri = new Uri(url);
@@ -106,7 +106,7 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// put url(update)
         /// </summary>
-        public static string PutUrl(IHttpClientFactory client, string url, Dictionary<string, object> dic, string mediaType = "application/json")
+        public static string PutUrl(IHttpClientFactory client, string url, Dictionary<string, object> dic, int version = 1, string mediaType = "application/json")
         {
             try
             {
@@ -127,7 +127,7 @@ namespace FastUntility.Core.Base
                 }
                 
                 var handle = new HttpRequestMessage();
-                handle.Version = new Version(2, 0);
+                handle.Version = new Version(version, 0);
                 handle.Content = new StringContent("", Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Put;
                 handle.RequestUri = new Uri(url);
@@ -146,13 +146,13 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// put content(update)
         /// </summary>
-        public static string PutContent(IHttpClientFactory client, string url, string param, string mediaType = "application/json")
+        public static string PutContent(IHttpClientFactory client, string url, string param, int version = 1, string mediaType = "application/json")
         {
             try
             {
                 var http = client.CreateClient();
                 var handle = new HttpRequestMessage();
-                handle.Version = new Version(2, 0);
+                handle.Version = new Version(version, 0);
                 handle.Content = new StringContent(param, Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Put;
                 handle.RequestUri = new Uri(url);
@@ -171,13 +171,13 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// delete url (delete)
         /// </summary>
-        public static string DeleteUrl(IHttpClientFactory client, string url, string mediaType = "application/json")
+        public static string DeleteUrl(IHttpClientFactory client, string url, int version = 1, string mediaType = "application/json")
         {
             try
             {
                 var http = client.CreateClient();
                 var handle = new HttpRequestMessage();
-                handle.Version = new Version(2, 0);
+                handle.Version = new Version(version, 0);
                 handle.Content = new StringContent("", Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Delete;
                 handle.RequestUri = new Uri(url);
@@ -197,7 +197,7 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post content(insert)
         /// </summary>
-        public static string PostSoap(IHttpClientFactory client, string url, string method, Dictionary<string, object> param)
+        public static string PostSoap(IHttpClientFactory client, string url, string method, Dictionary<string, object> param, int version = 1)
         {
             try
             {
@@ -218,12 +218,11 @@ namespace FastUntility.Core.Base
                 xml.Append("</soap:Envelope>");;
 
                 var handle = new HttpRequestMessage();
-                handle.Version = new Version(2, 0);
+                handle.Version = new Version(version, 0);
                 handle.Content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
                 handle.Method = HttpMethod.Post;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
-                response.EnsureSuccessStatusCode();
                 var result = response.Content.ReadAsStringAsync().Result;
 
                 result = result.Replace("soap:Envelope", "Envelope");
