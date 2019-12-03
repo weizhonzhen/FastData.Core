@@ -1,4 +1,4 @@
-﻿using FastData.Core.Property;
+using FastData.Core.Property;
 using FastData.Core.Model;
 using FastUntility.Core.Base;
 
@@ -16,8 +16,8 @@ namespace FastData.Core.Check
         /// <returns></returns>
         public static CompareModel<T> CompareTo<T>(T CacheItem, T modelItem) where T : class, new()
         {
-            var dynGet = new DynamicGet<T>();
-            var dynSet = new DynamicSet<T>();
+            var dynGet = new Property.DynamicGet<T>();
+            var dynSet = new Property.DynamicSet<T>();
             var result = new CompareModel<T>();
 
             result.Item = modelItem;
@@ -118,7 +118,7 @@ namespace FastData.Core.Check
         /// <returns></returns>
         private static ColumnType GetColumnType<T>(T ModelItem, object ModelVaue, string name)
         {
-            var dynGet = new DynamicGet<T>();
+            var dynGet = new Property.DynamicGet<T>();
             var item = new ColumnType();
             item.Name = name;
             var type = ModelVaue.ToStr().ToLower();
