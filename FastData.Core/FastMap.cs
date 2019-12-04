@@ -155,7 +155,7 @@ namespace FastData.Core
                 {
                     var temp = new MapXmlModel();
                     temp.LastWrite = info.LastWriteTime;
-                    temp.FileKey = ReadXml(info.FullName, config);
+                    temp.FileKey = ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
                     temp.FileName = info.FullName;
                     if (SaveXml(dbKey, key, info, config, db))
                         DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
@@ -167,7 +167,7 @@ namespace FastData.Core
 
                     var model = new MapXmlModel();
                     model.LastWrite = info.LastWriteTime;
-                    model.FileKey = ReadXml(info.FullName, config);
+                    model.FileKey = ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
                     model.FileName = info.FullName;
                     if (SaveXml(dbKey, key, info, config, db))
                         DbCache.Set<MapXmlModel>(config.CacheType, key, model);
@@ -635,9 +635,9 @@ namespace FastData.Core
         /// <summary>
         /// 读取xml map并缓存
         /// </summary>
-        private static List<string> ReadXml(string path, ConfigModel config)
+        private static List<string> ReadXml(string path, ConfigModel config,string fileName)
         {
-            var map = Api ?? new List<string>();
+            var map = Api;
             var key = new List<string>();
             var sql = new List<string>();
             var db = new Dictionary<string, object>();
@@ -654,15 +654,18 @@ namespace FastData.Core
                 DbCache.Set(config.CacheType, key[i].ToLower(), sql[i]);
             }
 
+            var apilist = (map.GetValue(fileName) as List<string>) ?? new List<string>();           
             foreach (KeyValuePair<string,object> item in db)
             {
                 DbCache.Set(config.CacheType, string.Format("{0}.db", item.Key.ToLower()),item.Value);
 
-                if (!map.Exists(a => a.ToLower() == item.Key.ToLower()))
-                    map.Add(item.Key.ToLower());
+                if (!apilist.Exists(a => a.ToLower() == item.Key.ToLower()))
+                    apilist.Add(item.Key.ToLower());
             }
-            DbCache.Set<List<string>>(config.CacheType, "FastMap.Api", map);
-            
+
+            map.SetValue(fileName, apilist);
+            DbCache.Set<Dictionary<string, object>>(config.CacheType, "FastMap.Api", map);
+
             foreach (KeyValuePair<string, object> item in type)
             {
                 DbCache.Set(config.CacheType, string.Format("{0}.type", item.Key.ToLower()), item.Value);
@@ -1365,11 +1368,11 @@ namespace FastData.Core
         /// <summary>
         /// 获取api接口key
         /// </summary>
-        public static List<string> Api
+        public static Dictionary<string, object> Api
         {
             get
             {
-                return DbCache.Get<List<string>>(DataConfig.Get().CacheType, "FastMap.Api");
+                return DbCache.Get<Dictionary<string,object>>(DataConfig.Get().CacheType, "FastMap.Api")??new Dictionary<string, object>();
             }
         }
         #endregion
