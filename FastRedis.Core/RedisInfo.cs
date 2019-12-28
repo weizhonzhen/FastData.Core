@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Threading.Tasks;
 using System.IO;
-using ServiceStack.Redis;
+using StackExchange.Redis;
+using FastUntility.Core.Base;
 
 namespace FastRedis.Core
 {
@@ -11,7 +11,6 @@ namespace FastRedis.Core
     /// </summary>
     public static class RedisInfo
     {
-
         #region 是否存在
         /// <summary>
         /// 是否存在 
@@ -21,12 +20,14 @@ namespace FastRedis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
+                using (var redis = RedisContext.GetContext())
                 {
+                    var info = redis.GetDatabase(db);
+                    
                     if (string.IsNullOrEmpty(key))
                         return false;
                     else
-                        return redis.ContainsKey(key);
+                        return info.KeyExists(key);
                 }
             }
             catch (RedisException ex)
@@ -67,12 +68,15 @@ namespace FastRedis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
+                using (var redis = RedisContext.GetContext())
                 {
-                    if (string.IsNullOrEmpty(key))
-                        return false;
+                    if (!string.IsNullOrEmpty(key))
+                    {
+                        var info = redis.GetDatabase(db);
+                        return info.StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
+                    }
                     else
-                        return redis.Set<T>(key, model, DateTime.Now.AddHours(hours));
+                        return false;
                 }
             }
             catch (RedisException ex)
@@ -117,12 +121,15 @@ namespace FastRedis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
+                using (var redis = RedisContext.GetContext())
                 {
-                    if (string.IsNullOrEmpty(key))
-                        return false;
+                    if (!string.IsNullOrEmpty(key))
+                    {
+                        var info = redis.GetDatabase(db);
+                        return info.StringSet(key, model, TimeSpan.FromHours(hours));
+                    }
                     else
-                        return redis.Set<string>(key, model, DateTime.Now.AddHours(hours));
+                        return false;
                 }
             }
             catch (RedisException ex)
@@ -148,9 +155,9 @@ namespace FastRedis.Core
         public static async Task<bool> SetAsy(string key, string model, int hours = 24 * 30 * 12, int db = 0)
         {
             return await Task.Factory.StartNew(() =>
-            {
+             {
                 return Set(key, model, hours, db);
-            });
+             });
         }
         #endregion
 
@@ -167,12 +174,15 @@ namespace FastRedis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
+                using (var redis = RedisContext.GetContext())
                 {
                     if (string.IsNullOrEmpty(key))
-                        return false;
+                    {
+                        var info = redis.GetDatabase(db);
+                        return info.StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
+                    }
                     else
-                        return redis.Set<string>(key, model, DateTime.Now.AddMinutes(Minutes));
+                        return false;
                 }
             }
             catch (RedisException ex)
@@ -215,12 +225,15 @@ namespace FastRedis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
+                using (var redis = RedisContext.GetContext())
                 {
                     if (string.IsNullOrEmpty(key))
                         return "";
                     else
-                        return redis.Get<string>(key);
+                    {
+                        var info = redis.GetDatabase(db);
+                        return info.StringGet(key);
+                    }
                 }
             }
             catch (RedisException ex)
@@ -261,12 +274,15 @@ namespace FastRedis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
+                using (var redis = RedisContext.GetContext())
                 {
                     if (string.IsNullOrEmpty(key))
                         return new T();
                     else
-                        return redis.Get<T>(key);
+                    {
+                        var info = redis.GetDatabase(db);
+                        return BaseJson.JsonToModel<T>(info.StringGet(key)) ?? new T();
+                    }
                 }
             }
             catch (RedisException ex)
@@ -306,12 +322,15 @@ namespace FastRedis.Core
         {
             try
             {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
+                using (var redis = RedisContext.GetContext())
                 {
                     if (string.IsNullOrEmpty(key))
-                        return false;
+                    {
+                        var info = redis.GetDatabase(db);
+                        return info.KeyDelete(key);
+                    }
                     else
-                        return redis.Remove(key);
+                        return false;
                 }
             }
             catch (RedisException ex)
@@ -339,327 +358,7 @@ namespace FastRedis.Core
             });
         }
         #endregion
-
-        #region 设置值 Dic
-        /// <summary>
-        /// 设置值 Dic
-        /// </summary>
-        /// <typeparam name="T">泛型</typeparam>
-        /// <param name="dic">字典</param>
-        /// <returns></returns>
-        public static bool SetDic<T>(Dictionary<string, T> dic, int db = 0)
-        {
-            try
-            {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
-                {
-                    redis.SetAll<T>(dic);
-
-                    return true;
-                }
-            }
-            catch (RedisException ex)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    SaveLog<T>(ex, "SetDic<T>");
-                });
-                return false;
-            }
-        }
-        #endregion
-
-        #region 设置值 Dic Asy
-        /// <summary>
-        /// 设置值 Dic Asy
-        /// </summary>
-        /// <typeparam name="T">泛型</typeparam>
-        /// <param name="dic">字典</param>
-        /// <returns></returns>
-        public static async Task<bool> SetDicAsy<T>(Dictionary<string, T> dic, int db = 0)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                return SetDic<T>(dic, db);
-            });
-        }
-        #endregion
-
-        #region 获取值 dic
-        /// <summary>
-        /// 获取值 dic
-        /// </summary>
-        /// <typeparam name="T">泛型</typeparam>
-        /// <param name="keys">键</param>
-        /// <returns></returns>
-        public static IDictionary<string, T> GetDic<T>(string[] keys, int db = 0) where T : class, new()
-        {
-            try
-            {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
-                {
-                    return redis.GetAll<T>(keys);
-                }
-            }
-            catch (RedisException ex)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    SaveLog<T>(ex, "GetDic<T>");
-                });
-                return new Dictionary<string, T>();
-            }
-        }
-        #endregion
-
-        #region 获取值 dic asy
-        /// <summary>
-        /// 获取值 dic asy
-        /// </summary>
-        /// <typeparam name="T">泛型</typeparam>
-        /// <param name="keys">键</param>
-        /// <returns></returns>
-        public static async Task<IDictionary<string, T>> GetDicAsy<T>(string[] keys, int db = 0) where T : class, new()
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                return GetDic<T>(keys, db);
-            });
-        }
-        #endregion
-
-        #region 删除值 dic
-        /// <summary>
-        /// 删除值 dic
-        /// </summary>
-        /// <param name="keys">键</param>
-        /// <returns></returns>
-        public static bool RemoveDic(string[] keys, int db = 0)
-        {
-            try
-            {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
-                {
-                    redis.RemoveAll(keys);
-
-                    return true;
-                }
-            }
-            catch (RedisException ex)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    SaveLog(ex, "RemoveDic", keys.ToString());
-                });
-                return false;
-            }
-        }
-        #endregion
-
-        #region 删除值 dic asy
-        /// <summary>
-        /// 删除值 dic asy
-        /// </summary>
-        /// <param name="keys">键</param>
-        /// <returns></returns>
-        public static async Task<bool> RemoveDicAsy(string[] keys, int db = 0)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                return RemoveDic(keys, db);
-            });
-        }
-        #endregion
-
-
-        #region 发布消息(生产者消费者模式)
-        /// <summary>
-        /// 发布消息(生产者消费者模式)
-        /// </summary>
-        /// <param name="queueName">队列名称</param>
-        /// <param name="message">消息</param>
-        /// <param name="db"></param>
-        public static void Send(string queueName, string message, int db = 0)
-        {
-            try
-            {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
-                {
-                    if (string.IsNullOrEmpty(queueName))
-                        return;
-                    else
-                        redis.EnqueueItemOnList(queueName, message);
-                }
-            }
-            catch (RedisException ex)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    SaveLog(ex, "Send", "");
-                });
-            }
-        }
-        #endregion
-
-        #region 发布消息(生产者消费者模式) asy
-        /// <summary>
-        /// 发布消息(生产者消费者模式) asy
-        /// </summary>
-        /// <param name="queueName">队列名称</param>
-        /// <param name="message">消息</param>
-        /// <param name="db"></param>
-        public static void SendAsy(string queueName, string message, int db = 0)
-        {
-            Task.Factory.StartNew(() =>
-            {
-                Send(queueName, message, db);
-            });
-        }
-        #endregion
-
-        #region 接收消息(生产者消费者模式)
-        /// <summary>
-        /// 接收消息(生产者消费者模式)
-        /// </summary>
-        public static string Receive(string queueName, int db = 0)
-        {
-            try
-            {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
-                {
-                    if (string.IsNullOrEmpty(queueName))
-                        return "";
-                    else
-                        return redis.DequeueItemFromList(queueName);
-                }
-            }
-            catch (RedisException ex)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    SaveLog(ex, "Receive", "");
-                });
-
-                return "";
-            }
-        }
-        #endregion
-
-        #region 接收消息(生产者消费者模式) asy
-        /// <summary>
-        /// 接收消息(生产者消费者模式) asy
-        /// </summary>
-        /// <param name="queueName">队列名称</param>
-        /// <param name="message">消息</param>
-        /// <param name="db"></param>
-        public static async Task<string> ReceiveAsy(string queueName, int db = 0)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                return Receive(queueName, db);
-            });
-        }
-        #endregion
-
-
-        #region 发布消息(发布者订阅者模式)
-        /// <summary>
-        /// 发布消息(发布者订阅者模式)
-        /// </summary>
-        /// <param name="channel">频道</param>
-        /// <param name="message">消息</param>
-        /// <param name="db"></param>
-        public static void Publish(string channel, string message, int db = 0)
-        {
-            try
-            {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
-                {
-                    if (string.IsNullOrEmpty(channel))
-                        return;
-                    else
-                        redis.PublishMessage(channel, message);
-                }
-            }
-            catch (RedisException ex)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    SaveLog(ex, "Publish", "");
-                });
-            }
-        }
-        #endregion
-
-        #region 发布消息(发布者订阅者模式) asy
-        /// <summary>
-        /// 发布消息(发布者订阅者模式) asy
-        /// </summary>
-        /// <param name="channel">频道</param>
-        /// <param name="message">消息</param>
-        /// <param name="db"></param>
-        public static void PublishAsy(string channel, string message, int db = 0)
-        {
-            Task.Factory.StartNew(() =>
-            {
-                Publish(channel, message, db);
-            });
-        }
-        #endregion
-
-        #region 接收消息(发布者订阅者模式)
-        /// <summary>
-        /// 接收消息(发布者订阅者模式)
-        /// </summary>
-        /// <param name="message">接收</param>
-        /// <param name="subscribe">订阅</param>
-        /// <param name="unSubscribe">取消订阅</param>
-        /// <param name="channel">频道</param>
-        /// <param name="db"></param>
-        public static void Receive(string channel, Action<string, string> message, Action<string> subscribe = null, Action<string> unSubscribe = null, int db = 0)
-        {
-            try
-            {
-                using (IRedisClient redis = RedisContext.GetContext(db).GetClient())
-                {
-                    if (string.IsNullOrEmpty(channel))
-                        return;
-                    else
-                    {
-                        using (var item = redis.CreateSubscription())
-                        {
-                            item.OnMessage = message;
-                            item.OnSubscribe = subscribe;
-                            item.OnUnSubscribe = unSubscribe;
-                            item.SubscribeToChannels(channel);
-                        }
-                    }
-                }
-            }
-            catch (RedisException ex)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    SaveLog(ex, "Receive", "");
-                });
-            }
-        }
-        #endregion
-
-        #region 接收消息(发布者订阅者模式) asy
-        /// <summary>
-        /// 接收消息(发布者订阅者模式) asy
-        /// </summary>
-        public static void ReceiveAsy(string channel, Action<string, string> message, Action<string> subscribe = null, Action<string> unSubscribe = null, int db = 0)
-        {
-            Task.Factory.StartNew(() =>
-            {
-                Receive(channel, message, subscribe, unSubscribe, db);
-            });
-        }
-        #endregion
-
-
+                     
         #region 出错日志
         /// <summary>
         /// 出错日志
