@@ -7,10 +7,17 @@ using FastUntility.Core.Base;
 namespace FastRedis.Core
 {
     /// <summary>
-    /// redis操作类
+    /// RedisContext.GetContext()操作类
     /// </summary>
     public static class RedisInfo
     {
+        private static readonly ConnectionMultiplexer Context;
+        static RedisInfo()
+        {
+            var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
+            Context = ConnectionMultiplexer.Connect(config.Server);
+        }
+
         #region 是否存在
         /// <summary>
         /// 是否存在 
@@ -20,15 +27,10 @@ namespace FastRedis.Core
         {
             try
             {
-                using (var redis = RedisContext.GetContext())
-                {
-                    var info = redis.GetDatabase(db);
-                    
-                    if (string.IsNullOrEmpty(key))
-                        return false;
-                    else
-                        return info.KeyExists(key);
-                }
+                if (string.IsNullOrEmpty(key))
+                    return false;
+                else
+                    return Context.GetDatabase(db).KeyExists(key);
             }
             catch (RedisException ex)
             {
@@ -68,16 +70,10 @@ namespace FastRedis.Core
         {
             try
             {
-                using (var redis = RedisContext.GetContext())
-                {
-                    if (!string.IsNullOrEmpty(key))
-                    {
-                        var info = redis.GetDatabase(db);
-                        return info.StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
-                    }
-                    else
-                        return false;
-                }
+                if (!string.IsNullOrEmpty(key))
+                    return Context.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
+                else
+                    return false;
             }
             catch (RedisException ex)
             {
@@ -121,16 +117,10 @@ namespace FastRedis.Core
         {
             try
             {
-                using (var redis = RedisContext.GetContext())
-                {
-                    if (!string.IsNullOrEmpty(key))
-                    {
-                        var info = redis.GetDatabase(db);
-                        return info.StringSet(key, model, TimeSpan.FromHours(hours));
-                    }
-                    else
-                        return false;
-                }
+                if (!string.IsNullOrEmpty(key))
+                    return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromHours(hours));
+                else
+                    return false;
             }
             catch (RedisException ex)
             {
@@ -174,16 +164,10 @@ namespace FastRedis.Core
         {
             try
             {
-                using (var redis = RedisContext.GetContext())
-                {
-                    if (string.IsNullOrEmpty(key))
-                    {
-                        var info = redis.GetDatabase(db);
-                        return info.StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
-                    }
-                    else
-                        return false;
-                }
+                if (string.IsNullOrEmpty(key))
+                    return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
+                else
+                    return false;
             }
             catch (RedisException ex)
             {
@@ -225,16 +209,10 @@ namespace FastRedis.Core
         {
             try
             {
-                using (var redis = RedisContext.GetContext())
-                {
-                    if (string.IsNullOrEmpty(key))
-                        return "";
-                    else
-                    {
-                        var info = redis.GetDatabase(db);
-                        return info.StringGet(key);
-                    }
-                }
+                if (string.IsNullOrEmpty(key))
+                    return "";
+                else
+                    return Context.GetDatabase(db).StringGet(key);
             }
             catch (RedisException ex)
             {
@@ -274,16 +252,10 @@ namespace FastRedis.Core
         {
             try
             {
-                using (var redis = RedisContext.GetContext())
-                {
-                    if (string.IsNullOrEmpty(key))
-                        return new T();
-                    else
-                    {
-                        var info = redis.GetDatabase(db);
-                        return BaseJson.JsonToModel<T>(info.StringGet(key)) ?? new T();
-                    }
-                }
+                if (string.IsNullOrEmpty(key))
+                    return new T();
+                else
+                    return BaseJson.JsonToModel<T>(Context.GetDatabase(db).StringGet(key)) ?? new T();
             }
             catch (RedisException ex)
             {
@@ -322,16 +294,10 @@ namespace FastRedis.Core
         {
             try
             {
-                using (var redis = RedisContext.GetContext())
-                {
-                    if (string.IsNullOrEmpty(key))
-                    {
-                        var info = redis.GetDatabase(db);
-                        return info.KeyDelete(key);
-                    }
-                    else
-                        return false;
-                }
+                if (string.IsNullOrEmpty(key))
+                    return Context.GetDatabase(db).KeyDelete(key);
+                else
+                    return false;
             }
             catch (RedisException ex)
             {
@@ -368,7 +334,7 @@ namespace FastRedis.Core
         /// <param name="CurrentMethod"></param>
         private static void SaveLog<T>(Exception ex, string CurrentMethod)
         {
-            SaveLog(string.Format("方法：{0},对象：{1},出错详情：{2}", CurrentMethod, typeof(T).Name, ex.ToString()), "redis_exp");
+            SaveLog(string.Format("方法：{0},对象：{1},出错详情：{2}", CurrentMethod, typeof(T).Name, ex.ToString()), "RedisContext.GetContext()_exp");
         }
         #endregion
 
@@ -381,7 +347,7 @@ namespace FastRedis.Core
         /// <param name="CurrentMethod"></param>
         private static void SaveLog(Exception ex, string CurrentMethod, string key)
         {
-            SaveLog(string.Format("方法：{0},键：{1},出错详情：{2}", CurrentMethod, key, ex.ToString()), "redis_exp");
+            SaveLog(string.Format("方法：{0},键：{1},出错详情：{2}", CurrentMethod, key, ex.ToString()), "RedisContext.GetContext()_exp");
         }
         #endregion
 
