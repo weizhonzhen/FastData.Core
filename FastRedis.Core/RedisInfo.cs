@@ -164,7 +164,7 @@ namespace FastRedis.Core
         {
             try
             {
-                if (string.IsNullOrEmpty(key))
+                if (!string.IsNullOrEmpty(key))
                     return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
                 else
                     return false;
@@ -294,7 +294,7 @@ namespace FastRedis.Core
         {
             try
             {
-                if (string.IsNullOrEmpty(key))
+                if (!string.IsNullOrEmpty(key))
                     return Context.GetDatabase(db).KeyDelete(key);
                 else
                     return false;
