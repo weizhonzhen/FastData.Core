@@ -11,10 +11,12 @@ namespace FastRedis.Core
     /// </summary>
     public static class RedisInfo
     {
+        private static readonly int _db = 0;
         private static readonly ConnectionMultiplexer Context;
         static RedisInfo()
         {
             var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
+            _db = config.Db;
             Context = ConnectionMultiplexer.Connect(config.Server);
         }
 
@@ -27,6 +29,7 @@ namespace FastRedis.Core
         {
             try
             {
+                db = db == 0 ? _db : db;
                 if (string.IsNullOrEmpty(key))
                     return false;
                 else
@@ -70,6 +73,7 @@ namespace FastRedis.Core
         {
             try
             {
+                db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
                     return Context.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
                 else
@@ -117,6 +121,7 @@ namespace FastRedis.Core
         {
             try
             {
+                db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
                     return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromHours(hours));
                 else
@@ -164,6 +169,7 @@ namespace FastRedis.Core
         {
             try
             {
+                db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
                     return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
                 else
@@ -209,6 +215,7 @@ namespace FastRedis.Core
         {
             try
             {
+                db = db == 0 ? _db : db;
                 if (string.IsNullOrEmpty(key))
                     return "";
                 else
@@ -252,6 +259,7 @@ namespace FastRedis.Core
         {
             try
             {
+                db = db == 0 ? _db : db;
                 if (string.IsNullOrEmpty(key))
                     return new T();
                 else
@@ -294,6 +302,7 @@ namespace FastRedis.Core
         {
             try
             {
+                db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
                     return Context.GetDatabase(db).KeyDelete(key);
                 else
