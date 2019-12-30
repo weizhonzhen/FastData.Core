@@ -8,6 +8,8 @@ namespace FastRedis.Core
         /// <summary>
         /// 服务器
         /// </summary>
-        public string Server { get; set; }       
+        public string Server { get; set; }
+
+        public int Db { get; set; } = 0;
     }
 }
