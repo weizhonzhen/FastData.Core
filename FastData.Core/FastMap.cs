@@ -1011,7 +1011,7 @@ namespace FastData.Core
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
                                                 }
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
@@ -1032,7 +1032,7 @@ namespace FastData.Core
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(temp.ParameterName.ToLower(), temp.Value.ToString()));
+                                                    tempSql.Append(paramSql.ToString().Replace(temp.ParameterName.ToLower(), temp.Value.ToStr()));
                                                 }
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
@@ -1053,7 +1053,7 @@ namespace FastData.Core
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
                                                 }
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
@@ -1074,7 +1074,7 @@ namespace FastData.Core
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
                                                 }
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
@@ -1095,7 +1095,7 @@ namespace FastData.Core
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
                                                 }
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
@@ -1116,7 +1116,7 @@ namespace FastData.Core
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
                                                 }
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
@@ -1140,7 +1140,7 @@ namespace FastData.Core
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
                                                     tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
                                                 }
                                                 else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                                 {
@@ -1173,12 +1173,12 @@ namespace FastData.Core
                                                     if (condition.IndexOf(tempKey) >= 0)
                                                     {
                                                         tempParam.Remove(temp);
-                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToString()));
+                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToStr()));
                                                     }
                                                     else if (condition.IndexOf(flagParam) < 0 && flag != "")
                                                     {
                                                         tempParam.Remove(temp);
-                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToString()));
+                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToStr()));
                                                     }
                                                     else
                                                         tempSql.Append(condition);
@@ -1197,7 +1197,7 @@ namespace FastData.Core
                                             if (paramSql.IndexOf(tempKey) >= 0)
                                             {
                                                 tempParam.Remove(temp);
-                                                tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToString()));
+                                                tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
                                             }
                                             else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
                                             {
