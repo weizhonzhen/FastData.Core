@@ -1163,7 +1163,7 @@ namespace FastData.Core
                                                 condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
 
                                                 conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
-                                                conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
+                                                conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
                                                 //conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
                                                 conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
                                                 conditionValue = conditionValue.Replace("#", "\"");
