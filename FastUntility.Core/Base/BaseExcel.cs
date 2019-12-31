@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Fast.Untility.Core.Base
+namespace FastUntility.Core.Base
 {
     public static class BaseExcel
     {
