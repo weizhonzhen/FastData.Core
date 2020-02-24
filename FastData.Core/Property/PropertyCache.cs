@@ -112,10 +112,13 @@ namespace FastData.Core.Property
 
                 foreach (var item in info.CustomAttributes)
                 {
-                    foreach (var param in item.NamedArguments)
+                    if (item.AttributeType.Name == typeof(ColumnAttribute).Name)
                     {
-                        if (paramList.Exists(b => b.Name.ToLower() == param.MemberName.ToLower()))
-                            dynSet.SetValue(temp, param.MemberName, param.TypedValue.Value, true);
+                        foreach (var param in item.NamedArguments)
+                        {
+                            if (paramList.Exists(b => b.Name.ToLower() == param.MemberName.ToLower()))
+                                dynSet.SetValue(temp, param.MemberName, param.TypedValue.Value, true);
+                        }
                     }
                 }
 
