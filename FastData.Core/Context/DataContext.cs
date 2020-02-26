@@ -10,6 +10,8 @@ using FastData.Core.Base;
 using FastData.Core.Model;
 using FastData.Core.Type;
 using System.Linq.Expressions;
+using FastData.Core.Property;
+using System.Data;
 
 namespace FastData.Core.Context
 {
@@ -966,6 +968,7 @@ namespace FastData.Core.Context
         {
             var result = new DataReturn<T>();
             var sql = new StringBuilder();
+            var dyn = new Property.DynamicGet<T>();
 
             try
             {
@@ -975,24 +978,105 @@ namespace FastData.Core.Context
                 if (config.DbType == DataDbType.Oracle)
                 {
                     #region oracle
-                  
+                    cmd.Parameters.Clear();
+                    cmd.CommandText = string.Format("alter table {0} nologging", typeof(T).Name);
+                    cmd.ExecuteNonQuery();
+
+                    foreach (var method in cmd.GetType().GetMethods())
+                    {
+                        if (method.Name == "set_ArrayBindCount")
+                        {
+                            var param = new object[1];
+                            param[0] = list.Count;
+                            method.Invoke(cmd, param);
+                        }
+
+                        if (method.Name == "set_BindByName")
+                        {
+                            var param = new object[1];
+                            param[0] = true;
+                            method.Invoke(cmd, param);
+                        }
+                    }
+
+                    sql.AppendFormat("insert into {0} values(", typeof(T).Name);
+                    foreach (var info in PropertyCache.GetPropertyInfo<T>())
+                    {
+                        object[] pValue = new object[list.Count];
+                        var param = DbProviderFactories.GetFactory(config).CreateParameter();
+                      
+                        if (info.PropertyType.Name.ToLower() == "nullable`1")
+                            param.DbType = CommandParam.GetOracleDbType(info.PropertyType.GetGenericArguments()[0].Name);
+                        else
+                            param.DbType = CommandParam.GetOracleDbType(info.PropertyType.Name);
+
+                        param.Direction = ParameterDirection.Input;
+                        param.ParameterName = info.Name;
+                        sql.AppendFormat("{0}{1},", config.Flag, info.Name);
+
+                        for (var i = 0; i < list.Count; i++)
+                        {
+                            var value = dyn.GetValue(list[i], info.Name, true);
+                            if (value == null)
+                                value = DBNull.Value;
+                            pValue[i] = value;
+                        }
+
+                        param.Value = pValue;
+                        cmd.Parameters.Add(param);
+                    }
+
+                    sql.Append(")");
+                    cmd.CommandText = sql.ToString().Replace(",)", ")");
+                    result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
+
+                    cmd.CommandText = string.Format("alter table {0} logging", typeof(T).Name);
+                    cmd.ExecuteNonQuery();
                     #endregion
                 }
 
                 if (config.DbType == DataDbType.SqlServer)
                 {
                     #region sqlserver
-                   
-                   
+                    CommandParam.InitTvps<T>(cmd);
+                    cmd.Parameters.Clear();
+                    foreach (var method in cmd.Parameters.GetType().GetMethods())
+                    {
+                        if (method.Name == "AddWithValue")
+                        {
+                            var param = new object[2];
+                            param[0] = string.Format("@{0}", typeof(T).Name);
+                            param[1] = CommandParam.GetTable<T>(cmd, list);
+                            var sqlParam = method.Invoke(cmd.Parameters, param);
+
+                            foreach (var tempMethod in sqlParam.GetType().GetMethods())
+                            {
+                                if (tempMethod.Name == "set_SqlDbType")
+                                {
+                                    param = new object[1];
+                                    param[0] = SqlDbType.Structured;
+                                    tempMethod.Invoke(sqlParam, param);
+                                }
+                                if (tempMethod.Name == "set_TypeName")
+                                {
+                                    param = new object[1];
+                                    param[0] = typeof(T).Name;
+                                    tempMethod.Invoke(sqlParam, param);
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    cmd.CommandText = CommandParam.GetTvps<T>();
+                    result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
                     #endregion
                 }
 
                 if (config.DbType == DataDbType.MySql)
                 {
                     #region mysql
-
-
-
+                    cmd.CommandText = CommandParam.GetMySql<T>(list);
+                    result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
                     #endregion
                 }
 
@@ -1003,7 +1087,6 @@ namespace FastData.Core.Context
 
 
                     #endregion
-
                 }
 
                 if (isTrans && result.writeReturn.IsSuccess)
