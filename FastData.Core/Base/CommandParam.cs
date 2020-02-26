@@ -1,4 +1,11 @@
-﻿namespace FastData.Core.Base
+using FastData.Core.Property;
+using FastUntility.Core.Base;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.Text;
+
+namespace FastData.Core.Base
 {
     /// <summary>
     /// 标签：2015.9.6，魏中针
@@ -6,76 +13,6 @@
     /// </summary>
     internal static class CommandParam
     {
-        #region oracle 批量参数
-        /// <summary>
-        /// oracle 批量参数
-        /// </summary>
-        //public static bool GetCmdParam<T>(DataTable dt, List<OracleColumn> list,ref string sql, ref Object cmd, bool IsOutError = false,bool IsCache=true, bool IsAsync = false) where T : new()
-        //{
-        //    try
-        //    {
-        //        string[] pName = null;
-        //        var colCount = ColumnCount<T>(ref sql,ref pName,IsCache);
-                
-        //        for (int i = 0; i < colCount;i++ )
-        //        {
-        //            var param = new OracleParameter(pName[i], GetOracleDbType(list, pName[i]));
-        //            object[] pValue = new object[dt.Rows.Count];
-
-        //            for (int j = 0; j < dt.Rows.Count; j++)
-        //            {
-        //                var itemValue = dt.Rows[j][i];
-
-        //                if (itemValue == null)
-        //                    itemValue = DBNull.Value;
-
-        //                pValue[j] = itemValue;
-        //            }
-
-        //            param.Value = pValue;
-        //            (cmd as OracleCommand).Parameters.Add(param);
-        //        }
-
-        //        (cmd as OracleCommand).CommandText = sql;
-        //        (cmd as OracleCommand).BindByName = true;
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        DbLog.LogException<T>(IsOutError, IsAsync, DataDbType.Oracle, ex, "GetCmdParam<T>");
-        //        return false;
-        //    }
-        //}
-        #endregion
-
-        #region 获取列数及SQL
-        /// <summary>
-        /// 获取列数及SQL
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        //private static int ColumnCount<T>(ref string sql,ref string[] pName,bool isCache)
-        //{
-        //    var sb = new StringBuilder();
-        //    int count = 0;
-        //    var pInfo = PropertyCache.GetPropertyInfo<T>(isCache);
-
-        //    sb.AppendFormat("insert into {0} values(", typeof(T).Name);
-        //    pName = new string[pInfo.Count];
-
-        //    foreach(var p in pInfo)
-        //    {
-        //        sb.AppendFormat(":{0},",p.Name);
-        //        pName[count] = p.Name;
-        //        count++;
-        //    }
-
-        //    sql= sb.Append(")").ToString().Replace(",)", ")");
-
-        //    return count;
-        //}
-        #endregion                
-
         #region 获取列类型
         /// <summary>
         /// 获取列类型
@@ -83,48 +20,167 @@
         /// <param name="list"></param>
         /// <param name="col"></param>
         /// <returns></returns>
-        //private static OracleDbType GetOracleDbType(List<OracleColumn> list,string col)
-        //{
-        //    var item = list.Find(a => a.colName == col);
+        public static DbType GetOracleDbType(string type)
+        {
+            switch (type.ToLower())
+            {                
+                case "string":
+                    return DbType.String;
+                case "datetime":
+                    return DbType.DateTime;
+                case "decimal":
+                    return DbType.Decimal;
+                case "int32":
+                    return  DbType.Decimal;
+                case "int64":
+                    return DbType.Decimal;
+                case "byte[]":
+                    return DbType.Byte;
+                case "float":
+                    return DbType.Double;
+                case "double":
+                    return DbType.Double;
+                default:
+                    return DbType.Object;
+            }            
+        }
+        #endregion
 
-        //    switch (item.colType.ToUpper().Trim())
-        //    {
-        //        case "BFILE":
-        //            return OracleDbType.BFile;
-        //        case "REAL":
-        //            return OracleDbType.Double;
-        //        case "LONG":
-        //            return OracleDbType.Long;
-        //        case "DATE":
-        //            return OracleDbType.Date;
-        //        case "NUMBER":
-        //            return OracleDbType.Decimal;
-        //        case "VARCHAR2":
-        //            return OracleDbType.Varchar2;
-        //        case "NVARCHAR2":
-        //            return OracleDbType.NVarchar2;
-        //        case "RAW":
-        //            return OracleDbType.Raw;
-        //        case "DECIMAL":
-        //            return OracleDbType.Decimal;
-        //        case "INTEGER":
-        //            return OracleDbType.Int32;
-        //        case "CHAR":
-        //            return OracleDbType.Char;
-        //        case "NCHAR":
-        //            return OracleDbType.NChar;
-        //        case "FLOAT":
-        //            return OracleDbType.Double;
-        //        case "BLOB":
-        //            return OracleDbType.Blob;
-        //        case "CLOB":
-        //            return OracleDbType.Clob;
-        //        case "NCLOB":
-        //            return OracleDbType.NClob;
-        //        default:
-        //            return OracleDbType.NVarchar2;
-        //    }
-        //}
+        #region tvsps sql
+        /// <summary>
+        /// tvsps sql
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dyn"></param>
+        /// <returns></returns>
+        public static string GetTvps<T>()
+        {
+            var sql1 = new StringBuilder();
+            var sql2 = new StringBuilder();
+
+            sql1.AppendFormat("insert into {0} (", typeof(T).Name);
+            sql2.Append("select ");
+            foreach (var item in PropertyCache.GetPropertyInfo<T>())
+            {
+                sql1.AppendFormat("{0},", item.Name);
+                sql2.AppendFormat("tb.{0},", item.Name);
+            }
+            sql1.Append(")");
+            sql2.AppendFormat("from @{0} as tb", typeof(T).Name);
+
+            return string.Format("{0}{1}", sql1.ToString().Replace(",)", ") "), sql2.ToString().Replace(",from", " from"));
+        }
+        #endregion
+
+        #region 获取datatabel
+        /// <summary>
+        /// 获取datatabel
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        public static DataTable GetTable<T>(DbCommand cmd,List<T> list)
+        {
+            var dyn = new Property.DynamicGet<T>();
+            var dt = new DataTable();
+            cmd.CommandText = string.Format("select top 1 * from {0}", typeof(T).Name);
+            dt.Load(cmd.ExecuteReader());
+            dt.Clear();
+            foreach (var item in list)
+            {
+                var row = dt.NewRow();
+                foreach (var info in PropertyCache.GetPropertyInfo<T>())
+                {
+                    row[info.Name] = dyn.GetValue(item, info.Name, true);
+                }
+                dt.Rows.Add(row);
+            }
+
+            return dt;
+        }
+        #endregion
+
+        #region tvps
+        /// <summary>
+        /// tvps
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cmd"></param>
+        public static void InitTvps<T>(DbCommand cmd)
+        {
+            var sql = new StringBuilder();
+            cmd.CommandText = string.Format("select a.name,(select top 1 name from sys.systypes c where a.xtype=c.xtype) as type,length,isnullable,prec,scale from syscolumns a where a.id=object_id('{0}') order by a.colid asc", typeof(T).Name);
+            var dr = cmd.ExecuteReader();
+            var dic = BaseJson.DataReaderToDic(dr);
+            dr.Close();
+
+            sql.AppendFormat("if not exists(SELECT 1 FROM sys.table_types where name='{0}')", typeof(T).Name);
+            sql.AppendFormat("CREATE TYPE {0} AS TABLE(", typeof(T).Name);
+
+            foreach(var item in dic)
+            {
+                switch (item.GetValue("type").ToStr())
+                {
+                    case "char":
+                    case "nchar":
+                    case "varchar":
+                    case "nvarchar":
+                    case "varchar2":
+                    case "nvarchar2":
+                        sql.AppendFormat("[{0}] [{1}]({2}) {3},", item.GetValue("name"), item.GetValue("type"), item.GetValue("length"), item.GetValue("isnullable").ToStr() == "1" ? "NULL" : "NOT NULL");
+                        break;
+                    case "decimal":
+                    case "numeric":
+                    case "number":
+                        if (item.GetValue("prec").ToStr() == "0" && item.GetValue("scale").ToStr() == "0")
+                            sql.AppendFormat("[{0}] [{1}] {2},", item.GetValue("name"), item.GetValue("type"), item.GetValue("isnullable").ToStr() == "1" ? "NULL" : "NOT NULL");
+                        else
+                            sql.AppendFormat("[{0}] [{1}]({2},{3}) {4},", item.GetValue("name"), item.GetValue("type"), item.GetValue("prec"), item.GetValue("scale"), item.GetValue("isnullable").ToStr() == "1" ? "NULL" : "NOT NULL");
+                        break;
+                    default:
+                        sql.AppendFormat("[{0}] [{1}] {2},", item.GetValue("name"), item.GetValue("type"), item.GetValue("isnullable").ToStr() == "1" ? "NULL" : "NOT NULL");
+                        break;
+                }
+            }
+
+            sql.Append(")").Replace(",)", ")");
+            cmd.CommandText = sql.ToString();
+            cmd.ExecuteNonQuery();
+        }
+        #endregion
+
+        #region mysql 
+        /// <summary>
+        /// mysql
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static string GetMySql<T>(List<T> list)
+        {
+            var sql = new StringBuilder();
+            sql.AppendFormat("insert into {0}(", typeof(T).Name);
+            var dyn = new Property.DynamicGet<T>();
+
+            foreach (var info in PropertyCache.GetPropertyInfo<T>())
+            {
+                sql.AppendFormat("{0},", info.Name);
+            }
+            sql.Append(")").Replace(",)", ")");
+
+            foreach (var item in list)
+            {
+                sql.Append("(");
+
+                foreach (var info in PropertyCache.GetPropertyInfo<T>())
+                {
+                    sql.AppendFormat("'{0}',", dyn.GetValue(item, info.Name, true));
+                }
+                sql.Append("),").Replace(",)", ")");
+            }
+
+            return sql.ToStr().Substring(0, sql.ToStr().Length - 1);
+        }
         #endregion
     }
 }
