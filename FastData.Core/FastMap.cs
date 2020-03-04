@@ -174,8 +174,6 @@ namespace FastData.Core
                 }
             }
 
-            CreateLogTable(query);
-
             if (config.IsMapSave)
             {
                 query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
