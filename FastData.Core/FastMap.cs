@@ -173,7 +173,7 @@ namespace FastData.Core
                         DbCache.Set<MapXmlModel>(config.CacheType, key, model);
                 }
             }
-
+            
             if (config.IsMapSave)
             {
                 query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
@@ -652,15 +652,13 @@ namespace FastData.Core
                 DbCache.Set(config.CacheType, key[i].ToLower(), sql[i]);
             }
 
-            var apilist = (map.GetValue(fileName) as List<string>) ?? new List<string>();           
+            var apilist =  new List<string>();           
             foreach (KeyValuePair<string,object> item in db)
             {
                 DbCache.Set(config.CacheType, string.Format("{0}.db", item.Key.ToLower()),item.Value);
-
-                if (!apilist.Exists(a => a.ToLower() == item.Key.ToLower()))
-                    apilist.Add(item.Key.ToLower());
+                apilist.Add(item.Key.ToLower());
             }
-            
+
             map.Remove(fileName);
             map.Add(fileName, apilist);
             DbCache.Set<Dictionary<string, object>>(config.CacheType, "FastMap.Api", map);
