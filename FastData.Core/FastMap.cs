@@ -160,7 +160,7 @@ namespace FastData.Core
                     if (SaveXml(dbKey, key, info, config, db))
                         DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
                 }
-                else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Minutes != 0)
+                else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
                 {
                     foreach (var temp in DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey)
                         DbCache.Remove(config.CacheType, temp);
