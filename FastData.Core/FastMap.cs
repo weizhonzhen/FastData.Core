@@ -660,8 +660,9 @@ namespace FastData.Core
                 if (!apilist.Exists(a => a.ToLower() == item.Key.ToLower()))
                     apilist.Add(item.Key.ToLower());
             }
-
-            map.SetValue(fileName, apilist);
+            
+            map.Remove(fileName);
+            map.Add(fileName, apilist);
             DbCache.Set<Dictionary<string, object>>(config.CacheType, "FastMap.Api", map);
 
             foreach (KeyValuePair<string, object> item in type)
