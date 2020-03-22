@@ -62,21 +62,21 @@ namespace FastData.Core.Model
         /// json
         /// </summary>
         public string Json { get; set; }
-        
+
         /// <summary>
         /// dic list
         /// </summary>
-        public List<Dictionary<string, object>> DicList { get; set; }
+        public List<Dictionary<string, object>> DicList { get; set; } = new List<Dictionary<string, object>>();
 
         /// <summary>
         /// dic item
         /// </summary>
-        public Dictionary<string, object> Dic { get; set; }
-        
+        public Dictionary<string, object> Dic { get; set; } = new Dictionary<string, object>();
+
         /// <summary>
         /// data table
         /// </summary>
-        public DataTable Table { get; set; }
+        public DataTable Table { get; set; } = new DataTable();
 
         /// <summary>
         /// 分页
