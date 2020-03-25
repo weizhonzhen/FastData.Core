@@ -79,25 +79,22 @@ namespace FastData.Core
             {
                 foreach (var temp in assembly.ExportedTypes)
                 {
-                    Task.Factory.StartNew(() =>
+                    var typeInfo = (temp as TypeInfo);
+                    if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
                     {
-                        var typeInfo = (temp as TypeInfo);
-                        if (typeInfo.Namespace != null && typeInfo.Namespace.Contains(nameSpace))
+                        var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
+
+                        var cacheList = new List<PropertyModel>();
+                        foreach (var info in typeInfo.DeclaredProperties)
                         {
-                            var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
-
-                            var cacheList = new List<PropertyModel>();
-                            foreach (var info in typeInfo.DeclaredProperties)
-                            {
-                                var model = new PropertyModel();
-                                model.Name = info.Name;
-                                model.PropertyType = info.PropertyType;
-                                cacheList.Add(model);
-                            }
-
-                            DbCache.Set<List<PropertyModel>>(config.CacheType, key, cacheList);
+                            var model = new PropertyModel();
+                            model.Name = info.Name;
+                            model.PropertyType = info.PropertyType;
+                            cacheList.Add(model);
                         }
-                    });
+
+                        DbCache.Set<List<PropertyModel>>(config.CacheType, key, cacheList);
+                    }
                 }
             }
         }
@@ -127,7 +124,7 @@ namespace FastData.Core
                 foreach (var temp in assembly.ExportedTypes)
                 {
                     var typeInfo = (temp as TypeInfo);
-                    if (typeInfo.Namespace != null && typeInfo.Namespace.Contains(nameSpace))
+                    if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
                         BaseTable.Check(query, temp.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
                 }
             }
