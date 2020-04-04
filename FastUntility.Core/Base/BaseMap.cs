@@ -1,6 +1,8 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace FastUntility.Core.Base
 {
@@ -25,7 +27,15 @@ namespace FastUntility.Core.Base
                 {
                     var info = list.Find(a => a.Name.ToLower() == item.Name.ToLower());
 
-                    if (info.PropertyType.Namespace == "System")
+                    var isList = item.PropertyType.FullName.IndexOf("[[") > 0;
+                    var isLeafSystemType = isList && item.PropertyType.FullName.Split('[')[2].Replace("[", "").StartsWith("System.");
+                    var isSystemType = item.PropertyType.FullName.StartsWith("System.");
+
+                    if (isList && !isLeafSystemType)
+                    {
+                        
+                    }
+                    else if (isSystemType)
                     {
                         if (item.PropertyType.Name == "Nullable`1" && item.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                             dynSet.SetValue(result, info.Name, dynGet.GetValue(model, item.Name, true), true);
