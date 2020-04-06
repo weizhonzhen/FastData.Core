@@ -35,24 +35,27 @@ namespace FastUntility.Core.Base
                         var leafList = Activator.CreateInstance(typeof(List<>).MakeGenericType(property.PropertyType.GetGenericArguments()[0]));
                         var tempList = Convert.ChangeType(dynGet.GetValue(model, item.Name, true), item.PropertyType) as IEnumerable;
 
-                        foreach (var temp in tempList)
+                        if (tempList != null)
                         {
-                            var leafModel = Activator.CreateInstance(property.PropertyType.GetGenericArguments()[0]);
-                            var propertyList = leafModel.GetType().GetProperties().ToList();
-                           
-                            foreach (var leaf in temp.GetType().GetProperties())
+                            foreach (var temp in tempList)
                             {
-                                if (propertyList.Exists(a => a.Name == leaf.Name))
-                                {
-                                    var tempProperty = propertyList.Find(a => a.Name.ToLower() == leaf.Name.ToLower());
-                                    tempProperty.SetValue(leafModel, leaf.GetValue(temp));
-                                }
-                            }
+                                var leafModel = Activator.CreateInstance(property.PropertyType.GetGenericArguments()[0]);
+                                var propertyList = leafModel.GetType().GetProperties().ToList();
 
-                            var method = leafList.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
-                            method.Invoke(leafList, new object[] { leafModel });
+                                foreach (var leaf in temp.GetType().GetProperties())
+                                {
+                                    if (propertyList.Exists(a => a.Name == leaf.Name))
+                                    {
+                                        var tempProperty = propertyList.Find(a => a.Name.ToLower() == leaf.Name.ToLower());
+                                        tempProperty.SetValue(leafModel, leaf.GetValue(temp));
+                                    }
+                                }
+
+                                var method = leafList.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
+                                method.Invoke(leafList, new object[] { leafModel });
+                            }
+                            dynSet.SetValue(result, property.Name, leafList, true);
                         }
-                        dynSet.SetValue(result, property.Name, leafList, true);
                     }
                     else if (isSystemType)
                     {
