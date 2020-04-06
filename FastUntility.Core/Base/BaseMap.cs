@@ -1,15 +1,15 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace FastUntility.Core.Base
 {
     public static class BaseMap
     {
         /// <summary>
-        /// 对象复制
+        /// 对象映射
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
@@ -25,37 +25,56 @@ namespace FastUntility.Core.Base
             {
                 if (list.Exists(a => a.Name.ToLower() == item.Name.ToLower()))
                 {
-                    var info = list.Find(a => a.Name.ToLower() == item.Name.ToLower());
-
-                    var isList = item.PropertyType.FullName.IndexOf("[[") > 0;
-                    var isLeafSystemType = isList && item.PropertyType.FullName.Split('[')[2].Replace("[", "").StartsWith("System.");
+                    var property = list.Find(a => a.Name.ToLower() == item.Name.ToLower());
+                    var isList = item.PropertyType.GetGenericArguments().Length > 0;
+                    var isLeafSystemType = isList && item.PropertyType.GetGenericArguments()[0].FullName.StartsWith("System.");
                     var isSystemType = item.PropertyType.FullName.StartsWith("System.");
 
                     if (isList && !isLeafSystemType)
                     {
-                        
+                        var leafList = Activator.CreateInstance(typeof(List<>).MakeGenericType(property.PropertyType.GetGenericArguments()[0]));
+                        var tempList = Convert.ChangeType(dynGet.GetValue(model, item.Name, true), item.PropertyType) as IEnumerable;
+
+                        foreach (var temp in tempList)
+                        {
+                            var leafModel = Activator.CreateInstance(property.PropertyType.GetGenericArguments()[0]);
+                            var propertyList = leafModel.GetType().GetProperties().ToList();
+                           
+                            foreach (var leaf in temp.GetType().GetProperties())
+                            {
+                                if (propertyList.Exists(a => a.Name == leaf.Name))
+                                {
+                                    var tempProperty = propertyList.Find(a => a.Name.ToLower() == leaf.Name.ToLower());
+                                    tempProperty.SetValue(leafModel, leaf.GetValue(temp));
+                                }
+                            }
+
+                            var method = leafList.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
+                            method.Invoke(leafList, new object[] { leafModel });
+                        }
+                        dynSet.SetValue(result, property.Name, leafList, true);
                     }
                     else if (isSystemType)
                     {
                         if (item.PropertyType.Name == "Nullable`1" && item.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(result, info.Name, dynGet.GetValue(model, item.Name, true), true);
+                            dynSet.SetValue(result, property.Name, dynGet.GetValue(model, item.Name, true), true);
                         else
-                            dynSet.SetValue(result, info.Name, Convert.ChangeType(dynGet.GetValue(model, item.Name, true), item.PropertyType), true);
+                            dynSet.SetValue(result, property.Name, Convert.ChangeType(dynGet.GetValue(model, item.Name, true), item.PropertyType), true);
                     }
                     else
                     {
                         var tempModel = Convert.ChangeType(dynGet.GetValue(model, item.Name, true), item.PropertyType);
-                        var leafModel = Activator.CreateInstance(info.PropertyType.Assembly.GetType(info.PropertyType.FullName));
-                        var leafList = (info.PropertyType as TypeInfo).GetProperties().ToList();
+                        var leafModel = Activator.CreateInstance(property.PropertyType);
+                        var propertyList = (property.PropertyType as TypeInfo).GetProperties().ToList();
                         foreach (var leaf in (item.PropertyType as TypeInfo).GetProperties())
                         {
-                            if (leafList.Exists(a => a.Name == leaf.Name))
+                            if (propertyList.Exists(a => a.Name == leaf.Name))
                             {
-                                var temp = leafList.Find(a => a.Name.ToLower() == leaf.Name.ToLower());
+                                var temp = propertyList.Find(a => a.Name.ToLower() == leaf.Name.ToLower());
                                 temp.SetValue(leafModel, leaf.GetValue(tempModel));
                             }
                         }
-                        dynSet.SetValue(result, info.Name, leafModel, true);
+                        dynSet.SetValue(result, property.Name, leafModel, true);
                     }
                 }
             }
