@@ -247,10 +247,8 @@ namespace System.Collections.Generic
 
             if (item == null)
                 return item;
-
-            key = item.Keys.ToList().Find(a => a.ToLower() == key.ToLower());
-
-            if (!string.IsNullOrEmpty(key))
+            
+            if (item.Keys.ToList().Exists(a => a.ToLower() == key.ToLower()))
                 item[key] = value;
             else
                 item.Add(key, value);
