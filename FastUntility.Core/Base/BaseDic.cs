@@ -1,4 +1,4 @@
-﻿using FastUntility.Core.Cache;
+using FastUntility.Core.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -182,7 +182,7 @@ namespace FastUntility.Core.Base
         /// <param name="instance">类型</param>
         /// <param name="memberName">成员</param>
         /// <returns></returns>
-        public object GetValue(object instance, string memberName, bool IsCache)
+        public object GetValue(T instance, string memberName, bool IsCache)
         {
             IsGetCache = IsCache;
             return GetValueDelegate(instance, memberName);
@@ -228,17 +228,16 @@ namespace System.Collections.Generic
         {
             if (string.IsNullOrEmpty(key))
                 return "";
-
+            
             if (item == null)
                 return "";
 
-           foreach(KeyValuePair<string,object> temp in item)
-            {
-                if (temp.Key.ToLower() == key.ToLower())
-                    return temp.Value;
-            }
+            key = item.Keys.ToList().Find(a => a.ToLower() == key.ToLower());
 
-            return "";
+            if (string.IsNullOrEmpty(key))
+                return "";
+            else
+                return item[key];
         }
 
         public static Dictionary<string, object> SetValue(this Dictionary<string, object> item, string key, object value)
@@ -249,16 +248,13 @@ namespace System.Collections.Generic
             if (item == null)
                 return item;
 
-            foreach (var temp in item.Keys)
-            {
-                if (temp.ToLower() == key.ToLower())
-                {
-                    item[temp] = value;
-                    return item;
-                }
-            }
+            key = item.Keys.ToList().Find(a => a.ToLower() == key.ToLower());
 
-            item.Add(key, value);
+            if (!string.IsNullOrEmpty(key))
+                item[key] = value;
+            else
+                item.Add(key, value);
+
             return item;
         }
     }
