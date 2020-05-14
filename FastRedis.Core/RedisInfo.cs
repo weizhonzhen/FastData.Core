@@ -71,6 +71,7 @@ namespace FastRedis.Core
         /// <returns></returns>
         public static bool Set<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
         {
+            Remove(key, db);
             try
             {
                 db = db == 0 ? _db : db;
@@ -119,6 +120,7 @@ namespace FastRedis.Core
         /// <returns></returns>
         public static bool Set(string key, string model, int hours = 24 * 30 * 12, int db = 0)
         {
+            Remove(key, db);
             try
             {
                 db = db == 0 ? _db : db;
@@ -167,6 +169,7 @@ namespace FastRedis.Core
         /// <returns></returns>
         public static bool Set(string key, string model, double Minutes, int db = 0)
         {
+            Remove(key, db);
             try
             {
                 db = db == 0 ? _db : db;
