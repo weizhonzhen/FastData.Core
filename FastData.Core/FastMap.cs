@@ -977,7 +977,7 @@ namespace FastData.Core
         /// <returns></returns>
         private static string GetMapSql(string name, ref DbParameter[] param, DataContext db, string key)
         {
-            var tempParam = param.ToList();
+            var tempParam = new List<DbParameter>();
             var sql = new StringBuilder();
             var flag = "";
             var cacheType = "";
@@ -1013,6 +1013,7 @@ namespace FastData.Core
                             if (!param.ToList().Exists(a => a.ParameterName.ToLower() == item.ToLower()))
                                 continue;
                             var temp = param.ToList().Find(a => a.ParameterName.ToLower() == item.ToLower());
+                            tempParam.Add(temp);
 
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
