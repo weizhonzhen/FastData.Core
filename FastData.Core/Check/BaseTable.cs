@@ -1,4 +1,4 @@
-﻿using FastData.Core.Model;
+using FastData.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -430,7 +430,10 @@ namespace FastData.Core.Check
                 case "decimal":
                 case "numeric":
                 case "number":
-                    return string.Format("{0}({1},{2})", item.Type, item.Precision, item.Scale);
+                    if (item.Precision == 0 && item.Scale == 0)
+                        return item.Type;
+                    else
+                        return string.Format("decimal({0},{1})", item.Precision, item.Scale);
                 default:
                     return item.Type;
             }
