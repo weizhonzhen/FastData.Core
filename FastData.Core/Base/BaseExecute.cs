@@ -8,7 +8,6 @@ using System.Data.Common;
 using FastUntility.Core.Page;
 using FastData.Core.Type;
 using FastData.Core.Model;
-using FastUntility.Core.Base;
 
 namespace FastData.Core.Base
 {
@@ -100,11 +99,11 @@ namespace FastData.Core.Base
                     table.AppendFormat(" {0} on {1}", item.Table[i], item.Predicate[i].Where);
 
                     if (item.Predicate[i].Param.Count != 0)
-                        param.AddRange(Parameter.ReNewParam(item.Predicate[i].Param,item.Config));
+                        param.AddRange(item.Predicate[i].Param);
                 }
                                 
                 if (item.Predicate[0].Param.Count != 0)
-                    param.AddRange(Parameter.ReNewParam(item.Predicate[0].Param,item.Config));
+                    param.AddRange(item.Predicate[0].Param);
 
                 if (item.Config.DbType == DataDbType.SqlServer)
                 {
@@ -203,7 +202,7 @@ namespace FastData.Core.Base
             }
             catch(Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (item.Config.SqlErrorType == SqlErrorType.Db)
                         DbLogTable.LogException(item.Config, ex, "ToPageDataReader", "");
@@ -233,14 +232,14 @@ namespace FastData.Core.Base
                     sql = string.Format("{2} {0} on {1}", item.Table[i], item.Predicate[i].Where, sql);
 
                     if (item.Predicate[i].Param.Count != 0)
-                        param.AddRange(Parameter.ReNewParam(item.Predicate[i].Param,item.Config));
+                        param.AddRange(item.Predicate[i].Param);
                 }
 
                 if (!string.IsNullOrEmpty(item.Predicate[0].Where))
                     sql = string.Format("{1} where {0}", item.Predicate[0].Where, sql);
 
                 if (item.Predicate[0].Param.Count != 0)
-                    param.AddRange(Parameter.ReNewParam(item.Predicate[0].Param,item.Config));
+                    param.AddRange(item.Predicate[0].Param);
 
                 if(param.Count!=0)
                     cmd.Parameters.AddRange(param.ToArray());
@@ -251,7 +250,7 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (item.Config.SqlErrorType == SqlErrorType.Db)
                         DbLogTable.LogException(item.Config, ex, "ToPageCount", "");
@@ -280,7 +279,7 @@ namespace FastData.Core.Base
                 tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
 
                 if (param != null)
-                    cmd.Parameters.AddRange(Parameter.ReNewParam(param.ToList(), config).ToArray());
+                    cmd.Parameters.AddRange(param.ToArray());
                 
                 var dt = BaseExecute.ToDataTable(cmd, sql.ToString());
 
@@ -288,7 +287,7 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (config.SqlErrorType == SqlErrorType.Db)
                         DbLogTable.LogException(config, ex, "ToPageCountSql", "");
@@ -341,7 +340,7 @@ namespace FastData.Core.Base
                 tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
 
                 if (param != null)
-                    cmd.Parameters.AddRange(Parameter.ReNewParam(param.ToList(), config).ToArray());
+                    cmd.Parameters.AddRange(param.ToArray());
 
                 cmd.CommandText = sql;
 
@@ -349,7 +348,7 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (config.SqlErrorType == SqlErrorType.Db)
                         DbLogTable.LogException(config, ex, "ToPageDataReaderSql", "");
