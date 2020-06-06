@@ -1617,7 +1617,7 @@ namespace FastData.Core
                             param.Add(tempParam);
                         }
 
-                        var tempData = db.ExecuteSql(sql, param.ToArray(), true);
+                        var tempData = db.ExecuteSql(sql, param.ToArray(), false);
 
                         foreach (var temp in tempData.DicList)
                         {
