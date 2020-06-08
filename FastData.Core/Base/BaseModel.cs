@@ -166,6 +166,13 @@ namespace FastData.Core.Base
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T).Name);
 
+            if (where.Count == 0)
+            {
+                result.Message = string.Format("{0}没有主键", typeof(T).Name);
+                result.IsSuccess = false;
+                return result;
+            }
+
             try
             {
                 result.Sql = string.Format("update {0} set", typeof(T).Name);
