@@ -240,6 +240,56 @@ namespace FastData.Core
         #endregion
 
 
+        #region 修改
+        /// <summary>
+        /// 修改
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public static WriteReturn Update<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                var tempDb = BaseContext.GetContext(key);
+                result = tempDb.Update(model, field);
+                config = tempDb.config;
+                tempDb.Dispose();
+            }
+            else
+            {
+                result = db.Update(model, field);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 修改asy
+        /// <summary>
+        /// 修改asy
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        {
+            return await Task.Run(() =>
+            {
+                return Update<T>(model, field, db, key);
+            });
+        }
+        #endregion
+
+
         #region 执行sql
         /// <summary>
         /// 执行sql
