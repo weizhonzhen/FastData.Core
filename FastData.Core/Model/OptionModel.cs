@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data.Common;
 
 namespace FastData.Core.Model
@@ -22,11 +22,16 @@ namespace FastData.Core.Model
         /// <summary>
         /// 结果状态
         /// </summary>
-        public bool Result { get; set; }
+        public bool IsSuccess { get; set; }
         
         /// <summary>
         /// 是否缓存
         /// </summary>
         public bool IsCache { get; set; }
+
+        /// <summary>
+        /// 出错信息
+        /// </summary>
+        public string Message { get; set; }
     }
 }
