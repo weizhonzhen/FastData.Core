@@ -8,7 +8,6 @@ using FastData.Core.Property;
 using FastData.Core.Model;
 using System.Data.Common;
 using FastData.Core.Type;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace FastData.Core.Base
 {
@@ -250,6 +249,78 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
                     else
                         DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
+                });
+                result.IsSuccess = false;
+                return result;
+            }
+        }
+        #endregion
+
+        #region model 转 delete sql
+        /// <summary>
+        /// model 转 delete sql
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="model">实体</param>
+        /// <param name="sql">sql</param>
+        /// <param name="oracleParam">参数</param>
+        /// <returns></returns>
+        public static OptionModel DeleteToSql<T>(DbCommand cmd, T model, ConfigModel config)
+        {
+            var result = new OptionModel();
+            var dynGet = new DynamicGet<T>();
+            result.IsCache = config.IsPropertyCache;
+            var where = PrimaryKey(config, cmd, typeof(T).Name);
+
+            if (where.Count == 0)
+            {
+                result.Message = string.Format("{0}没有主键", typeof(T).Name);
+                result.IsSuccess = false;
+                return result;
+            }
+
+            try
+            {
+                result.Sql = string.Format("delete {0} ", typeof(T).Name);
+
+                var count = 1;
+                foreach (var item in where)
+                {
+                    var itemValue = dynGet.GetValue(model, item, config.IsPropertyCache);
+
+                    if (itemValue == null)
+                    {
+                        result.IsSuccess = false;
+                        result.Message = string.Format("主键{0}值为空", item);
+                        return result;
+                    }
+
+                    if (count == 1)
+                        result.Sql = string.Format("{2} where {0}={1}{0} ", item, config.Flag, result.Sql);
+                    else
+                        result.Sql = string.Format("{2} and {0}={1}{0} ", item, config.Flag, result.Sql);
+
+                    var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                    temp.ParameterName =  item;
+                    temp.Value = itemValue == null ? DBNull.Value : itemValue;
+
+                    result.Param.Add(temp);
+
+                    count++;
+                }
+
+                result.IsSuccess = true;
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Task.Run(() =>
+                {
+                    if (config.SqlErrorType == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
+                    else
+                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "DeleteToSql<T>", result.Sql);
                 });
                 result.IsSuccess = false;
                 return result;
