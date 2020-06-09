@@ -824,6 +824,62 @@ namespace FastData.Core.Context
         }
         #endregion
 
+        #region 删除
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <returns></returns>
+        public DataReturn<T> Delete<T>(T model,bool isTrans = false) where T : class, new()
+        {
+            var result = new DataReturn<T>();
+            var optionModel = new OptionModel();
+
+            try
+            {
+                if (isTrans)
+                    BeginTrans();
+
+                optionModel = BaseModel.DeleteToSql<T>(cmd, model, config);
+
+                result.sql = ParameterToSql.ObjectParamToSql(optionModel.Param, optionModel.Sql, config);
+
+                cmd.Parameters.Clear();
+
+                if (optionModel.Param.Count != 0)
+                    cmd.Parameters.AddRange(optionModel.Param.ToArray());
+
+                if (optionModel.IsSuccess)
+                    result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, optionModel.Sql);
+                else
+                    result.writeReturn.IsSuccess = false;
+
+                if (isTrans && result.writeReturn.IsSuccess)
+                    SubmitTrans();
+                else if (isTrans && result.writeReturn.IsSuccess == false)
+                    RollbackTrans();
+            }
+            catch (Exception ex)
+            {
+                if (isTrans)
+                    RollbackTrans();
+
+                Task.Run(() =>
+                {
+                    if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "Delete<T>", "");
+                    else
+                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Delete<T>", result.sql);
+                });
+
+                result.writeReturn.IsSuccess = false;
+                result.writeReturn.Message = ex.Message;
+            }
+
+            return result;
+        }
+        #endregion
+
         #region 修改(Lambda表达式)
         /// <summary>
         /// 修改(Lambda表达式)
@@ -910,7 +966,6 @@ namespace FastData.Core.Context
             var update = new OptionModel();
             try
             {
-
                 update = BaseModel.UpdateToSql<T>(cmd, model, config, field);
                 if (isTrans)
                     BeginTrans();
