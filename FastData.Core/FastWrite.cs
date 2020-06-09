@@ -181,6 +181,56 @@ namespace FastData.Core
         #endregion
 
 
+        #region 删除
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public static WriteReturn Delete<T>(T model, DataContext db = null, string key = null, bool isTrans = false) where T : class, new()
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                var tempDb = BaseContext.GetContext(key);
+                result = tempDb.Delete(model,isTrans);
+                config = tempDb.config;
+                tempDb.Dispose();
+            }
+            else
+            {
+                result = db.Delete(model, isTrans);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 删除asy
+        /// <summary>
+        /// 删除asy
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<WriteReturn> UpdateAsy<T>(T model, DataContext db = null, string key = null, bool isTrans = false) where T : class, new()
+        {
+            return await Task.Run(() =>
+            {
+                return Delete<T>(model, db, key);
+            });
+        }
+        #endregion
+
+
         #region 修改(Lambda表达式)
         /// <summary>
         /// 修改(Lambda表达式)
@@ -246,7 +296,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public static WriteReturn Update<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        public static WriteReturn Update<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -257,13 +307,13 @@ namespace FastData.Core
             if (db == null)
             {
                 var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Update(model, field);
+                result = tempDb.Update(model, field, isTrans);
                 config = tempDb.config;
                 tempDb.Dispose();
             }
             else
             {
-                result = db.Update(model, field);
+                result = db.Update(model, field, isTrans);
                 config = db.config;
             }
 
@@ -280,11 +330,11 @@ namespace FastData.Core
         /// 修改asy
         /// </summary>
         /// <returns></returns>
-        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false) where T : class, new()
         {
             return await Task.Run(() =>
             {
-                return Update<T>(model, field, db, key);
+                return Update<T>(model, field, db, key, isTrans);
             });
         }
         #endregion
