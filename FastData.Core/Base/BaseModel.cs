@@ -8,6 +8,8 @@ using FastData.Core.Property;
 using FastData.Core.Model;
 using System.Data.Common;
 using FastData.Core.Type;
+using System.Data;
+using System.Runtime.InteropServices;
 
 namespace FastData.Core.Base
 {
@@ -182,6 +184,9 @@ namespace FastData.Core.Base
                     #region 属性
                     foreach (var item in pInfo)
                     {
+                        if (where.Exists(a => a == item.Name))
+                            continue;
+
                         result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
                         var itemValue = dynGet.GetValue(model, item.Name, config.IsPropertyCache);
@@ -198,6 +203,9 @@ namespace FastData.Core.Base
                     var list = (field.Body as NewExpression).Members;
                     foreach (var item in list)
                     {
+                        if (where.Exists(a => a == item.Name))
+                            continue;
+
                         result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
                         var itemValue = dynGet.GetValue(model, item.Name, config.IsPropertyCache);
@@ -224,12 +232,12 @@ namespace FastData.Core.Base
                     }
 
                     if (count == 1)
-                        result.Sql = string.Format("{2} where {0}={1}{0}{3} ", item, config.Flag, result.Sql, count);
+                        result.Sql = string.Format("{2} where {0}={1}{0} ", item, config.Flag, result.Sql);
                     else
-                        result.Sql = string.Format("{2} and {0}={1}{0}{3} ", item, config.Flag, result.Sql, count);
+                        result.Sql = string.Format("{2} and {0}={1}{0} ", item, config.Flag, result.Sql);
 
                     var temp = DbProviderFactories.GetFactory(config).CreateParameter();
-                    temp.ParameterName = string.Format("{0}{1}", item, count);
+                    temp.ParameterName = item;
                     temp.Value = itemValue == null ? DBNull.Value : itemValue;
 
                     result.Param.Add(temp);
@@ -249,6 +257,128 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
                     else
                         DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
+                });
+                result.IsSuccess = false;
+                return result;
+            }
+        }
+        #endregion
+
+        #region model 转 update list sql
+        /// <summary>
+        /// model 转 update list sql
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="model">实体</param>
+        /// <param name="sql">sql</param>
+        /// <param name="oracleParam">参数</param>
+        /// <returns></returns>
+        public static OptionModel UpdateListToSql<T>(DbCommand cmd,List<T> list, ConfigModel config, Expression<Func<T, object>> field = null)
+        {
+            var dynGet = new DynamicGet<T>();
+            var result = new OptionModel();
+            result.IsCache = config.IsPropertyCache;
+            var where = PrimaryKey(config, cmd, typeof(T).Name);
+
+            if (where.Count == 0)
+            {
+                result.Message = string.Format("{0}没有主键", typeof(T).Name);
+                result.IsSuccess = false;
+                return result;
+            }
+
+            try
+            {
+                result.table = BaseExecute.ToDataTable<T>(cmd,config, where, field);
+
+                result.Sql = string.Format("update {0} set", typeof(T).Name);
+                var pInfo = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
+
+                if (field == null)
+                {
+                    #region 属性
+                    foreach (var item in pInfo)
+                    {
+                        if (where.Exists(a => a == item.Name))
+                            continue;
+                        result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
+                        var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                        temp.ParameterName = item.Name;
+                        temp.SourceColumn = item.Name;                           
+                        result.Param.Add(temp);
+                    }
+                    #endregion
+                }
+                else
+                {
+                    #region lambda
+                    foreach (var item in (field.Body as NewExpression).Members)
+                    {
+                        if (where.Exists(a => a == item.Name))
+                            continue;
+                        result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
+                        var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                        temp.ParameterName = item.Name;
+                        temp.SourceColumn = item.Name;
+                        result.Param.Add(temp);
+                    }
+                    #endregion
+                }
+
+                result.Sql = result.Sql.Substring(0, result.Sql.Length - 1);
+
+                var count = 1;
+                foreach (var item in where)
+                {
+                    if (count == 1)
+                        result.Sql = string.Format("{2} where {0}={1}{0} ", item, config.Flag, result.Sql);
+                    else
+                        result.Sql = string.Format("{2} and {0}={1}{0} ", item, config.Flag, result.Sql);
+
+                    var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                    temp.ParameterName = item;
+                    temp.SourceColumn = item;
+                    result.Param.Add(temp);
+                    count++;
+                }
+
+                result.IsSuccess = true;
+
+                foreach(var model in list)
+                {
+                    var row = result.table.NewRow();
+                    foreach (var item in where)
+                    {
+                        row[item] = dynGet.GetValue(model, item, true);
+                    }
+
+                    if (field == null)
+                    {
+                        foreach (var info in PropertyCache.GetPropertyInfo<T>())
+                        {
+                            row[info.Name] = dynGet.GetValue(model, info.Name, true);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var info in (field.Body as NewExpression).Members)
+                        {
+                            row[info.Name] = dynGet.GetValue(model, info.Name, true);
+                        }
+                    }
+                    result.table.Rows.Add(row);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Task.Run(() =>
+                {
+                    if (config.SqlErrorType == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "UpdateListToSql<T>", result.Sql);
+                    else
+                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateListToSql<T>", result.Sql);
                 });
                 result.IsSuccess = false;
                 return result;
