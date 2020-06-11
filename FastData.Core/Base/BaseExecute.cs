@@ -8,6 +8,9 @@ using System.Data.Common;
 using FastUntility.Core.Page;
 using FastData.Core.Type;
 using FastData.Core.Model;
+using StackExchange.Redis;
+using System.Linq.Expressions;
+using FastData.Core.Property;
 
 namespace FastData.Core.Base
 {
@@ -357,6 +360,48 @@ namespace FastData.Core.Base
                 });
                 return null;
             }
+        }
+        #endregion
+
+        #region 获取表结构
+        /// <summary>
+        /// 获取表结构
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        public static DataTable ToDataTable<T>(DbCommand cmd, ConfigModel config, List<string> where, Expression<Func<T, object>> field = null)
+        {
+            var dt = new DataTable();
+            var sql = new List<string>();
+
+            if (field == null)
+            {
+                foreach (var item in PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache))
+                {
+                    sql.Add(item.Name);
+                }
+            }
+            else
+            {
+                foreach (var item in (field.Body as NewExpression).Members)
+                {
+                    sql.Add(item.Name);
+                }
+            }
+
+            foreach (var item in where)
+            {
+                sql.Add(item);
+            }
+
+            cmd.CommandText = string.Format("select {1} from {0} where 1=0", typeof(T).Name, string.Join(",", sql.ToArray()));
+
+            var dr = cmd.ExecuteReader();
+            dt.Load(dr);
+            dr.Close();
+            dr.Dispose();
+            return dt;
         }
         #endregion
     }
