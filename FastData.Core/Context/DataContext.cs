@@ -998,9 +998,79 @@ namespace FastData.Core.Context
                 Task.Run(() =>
                 {
                     if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
-                        DbLogTable.LogException<T>(config, ex, "UpdateModel<T>", "");
+                        DbLogTable.LogException<T>(config, ex, "Update<T>", "");
                     else
-                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateModel<T>", result.sql);
+                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Update<T>", result.sql);
+                });
+                result.writeReturn.IsSuccess = false;
+                result.writeReturn.Message = ex.Message;
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region 修改list
+        /// <summary>
+        /// 修改list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="model"></param>
+        /// <param name="field"></param>
+        /// <param name="isTrans"></param>
+        /// <returns></returns>
+        public DataReturn<T> UpdateList<T>(List<T> list, Expression<Func<T, object>> field = null) where T : class, new()
+        {
+            var result = new DataReturn<T>();
+            var update = new OptionModel();
+            try
+            {
+                if (list.Count == 0)
+                {
+                    result.writeReturn.IsSuccess = false;
+                    result.writeReturn.Message = "更新数据不能为空";
+                    return result;
+                }
+
+                update = BaseModel.UpdateListToSql<T>(cmd,list, config, field);
+    
+                if (update.IsSuccess)
+                {
+                    using (var adapter = DbProviderFactories.GetFactory(config).CreateDataAdapter())
+                    {
+                        BeginTrans();                        
+                        cmd.Parameters.Clear();
+                        adapter.InsertCommand = cmd;
+                        adapter.InsertCommand.CommandText = update.Sql;
+                        adapter.InsertCommand.UpdatedRowSource = UpdateRowSource.None;
+                        adapter.UpdateBatchSize = 0;
+
+                        if (update.Param.Count != 0)
+                            adapter.InsertCommand.Parameters.AddRange(update.Param.ToArray());
+
+                        result.sql = ParameterToSql.ObjectParamToSql(update.Param, update.Sql, config);
+
+                        result.writeReturn.IsSuccess = adapter.Update(update.table) > 0;
+                        if (result.writeReturn.IsSuccess)
+                            SubmitTrans();
+                        else
+                            RollbackTrans();
+                    }
+                }
+                else
+                {
+                    result.writeReturn.Message = update.Message;
+                    result.writeReturn.IsSuccess = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Task.Run(() =>
+                {
+                    if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                        DbLogTable.LogException<T>(config, ex, "UpdateList<T>", "");
+                    else
+                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateList<T>", result.sql);
                 });
                 result.writeReturn.IsSuccess = false;
                 result.writeReturn.Message = ex.Message;
