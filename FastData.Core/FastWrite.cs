@@ -340,6 +340,56 @@ namespace FastData.Core
         #endregion
 
 
+        #region 修改list
+        /// <summary>
+        /// 修改list
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public static WriteReturn UpdateList<T>(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                var tempDb = BaseContext.GetContext(key);
+                result = tempDb.UpdateList(list, field);
+                config = tempDb.config;
+                tempDb.Dispose();
+            }
+            else
+            {
+                result = db.UpdateList(list, field);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 修改list asy
+        /// <summary>
+        /// 修改list asy
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<WriteReturn> UpdateListAsy<T>(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        {
+            return await Task.Run(() =>
+            {
+                return UpdateList<T>(list, field, db, key);
+            });
+        }
+        #endregion
+
+
         #region 执行sql
         /// <summary>
         /// 执行sql
