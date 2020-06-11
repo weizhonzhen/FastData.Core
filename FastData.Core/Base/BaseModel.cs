@@ -8,8 +8,6 @@ using FastData.Core.Property;
 using FastData.Core.Model;
 using System.Data.Common;
 using FastData.Core.Type;
-using System.Data;
-using System.Runtime.InteropServices;
 
 namespace FastData.Core.Base
 {
