@@ -16,6 +16,9 @@ in Startup.cs Startup mothod
 
             // init map cache
             FastMap.InstanceMap();
+            
+            //by Repository
+            services.AddTransient<IFastRepository, FastRepository>();
        
 in db.json         
 ```csharp
