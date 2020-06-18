@@ -1,4 +1,4 @@
-using FastData.Core.Base;
+﻿using FastData.Core.Base;
 using FastData.Core.Context;
 using FastData.Core.Model;
 using System;
@@ -165,7 +165,6 @@ namespace FastData.Core
         }
         #endregion
 
-
         #region 返回list
         /// <summary>
         /// 返回list
@@ -185,9 +184,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetList<T>(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetList<T>(item);
+                }
             }
             else
                 result = db.GetList<T>(item);
@@ -263,9 +263,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetJson(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetJson(item);
+                }
             }
             else
                 result = db.GetJson(item);
@@ -341,9 +342,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetList<T>(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetList<T>(item);
+                }
             }
             else
                 result = db.GetList<T>(item);
@@ -419,9 +421,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetCount(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetCount(item);
+                }
             }
             else
                 result = db.GetCount(item);
@@ -470,9 +473,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetPage<T>(item, pModel);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetPage<T>(item, pModel);
+                }
             }
             else
                 result = db.GetPage<T>(item, pModel);
@@ -552,9 +556,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetPage(item, pModel);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetPage(item, pModel);
+                }
             }
             else
                 result = db.GetPage(item, pModel);
@@ -632,9 +637,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetDataTable(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetDataTable(item);
+                }
             }
             else
                 result = db.GetDataTable(item);
@@ -707,10 +713,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.ExecuteSql<T>(sql, param);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.ExecuteSql<T>(sql, param);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -793,9 +800,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetDic(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetDic(item);
+                }
             }
             else
                 result = db.GetDic(item);
@@ -869,9 +877,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetDic(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetDic(item);
+                }
             }
             else
                 result = db.GetDic(item);
@@ -943,10 +952,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.ExecuteSql(sql, param,false);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.ExecuteSql(sql, param, false);
+                    config = tempDb.config;
+                }
             }
             else
             {

@@ -1,4 +1,4 @@
-using FastData.Core.Base;
+﻿using FastData.Core.Base;
 using FastData.Core.Context;
 using FastData.Core.Model;
 using System;
@@ -34,10 +34,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.AddList<T>(list);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.AddList<T>(list);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -90,10 +91,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Add<T>(model, false);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Add<T>(model, false);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -145,10 +147,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = new DataContext(key);
-                result = tempDb.Delete<T>(predicate);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Delete<T>(predicate);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -197,10 +200,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Delete(model,isTrans);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Delete(model, isTrans);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -251,10 +255,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Update<T>(model, predicate, field);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Update<T>(model, predicate, field);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -306,10 +311,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Update(model, field, isTrans);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Update(model, field, isTrans);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -356,10 +362,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.UpdateList(list, field);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.UpdateList(list, field);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -407,10 +414,11 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.ExecuteSql(sql, param, false);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.ExecuteSql(sql, param, false);
+                    config = tempDb.config;
+                }
             }
             else
             {

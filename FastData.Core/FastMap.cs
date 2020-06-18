@@ -100,7 +100,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static void InstanceMap(string dbKey = null)
         {
-            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map,"map.json");
+            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, "map.json");
             var config = DataConfig.Get(dbKey);
             var db = new DataContext(dbKey);
             var query = new DataQuery { Config = config, Key = dbKey };
@@ -110,7 +110,7 @@ namespace FastData.Core
                 var info = new FileInfo(item);
                 var key = BaseSymmetric.Generate(info.FullName);
 
-                if (!DbCache.Exists(config.CacheType,key))
+                if (!DbCache.Exists(config.CacheType, key))
                 {
                     var temp = new MapXmlModel();
                     temp.LastWrite = info.LastWriteTime;
@@ -132,7 +132,7 @@ namespace FastData.Core
                         DbCache.Set<MapXmlModel>(config.CacheType, key, model);
                 }
             }
-            
+
             if (config.IsMapSave)
             {
                 query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
@@ -157,7 +157,7 @@ namespace FastData.Core
                     BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
                 }
             }
-            
+
             db.Dispose();
         }
         #endregion
@@ -172,21 +172,22 @@ namespace FastData.Core
             var config = db == null ? DataConfig.Get(key) : db.config;
             if (config.IsUpdateCache)
                 InstanceMap(key);
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
-                var sql = MapXml.GetMapSql(name, ref param,db,key);
+                var sql = MapXml.GetMapSql(name, ref param, db, key);
                 var result = FastRead.ExecuteSql<T>(sql, param, db, key);
                 if (MapXml.MapIsForEach(name, config))
                 {
                     if (db == null)
                     {
-                        var tempDb = BaseContext.GetContext(key);
-
-                        for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                        using (var tempDb = new DataContext(key))
                         {
-                            result = MapXml.MapForEach<T>(result, name, tempDb, key, config,i);
+
+                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                            {
+                                result = MapXml.MapForEach<T>(result, name, tempDb, key, config, i);
+                            }
                         }
-                        tempDb.Dispose();
                     }
                     else
                         result = MapXml.MapForEach<T>(result, name, db, key, config);
@@ -245,22 +246,23 @@ namespace FastData.Core
             if (config.IsUpdateCache)
                 InstanceMap(key);
 
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
-                var sql = MapXml.GetMapSql(name, ref param,db,key);
+                var sql = MapXml.GetMapSql(name, ref param, db, key);
 
                 var result = FastRead.ExecuteSql(sql, param, db, key);
 
-                if (MapXml.MapIsForEach(name,config))
+                if (MapXml.MapIsForEach(name, config))
                 {
                     if (db == null)
                     {
-                        var tempDb = BaseContext.GetContext(key);
-                        for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                        using (var tempDb = new DataContext(key))
                         {
-                            result = MapXml.MapForEach(result, name, tempDb, key, config,i);
+                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                            {
+                                result = MapXml.MapForEach(result, name, tempDb, key, config, i);
+                            }
                         }
-                        tempDb.Dispose();
                     }
                     else
                         result = MapXml.MapForEach(result, name, db, key, config);
@@ -321,9 +323,9 @@ namespace FastData.Core
             if (config.IsUpdateCache)
                 InstanceMap(key);
 
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
-                var sql = MapXml.GetMapSql(name, ref param,db,key);
+                var sql = MapXml.GetMapSql(name, ref param, db, key);
 
                 return FastWrite.ExecuteSql(sql, param, db, key);
             }
@@ -386,9 +388,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.GetPageSql(pModel, sql, param);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.GetPageSql(pModel, sql, param);
+                }
             }
             else
                 result = db.GetPageSql(pModel, sql, param);
@@ -418,17 +421,18 @@ namespace FastData.Core
 
                 var result = ExecuteSqlPage(pModel, sql, param, db, key);
 
-                if (MapXml.MapIsForEach(name,config))
+                if (MapXml.MapIsForEach(name, config))
                 {
                     if (db == null)
                     {
-                        var tempDb = BaseContext.GetContext(key);
-
-                        for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                        using (var tempDb = new DataContext(key))
                         {
-                            result.list = MapXml.MapForEach(result.list, name, tempDb, key, config,i);
+
+                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                            {
+                                result.list = MapXml.MapForEach(result.list, name, tempDb, key, config, i);
+                            }
                         }
-                        tempDb.Dispose();
                     }
                     else
                         result.list = MapXml.MapForEach(result.list, name, db, key, config);
@@ -495,9 +499,10 @@ namespace FastData.Core
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.GetPageSql<T>(pModel, sql, param);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.GetPageSql<T>(pModel, sql, param);
+                }
             }
             else
                 result = db.GetPageSql<T>(pModel, sql, param);
@@ -521,9 +526,9 @@ namespace FastData.Core
             if (config.IsUpdateCache)
                 InstanceMap(key);
 
-            if (DbCache.Exists(config.CacheType,name.ToLower()))
+            if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
-                var sql = MapXml.GetMapSql(name, ref param,db,key);
+                var sql = MapXml.GetMapSql(name, ref param, db, key);
 
                 var result = ExecuteSqlPage<T>(pModel, sql, param, db, key);
 
@@ -531,13 +536,14 @@ namespace FastData.Core
                 {
                     if (db == null)
                     {
-                        var tempDb = BaseContext.GetContext(key);
-
-                        for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                        using (var tempDb = new DataContext(key))
                         {
-                            result.list = MapXml.MapForEach<T>(result.list, name, tempDb, key, config,i);
+
+                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                            {
+                                result.list = MapXml.MapForEach<T>(result.list, name, tempDb, key, config, i);
+                            }
                         }
-                        tempDb.Dispose();
                     }
                     else
                         result.list = MapXml.MapForEach<T>(result.list, name, db, key, config);
@@ -665,7 +671,7 @@ namespace FastData.Core
         {
             get
             {
-                return DbCache.Get<Dictionary<string,object>>(DataConfig.Get().CacheType, "FastMap.Api")??new Dictionary<string, object>();
+                return DbCache.Get<Dictionary<string, object>>(DataConfig.Get().CacheType, "FastMap.Api") ?? new Dictionary<string, object>();
             }
         }
         #endregion
@@ -678,7 +684,7 @@ namespace FastData.Core
         #endregion
 
         #region 获取map参数备注
-        public static string MapParamRemark(string name,string param)
+        public static string MapParamRemark(string name, string param)
         {
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.remark", name.ToLower(), param.ToLower()));
         }
@@ -691,7 +697,7 @@ namespace FastData.Core
         /// <param name="name"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static string MapRequired(string name,string param)
+        public static string MapRequired(string name, string param)
         {
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.required", name.ToLower(), param.ToLower()));
         }
