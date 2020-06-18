@@ -33,19 +33,20 @@ namespace FastData.Core.Repository
                 InstanceMap(key);
             if (DbCache.Exists(config.CacheType, name.ToLower()))
             {
-                var sql =MapXml.GetMapSql(name, ref param, db, key);
+                var sql = MapXml.GetMapSql(name, ref param, db, key);
                 var result = FastRead.ExecuteSql<T>(sql, param, db, key);
                 if (MapXml.MapIsForEach(name, config))
                 {
                     if (db == null)
                     {
-                        var tempDb = BaseContext.GetContext(key);
-
-                        for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                        using (var tempDb = new DataContext(key))
                         {
-                            result = MapXml.MapForEach<T>(result, name, tempDb, key, config, i);
+
+                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                            {
+                                result = MapXml.MapForEach<T>(result, name, tempDb, key, config, i);
+                            }
                         }
-                        tempDb.Dispose();
                     }
                     else
                         result = MapXml.MapForEach<T>(result, name, db, key, config);
@@ -114,12 +115,13 @@ namespace FastData.Core.Repository
                 {
                     if (db == null)
                     {
-                        var tempDb = BaseContext.GetContext(key);
-                        for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                        using (var tempDb = new DataContext(key))
                         {
-                            result = MapXml.MapForEach(result, name, tempDb, key, config, i);
+                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                            {
+                                result = MapXml.MapForEach(result, name, tempDb, key, config, i);
+                            }
                         }
-                        tempDb.Dispose();
                     }
                     else
                         result = MapXml.MapForEach(result, name, db, key, config);
@@ -243,9 +245,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.GetPageSql(pModel, sql, param);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.GetPageSql(pModel, sql, param);
+                }
             }
             else
                 result = db.GetPageSql(pModel, sql, param);
@@ -279,13 +282,14 @@ namespace FastData.Core.Repository
                 {
                     if (db == null)
                     {
-                        var tempDb = BaseContext.GetContext(key);
-
-                        for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                        using (var tempDb = new DataContext(key))
                         {
-                            result.list = MapXml.MapForEach(result.list, name, tempDb, key, config, i);
+
+                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                            {
+                                result.list = MapXml.MapForEach(result.list, name, tempDb, key, config, i);
+                            }
                         }
-                        tempDb.Dispose();
                     }
                     else
                         result.list = MapXml.MapForEach(result.list, name, db, key, config);
@@ -352,9 +356,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.GetPageSql<T>(pModel, sql, param);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.GetPageSql<T>(pModel, sql, param);
+                }
             }
             else
                 result = db.GetPageSql<T>(pModel, sql, param);
@@ -388,13 +393,14 @@ namespace FastData.Core.Repository
                 {
                     if (db == null)
                     {
-                        var tempDb = BaseContext.GetContext(key);
-
-                        for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                        using (var tempDb = new DataContext(key))
                         {
-                            result.list = MapXml.MapForEach<T>(result.list, name, tempDb, key, config, i);
+
+                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                            {
+                                result.list = MapXml.MapForEach<T>(result.list, name, tempDb, key, config, i);
+                            }
                         }
-                        tempDb.Dispose();
                     }
                     else
                         result.list = MapXml.MapForEach<T>(result.list, name, db, key, config);
@@ -454,7 +460,7 @@ namespace FastData.Core.Repository
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower()));
         }
         #endregion
-               
+
         #region map 参数列表
         /// <summary>
         /// map 参数列表
@@ -564,10 +570,11 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.AddList<T>(list);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.AddList<T>(list);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -619,10 +626,11 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Add<T>(model, false);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Add<T>(model, false);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -673,10 +681,11 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = new DataContext(key);
-                result = tempDb.Delete<T>(predicate);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Delete<T>(predicate);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -724,10 +733,11 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Delete(model, isTrans);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Delete(model, isTrans);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -777,10 +787,11 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Update<T>(model, predicate, field);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Update<T>(model, predicate, field);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -831,10 +842,11 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.Update(model, field, isTrans);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Update(model, field, isTrans);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -880,10 +892,11 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.UpdateList(list, field);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.UpdateList(list, field);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -930,10 +943,11 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(key);
-                result = tempDb.ExecuteSql(sql, param, false);
-                config = tempDb.config;
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.ExecuteSql(sql, param, false);
+                    config = tempDb.config;
+                }
             }
             else
             {
@@ -1132,9 +1146,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetList<T>(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetList<T>(item);
+                }
             }
             else
                 result = db.GetList<T>(item);
@@ -1210,9 +1225,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetJson(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetJson(item);
+                }
             }
             else
                 result = db.GetJson(item);
@@ -1288,9 +1304,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetList<T>(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetList<T>(item);
+                }
             }
             else
                 result = db.GetList<T>(item);
@@ -1366,9 +1383,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetCount(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetCount(item);
+                }
             }
             else
                 result = db.GetCount(item);
@@ -1417,9 +1435,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetPage<T>(item, pModel);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetPage<T>(item, pModel);
+                }
             }
             else
                 result = db.GetPage<T>(item, pModel);
@@ -1499,9 +1518,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetPage(item, pModel);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetPage(item, pModel);
+                }
             }
             else
                 result = db.GetPage(item, pModel);
@@ -1579,9 +1599,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetDataTable(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetDataTable(item);
+                }
             }
             else
                 result = db.GetDataTable(item);
@@ -1634,7 +1655,7 @@ namespace FastData.Core.Repository
             });
         }
         #endregion
-        
+
         #region 返回List<Dictionary<string, object>>
         /// <summary>
         /// 返回List<Dictionary<string, object>>
@@ -1653,9 +1674,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetDic(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetDic(item);
+                }
             }
             else
                 result = db.GetDic(item);
@@ -1729,9 +1751,10 @@ namespace FastData.Core.Repository
 
             if (db == null)
             {
-                var tempDb = BaseContext.GetContext(item);
-                result = tempDb.GetDic(item);
-                tempDb.Dispose();
+                using (var tempDb = new DataContext(item.Key))
+                {
+                    result = tempDb.GetDic(item);
+                }
             }
             else
                 result = db.GetDic(item);
@@ -1784,6 +1807,5 @@ namespace FastData.Core.Repository
             });
         }
         #endregion
-
     }
 }
