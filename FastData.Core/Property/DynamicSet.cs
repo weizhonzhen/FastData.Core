@@ -9,11 +9,11 @@ namespace FastData.Core.Property
     /// </summary>
     internal class DynamicSet<T>
     {
-        private static bool IsSetCache;
-        private static Action<object, string, object> SetValueDelegate;
+        private bool IsSetCache;
+        private Action<object, string, object> SetValueDelegate;
 
         // 构建函数        
-        static DynamicSet()
+        public DynamicSet()
         {
             SetValueDelegate = GenerateSetValue();
         }
@@ -37,7 +37,7 @@ namespace FastData.Core.Property
         /// 动态生成setvalue
         /// </summary>
         /// <returns></returns>
-        private static Action<object, string, object> GenerateSetValue()
+        private Action<object, string, object> GenerateSetValue()
         {
             var instance = Expression.Parameter(typeof(object), "instance");
             var memberName = Expression.Parameter(typeof(string), "memberName");
@@ -70,9 +70,9 @@ namespace FastData.Core.Property
     /// </summary>
     internal class DynamicSet
     {
-        private static object Instance;
-        private static bool IsSetCache;
-        private static Action<object, string, object> SetValueDelegate;
+        private object Instance;
+        private bool IsSetCache;
+        private Action<object, string, object> SetValueDelegate;
 
         // 构建函数        
         public DynamicSet(object model)
@@ -100,7 +100,7 @@ namespace FastData.Core.Property
         /// 动态生成setvalue
         /// </summary>
         /// <returns></returns>
-        private static Action<object, string, object> GenerateSetValue()
+        private Action<object, string, object> GenerateSetValue()
         {
             var instance = Expression.Parameter(typeof(object), "instance");
             var memberName = Expression.Parameter(typeof(string), "memberName");

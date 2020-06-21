@@ -9,11 +9,11 @@ namespace FastData.Core.Property
     /// </summary>
     internal class DynamicGet<T>
     {
-        private static bool IsGetCache;
-        private static Func<object, string, object> GetValueDelegate;
+        private bool IsGetCache;
+        private Func<object, string, object> GetValueDelegate;
 
         // 构建函数        
-        static DynamicGet()
+        public DynamicGet()
         {
             GetValueDelegate = GenerateGetValue();
         }
@@ -37,7 +37,7 @@ namespace FastData.Core.Property
         /// 动态生成getvalue
         /// </summary>
         /// <returns></returns>
-        private static Func<object, string, object> GenerateGetValue()
+        private Func<object, string, object> GenerateGetValue()
         {
             var instance = Expression.Parameter(typeof(object), "instance");
             var memberName = Expression.Parameter(typeof(string), "memberName");
@@ -65,9 +65,9 @@ namespace FastData.Core.Property
 
     internal class DynamicGet
     {
-        private static object Instance;
-        private static bool IsGetCache;
-        private static Func<object, string, object> GetValueDelegate;
+        private object Instance;
+        private bool IsGetCache;
+        private Func<object, string, object> GetValueDelegate;
 
         // 构建函数        
         public DynamicGet(object model)
@@ -95,7 +95,7 @@ namespace FastData.Core.Property
         /// 动态生成getvalue
         /// </summary>
         /// <returns></returns>
-        private static Func<object, string, object> GenerateGetValue()
+        private Func<object, string, object> GenerateGetValue()
         {
             var instance = Expression.Parameter(typeof(object), "instance");
             var memberName = Expression.Parameter(typeof(string), "memberName");
