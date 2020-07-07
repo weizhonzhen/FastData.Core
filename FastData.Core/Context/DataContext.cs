@@ -1148,7 +1148,7 @@ namespace FastData.Core.Context
         /// <param name="IsTrans"></param>
         /// <param name="IsAsync"></param>
         /// <returns></returns>
-        public DataReturn<T> AddList<T>(List<T> list, bool isTrans = false) where T : class, new()
+        public DataReturn<T> AddList<T>(List<T> list) where T : class, new()
         {
             var result = new DataReturn<T>();
             var sql = new StringBuilder();
@@ -1156,8 +1156,7 @@ namespace FastData.Core.Context
 
             try
             {
-                if (isTrans)
-                    BeginTrans();
+                BeginTrans();
                 
                 if (config.DbType == DataDbType.Oracle)
                 {
@@ -1215,7 +1214,7 @@ namespace FastData.Core.Context
                     result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
 
                     cmd.CommandText = string.Format("alter table {0} logging", typeof(T).Name);
-                    cmd.ExecuteNonQuery();
+                    cmd.ExecuteNonQuery();                    
                     #endregion
                 }
 
@@ -1273,15 +1272,14 @@ namespace FastData.Core.Context
                     #endregion
                 }
 
-                if (isTrans && result.writeReturn.IsSuccess)
+                if (result.writeReturn.IsSuccess)
                     SubmitTrans();
-                else if (isTrans && result.writeReturn.IsSuccess == false)
+                else if (result.writeReturn.IsSuccess == false)
                     RollbackTrans();
             }
             catch (Exception ex)
             {
-                if (isTrans)
-                    RollbackTrans();
+                RollbackTrans();
 
                 Task.Run(() =>
                 {
