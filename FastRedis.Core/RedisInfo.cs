@@ -7,17 +7,27 @@ using FastUntility.Core.Base;
 namespace FastRedis.Core
 {
     /// <summary>
-    /// RedisContext.GetContext()操作类
+    /// RedisContext操作类
     /// </summary>
     public static class RedisInfo
     {
         private static readonly int _db = 0;
-        private static readonly ConnectionMultiplexer Context;
+        private static readonly Lazy<ConnectionMultiplexer> Context;
         static RedisInfo()
         {
             var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
             _db = config.Db;
-            Context = ConnectionMultiplexer.Connect(config.Server);
+            var options = new ConfigurationOptions
+            {
+                AbortOnConnectFail = false,
+                AllowAdmin = true,
+                ConnectTimeout = 15000,
+                SyncTimeout = 5000,
+                ResponseTimeout = 15000,
+                EndPoints = { config.Server }
+            };
+
+            Context = new Lazy<ConnectionMultiplexer>(() => { return ConnectionMultiplexer.Connect(options); });
         }
 
         #region 是否存在
@@ -33,7 +43,7 @@ namespace FastRedis.Core
                 if (string.IsNullOrEmpty(key))
                     return false;
                 else
-                    return Context.GetDatabase(db).KeyExists(key);
+                    return Context.Value.GetDatabase(db).KeyExists(key);
             }
             catch (RedisException ex)
             {
@@ -76,7 +86,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
+                    return Context.Value.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
                 else
                     return false;
             }
@@ -125,7 +135,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromHours(hours));
+                    return Context.Value.GetDatabase(db).StringSet(key, model, TimeSpan.FromHours(hours));
                 else
                     return false;
             }
@@ -174,7 +184,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
+                    return Context.Value.GetDatabase(db).StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
                 else
                     return false;
             }
@@ -222,7 +232,7 @@ namespace FastRedis.Core
                 if (string.IsNullOrEmpty(key))
                     return "";
                 else
-                    return Context.GetDatabase(db).StringGet(key);
+                    return Context.Value.GetDatabase(db).StringGet(key);
             }
             catch (RedisException ex)
             {
@@ -266,7 +276,7 @@ namespace FastRedis.Core
                 if (string.IsNullOrEmpty(key))
                     return new T();
                 else
-                    return BaseJson.JsonToModel<T>(Context.GetDatabase(db).StringGet(key)) ?? new T();
+                    return BaseJson.JsonToModel<T>(Context.Value.GetDatabase(db).StringGet(key)) ?? new T();
             }
             catch (RedisException ex)
             {
@@ -307,7 +317,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).KeyDelete(key);
+                    return Context.Value.GetDatabase(db).KeyDelete(key);
                 else
                     return false;
             }
