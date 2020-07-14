@@ -12,7 +12,7 @@ namespace FastRedis.Core
     public static class RedisInfo
     {
         private static readonly int _db = 0;
-        private static readonly Lazy<ConnectionMultiplexer> Context;
+        private static readonly Lazy<ConnectionMultiplexer> conn;
         static RedisInfo()
         {
             var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
@@ -27,7 +27,18 @@ namespace FastRedis.Core
                 EndPoints = { config.Server }
             };
 
-            Context = new Lazy<ConnectionMultiplexer>(() => { return ConnectionMultiplexer.Connect(options); });
+            conn = new Lazy<ConnectionMultiplexer>(() => { return ConnectionMultiplexer.Connect(options); });
+        }
+
+        /// <summary>
+        /// 连接
+        /// </summary>
+        private static ConnectionMultiplexer Context
+        {
+            get
+            {
+                return conn.Value;
+            }
         }
 
         #region 是否存在
@@ -43,7 +54,7 @@ namespace FastRedis.Core
                 if (string.IsNullOrEmpty(key))
                     return false;
                 else
-                    return Context.Value.GetDatabase(db).KeyExists(key);
+                    return Context.GetDatabase(db).KeyExists(key);
             }
             catch (RedisException ex)
             {
@@ -86,7 +97,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.Value.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
+                    return Context.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
                 else
                     return false;
             }
@@ -135,7 +146,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.Value.GetDatabase(db).StringSet(key, model, TimeSpan.FromHours(hours));
+                    return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromHours(hours));
                 else
                     return false;
             }
@@ -184,7 +195,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.Value.GetDatabase(db).StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
+                    return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
                 else
                     return false;
             }
@@ -232,7 +243,7 @@ namespace FastRedis.Core
                 if (string.IsNullOrEmpty(key))
                     return "";
                 else
-                    return Context.Value.GetDatabase(db).StringGet(key);
+                    return Context.GetDatabase(db).StringGet(key);
             }
             catch (RedisException ex)
             {
@@ -276,7 +287,7 @@ namespace FastRedis.Core
                 if (string.IsNullOrEmpty(key))
                     return new T();
                 else
-                    return BaseJson.JsonToModel<T>(Context.Value.GetDatabase(db).StringGet(key)) ?? new T();
+                    return BaseJson.JsonToModel<T>(Context.GetDatabase(db).StringGet(key)) ?? new T();
             }
             catch (RedisException ex)
             {
@@ -317,7 +328,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.Value.GetDatabase(db).KeyDelete(key);
+                    return Context.GetDatabase(db).KeyDelete(key);
                 else
                     return false;
             }
@@ -346,7 +357,7 @@ namespace FastRedis.Core
             });
         }
         #endregion
-                     
+
         #region 出错日志
         /// <summary>
         /// 出错日志
@@ -356,7 +367,7 @@ namespace FastRedis.Core
         /// <param name="CurrentMethod"></param>
         private static void SaveLog<T>(Exception ex, string CurrentMethod)
         {
-            SaveLog(string.Format("方法：{0},对象：{1},出错详情：{2}", CurrentMethod, typeof(T).Name, ex.ToString()), "RedisContext.GetContext()_exp");
+            BaseLog.SaveLog(string.Format("方法：{0},对象：{1},出错详情：{2}", CurrentMethod, typeof(T).Name, ex.ToString()), "RedisContext.GetContext()_exp");
         }
         #endregion
 
@@ -369,53 +380,7 @@ namespace FastRedis.Core
         /// <param name="CurrentMethod"></param>
         private static void SaveLog(Exception ex, string CurrentMethod, string key)
         {
-            SaveLog(string.Format("方法：{0},键：{1},出错详情：{2}", CurrentMethod, key, ex.ToString()), "RedisContext.GetContext()_exp");
-        }
-        #endregion
-
-        #region 写日志
-        /// <summary>
-        /// 说明：写日记
-        /// </summary>
-        /// <param name="StrContent">日志内容</param>
-        private static void SaveLog(string logContent, string fileName, string headName = "", bool IsWrap = false, int logCount = 10)
-        {
-            var path = string.Format("{0}/App_Data/log/{1}", AppDomain.CurrentDomain.BaseDirectory, DateTime.Now.ToString("yyyy-MM"));
-
-            try
-            {
-                logCount--;
-
-                //新建文件
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
-
-                if (fileName == "")
-                    fileName = string.Format("{0}.txt", DateTime.Now.ToString("yyyy-MM-dd-HH"));
-                else
-                    fileName = string.Format("{0}_{1}.txt", fileName, DateTime.Now.ToString("yyyy-MM-dd-HH"));
-
-                //写日志
-                using (var fs = new FileStream(string.Format("{0}/{1}", path, fileName), FileMode.OpenOrCreate, FileAccess.Write))
-                {
-                    var m_streamWriter = new StreamWriter(fs);
-                    m_streamWriter.BaseStream.Seek(0, SeekOrigin.End);
-                    m_streamWriter.WriteLine(string.Format("{0}[{1}]{2}", headName, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), logContent));
-                    m_streamWriter.WriteLine("");
-
-                    if (IsWrap)
-                        m_streamWriter.WriteLine("");
-
-                    m_streamWriter.Flush();
-                    m_streamWriter.Close();
-                    fs.Close();
-                }
-            }
-            catch
-            {
-                if (logCount != 0)
-                    SaveLog(fileName, path, headName, IsWrap, logCount--);
-            }
+            BaseLog.SaveLog(string.Format("方法：{0},键：{1},出错详情：{2}", CurrentMethod, key, ex.ToString()), "RedisContext.GetContext()_exp");
         }
         #endregion
     }
