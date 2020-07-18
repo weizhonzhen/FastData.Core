@@ -11,8 +11,8 @@ namespace FastRedis.Core
     /// </summary>
     public static class RedisInfo
     {
-        private static readonly int _db = 0;
-        private static readonly Lazy<ConnectionMultiplexer> conn;
+        internal static readonly int _db = 0;
+        internal static readonly Lazy<ConnectionMultiplexer> conn;
         static RedisInfo()
         {
             var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
@@ -23,17 +23,15 @@ namespace FastRedis.Core
                 AllowAdmin = true,
                 ConnectTimeout = 15000,
                 SyncTimeout = 5000,
-                ResponseTimeout = 15000,
                 EndPoints = { config.Server }
             };
-
             conn = new Lazy<ConnectionMultiplexer>(() => { return ConnectionMultiplexer.Connect(options); });
         }
 
         /// <summary>
         /// 连接
         /// </summary>
-        private static ConnectionMultiplexer Context
+        internal static ConnectionMultiplexer Context
         {
             get
             {
@@ -97,7 +95,7 @@ namespace FastRedis.Core
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
+                   return Context.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
                 else
                     return false;
             }
