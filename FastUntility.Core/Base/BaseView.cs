@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -16,9 +16,15 @@ namespace Fast.Untility.Core.Base
             {
                 var engine = controller.HttpContext.RequestServices.GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
                 var result = engine.FindView(controller.ControllerContext, view, isMainPage);
-                var viewContext = new ViewContext(controller.ControllerContext, result.View, controller.ViewData, controller.TempData, writer, new HtmlHelperOptions());
-                await result.View.RenderAsync(viewContext);
-                return writer.GetStringBuilder().ToString();
+
+                if (result.Success)
+                {
+                    var viewContext = new ViewContext(controller.ControllerContext, result.View, controller.ViewData, controller.TempData, writer, new HtmlHelperOptions());
+                    await result.View.RenderAsync(viewContext);
+                    return writer.GetStringBuilder().ToString();
+                }
+                else
+                    return "";
             }
         }
     }
