@@ -244,7 +244,6 @@ namespace FastUntility.Core.Base
                 handle.Version = new Version(version, minor);
                 handle.Content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
                 handle.Method = HttpMethod.Post;
-                handle.Headers.Add("SOAPAction", string.Format("{0}/{1}",Namespace,method));
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
                 var result = response.Content.ReadAsStringAsync().Result;
