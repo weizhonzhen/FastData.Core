@@ -233,7 +233,7 @@ namespace FastUntility.Core.Base
 
                 foreach (KeyValuePair<string, object> item in param)
                 {
-                    xml.AppendFormat("<{0}>{1}</{0}>", item.Key, item.Value);
+                    xml.AppendFormat("<{0}>{1}</{0}>", item.Key, item.Value.ToStr().Replace("<", "&lt;").Replace(">", "&gt;"));
                 }
 
                 xml.AppendFormat("</{0}>", method);
@@ -244,6 +244,7 @@ namespace FastUntility.Core.Base
                 handle.Version = new Version(version, minor);
                 handle.Content = new StringContent(xml.ToString(), Encoding.UTF8, "text/xml");
                 handle.Method = HttpMethod.Post;
+                handle.Headers.Add("SOAPAction", string.Format("{0}/{1}",Namespace,method));
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
                 var result = response.Content.ReadAsStringAsync().Result;
@@ -266,19 +267,3 @@ namespace FastUntility.Core.Base
         #endregion
     }
 }
-
-/*
-    GET  请求获取由Request-URI所标识的资源。
-         
-    POST  在Request-URI所标识的资源后附加新的数据。
-         
-    HEAD  请求获取由Request-URI所标识的资源的响应消息报头。
-         
-    OPTIONS  请求查询服务器的性能，或查询与资源相关的选项和需求。
-         
-    PUT   请求服务器存储一个资源，并用Request-URI作为其标识。
-         
-    DELETE  请求服务器删除由Request-URI所标识的资源。
-         
-    TRACE  请求服务器回送收到的请求信息，主要用语测试或诊断。         
- */
