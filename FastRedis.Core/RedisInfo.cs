@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using System.IO;
 using StackExchange.Redis;
 using FastUntility.Core.Base;
 
@@ -17,15 +16,7 @@ namespace FastRedis.Core
         {
             var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
             _db = config.Db;
-            var options = new ConfigurationOptions
-            {
-                AbortOnConnectFail = false,
-                AllowAdmin = true,
-                ConnectTimeout = 15000,
-                SyncTimeout = 5000,
-                EndPoints = { config.Server }
-            };
-            conn = new Lazy<ConnectionMultiplexer>(() => { return ConnectionMultiplexer.Connect(options); });
+            conn = new Lazy<ConnectionMultiplexer>(() => { return ConnectionMultiplexer.Connect(config.Server); });
         }
 
         /// <summary>
