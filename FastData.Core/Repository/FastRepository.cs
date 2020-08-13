@@ -1,4 +1,4 @@
-﻿using FastData.Core.Base;
+using FastData.Core.Base;
 using FastData.Core.Context;
 using FastData.Core.Model;
 using FastUntility.Core.Base;
@@ -560,7 +560,7 @@ namespace FastData.Core.Repository
         /// <param name="model">实体</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public WriteReturn AddList<T>(List<T> list, DataContext db = null, string key = null) where T : class, new()
+        public WriteReturn AddList<T>(List<T> list, DataContext db = null, string key = null, bool isLog = false) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -572,13 +572,13 @@ namespace FastData.Core.Repository
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.AddList<T>(list);
+                    result = tempDb.AddList<T>(list,isLog);
                     config = tempDb.config;
                 }
             }
             else
             {
-                result = db.AddList<T>(list);
+                result = db.AddList<T>(list,isLog);
                 config = db.config;
             }
 
@@ -598,11 +598,11 @@ namespace FastData.Core.Repository
         /// <param name="model">实体</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public async Task<WriteReturn> AddListAsy<T>(List<T> list, DataContext db = null, string key = null) where T : class, new()
+        public async Task<WriteReturn> AddListAsy<T>(List<T> list, DataContext db = null, string key = null, bool isLog = false) where T : class, new()
         {
             return await Task.Run(() =>
             {
-                return AddList<T>(list, db, key);
+                return AddList<T>(list, db, key,isLog);
             });
         }
         #endregion
