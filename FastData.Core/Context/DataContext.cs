@@ -1148,7 +1148,7 @@ namespace FastData.Core.Context
         /// <param name="IsTrans"></param>
         /// <param name="IsAsync"></param>
         /// <returns></returns>
-        public DataReturn<T> AddList<T>(List<T> list) where T : class, new()
+        public DataReturn<T> AddList<T>(List<T> list,bool isLog=false) where T : class, new()
         {
             var result = new DataReturn<T>();
             var sql = new StringBuilder();
@@ -1161,9 +1161,12 @@ namespace FastData.Core.Context
                 if (config.DbType == DataDbType.Oracle)
                 {
                     #region oracle
-                    cmd.Parameters.Clear();
-                    cmd.CommandText = string.Format("alter table {0} nologging", typeof(T).Name);
-                    cmd.ExecuteNonQuery();
+                    if (!isLog)
+                    {
+                        cmd.Parameters.Clear();
+                        cmd.CommandText = string.Format("alter table {0} nologging", typeof(T).Name);
+                        cmd.ExecuteNonQuery();
+                    }
 
                     foreach (var method in cmd.GetType().GetMethods())
                     {
@@ -1213,8 +1216,11 @@ namespace FastData.Core.Context
                     cmd.CommandText = sql.ToString().Replace(",)", ")");
                     result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
 
-                    cmd.CommandText = string.Format("alter table {0} logging", typeof(T).Name);
-                    cmd.ExecuteNonQuery();                    
+                    if (!isLog)
+                    {
+                        cmd.CommandText = string.Format("alter table {0} logging", typeof(T).Name);
+                        cmd.ExecuteNonQuery();
+                    }
                     #endregion
                 }
 
