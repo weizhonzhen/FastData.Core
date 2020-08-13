@@ -1,4 +1,4 @@
-﻿using FastData.Core.Context;
+using FastData.Core.Context;
 using FastData.Core.Model;
 using FastUntility.Core.Page;
 using System;
@@ -58,9 +58,9 @@ namespace FastData.Core.Repository
 
         Dictionary<string, object> Api();
 
-        WriteReturn AddList<T>(List<T> list, DataContext db = null, string key = null) where T : class, new();
+        WriteReturn AddList<T>(List<T> list, DataContext db = null, string key = null, bool isLog = false) where T : class, new();
 
-        Task<WriteReturn> AddListAsy<T>(List<T> list, DataContext db = null, string key = null) where T : class, new();
+        Task<WriteReturn> AddListAsy<T>(List<T> list, DataContext db = null, string key = null, bool isLog = false) where T : class, new();
 
         WriteReturn Add<T>(T model, DataContext db = null, string key = null) where T : class, new();
 
