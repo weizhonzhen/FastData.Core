@@ -8,7 +8,6 @@ using System.Data.Common;
 using FastUntility.Core.Page;
 using FastData.Core.Type;
 using FastData.Core.Model;
-using StackExchange.Redis;
 using System.Linq.Expressions;
 using FastData.Core.Property;
 
@@ -30,14 +29,11 @@ namespace FastData.Core.Base
         public static DataTable ToDataTable(DbCommand cmd, string sql, bool IsProcedure = false)
         {
             var dt = new DataTable();
-            var dr = ToDataReader(cmd, sql, IsProcedure);
-
-            dt.Load(dr);
-
-            dr.Close();
-            dr.Dispose();
-
-            return dt;
+            using (var dr = ToDataReader(cmd, sql, IsProcedure))
+            {
+                dt.Load(dr);
+                return dt;
+            }
         }
         #endregion
 
@@ -273,11 +269,10 @@ namespace FastData.Core.Base
         /// <returns></returns>
         public static int ToPageCountSql(DbParameter[] param, DbCommand cmd, string sql, ConfigModel config, ref string tempSql)
         {
+            sql = string.Format("select count(0) from ({0})t", sql);
             try
             {
                 cmd.Parameters.Clear();
-
-                sql = string.Format("select count(0) from ({0})t", sql);
 
                 tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
 
@@ -293,9 +288,9 @@ namespace FastData.Core.Base
                 Task.Run(() =>
                 {
                     if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException(config, ex, "ToPageCountSql", "");
+                        DbLogTable.LogException(config, ex, "ToPageCountSql", sql);
                     else
-                        DbLog.LogException(config.IsOutError,config.DbType, ex, "ToPageCountSql", "");
+                        DbLog.LogException(config.IsOutError,config.DbType, ex, "ToPageCountSql", sql);
                 });
                 return 0;
             }
@@ -397,11 +392,13 @@ namespace FastData.Core.Base
 
             cmd.CommandText = string.Format("select {1} from {0} where 1=0", typeof(T).Name, string.Join(",", sql.ToArray()));
 
-            var dr = cmd.ExecuteReader();
-            dt.Load(dr);
-            dr.Close();
-            dr.Dispose();
-            return dt;
+            using (var dr = cmd.ExecuteReader())
+            {
+                dt.Load(dr);
+                dr.Close();
+                dr.Dispose();
+                return dt;
+            }
         }
         #endregion
     }
