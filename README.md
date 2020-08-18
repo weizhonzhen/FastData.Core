@@ -42,7 +42,7 @@ in db.json
               }
             ], 
             "Redis": {
-                "Server": "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000"
+                "Server": "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000" --no timeouts
               }
       }
 ```
