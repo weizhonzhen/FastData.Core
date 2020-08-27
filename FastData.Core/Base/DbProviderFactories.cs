@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Reflection;
 using FastData.Core.Model;
 using System.Linq;
+using FastUntility.Core.Cache;
 
 namespace FastData.Core.Base
 {
@@ -18,17 +19,23 @@ namespace FastData.Core.Base
         {
             try
             {
-                var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == config.ProviderName);
-                if (assembly == null)
-                    assembly = Assembly.Load(config.ProviderName);
+                if (BaseCache.Exists(config.ProviderName))
+                    return BaseCache.Get<object>(config.ProviderName) as DbProviderFactory;
+                else
+                {
+                    var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == config.ProviderName);
+                    if (assembly == null)
+                        assembly = Assembly.Load(config.ProviderName);
 
-                var type = assembly.GetType(config.FactoryClient, false);
-                object instance = null;
+                    var type = assembly.GetType(config.FactoryClient, false);
+                    object instance = null;
 
-                if (type != null)
-                    instance = type.InvokeMember("Instance", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.GetProperty, null, type, null);
-                
-                return instance as DbProviderFactory;
+                    if (type != null)
+                        instance = Activator.CreateInstance(type);
+
+                    BaseCache.Set<object>(config.ProviderName, instance);
+                    return instance as DbProviderFactory;
+                }
             }
             catch (Exception ex)
             {
