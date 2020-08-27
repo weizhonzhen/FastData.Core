@@ -82,9 +82,6 @@ namespace FastData.Core.Base
 
                 list.Add(item);
             }
-
-            dr.Close();
-            dr.Dispose();
             
             return list;
         }
