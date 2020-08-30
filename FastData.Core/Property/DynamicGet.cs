@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FastUntility.Core.Cache;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -15,7 +16,14 @@ namespace FastData.Core.Property
         // 构建函数        
         public DynamicGet()
         {
-            GetValueDelegate = GenerateGetValue();
+            var key = string.Format("DynamicGet<T>.{0}.{1}", typeof(T)?.Namespace, typeof(T).Name);
+            if (!BaseCache.Exists(key))
+            {
+                GetValueDelegate = GenerateGetValue();
+                BaseCache.Set<object>(key, GetValueDelegate);
+            }
+            else
+                GetValueDelegate = BaseCache.Get<object>(key) as Func<object, string, object>;
         }
 
         #region 动态getvalue
@@ -73,7 +81,15 @@ namespace FastData.Core.Property
         public DynamicGet(object model)
         {
             Instance = model;
-            GetValueDelegate = GenerateGetValue();
+
+            var key = string.Format("DynamicGet.{0}.{1}", model.GetType()?.Namespace, model.GetType().Name);
+            if (!BaseCache.Exists(key))
+            {
+                GetValueDelegate = GenerateGetValue();
+                BaseCache.Set<object>(key, GetValueDelegate);
+            }
+            else
+                GetValueDelegate = BaseCache.Get<object>(key) as Func<object, string, object>;
         }
 
         #region 动态getvalue
