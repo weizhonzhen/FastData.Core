@@ -116,7 +116,14 @@ namespace FastUntility.Core.Base
         // 构建函数        
         static DynamicSet()
         {
-            SetValueDelegate = GenerateSetValue();
+            var key = string.Format("DynamicSet<T>.{0}.{1}", typeof(T)?.Namespace, typeof(T).Name);
+            if (!BaseCache.Exists(key))
+            {
+                SetValueDelegate = GenerateSetValue();
+                BaseCache.Set<object>(key, SetValueDelegate);
+            }
+            else
+                SetValueDelegate = BaseCache.Get<object>(key) as Action<object, string, object>;
         }
 
         #region 动态setvalue
@@ -172,7 +179,14 @@ namespace FastUntility.Core.Base
         // 构建函数        
         static DynamicGet()
         {
-            GetValueDelegate = GenerateGetValue();
+            var key = string.Format("DynamicGet<T>.{0}.{1}", typeof(T)?.Namespace, typeof(T).Name);
+            if (!BaseCache.Exists(key))
+            {
+                GetValueDelegate = GenerateGetValue();
+                BaseCache.Set<object>(key, GetValueDelegate);
+            }
+            else
+                GetValueDelegate = BaseCache.Get<object>(key) as Func<object, string, object>;
         }
 
         #region 动态getvalue
