@@ -8,7 +8,7 @@ namespace FastData.Core.Property
     /// <summary>
     /// 动态属性setvalue
     /// </summary>
-    public class DynamicSet<T>
+    internal class DynamicSet<T>
     {
         private bool IsSetCache;
         private Action<object, string, object> SetValueDelegate;
