@@ -11,19 +11,17 @@ namespace FastData.Core.Repository
 {
     public interface IQuery
     {
-        DataQuery SetKey(string key);
+        IQuery LeftJoin<T, T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false);
 
-        DataQuery LeftJoin<T, T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false);
+        IQuery RightJoin<T, T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false) where T1 : class, new();
 
-        DataQuery RightJoin<T, T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false) where T1 : class, new();
+        IQuery InnerJoin<T, T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false) where T1 : class, new();
 
-        DataQuery InnerJoin<T, T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false) where T1 : class, new();
+        IQuery OrderBy<T>(Expression<Func<T, object>> field, bool isDesc = true);
 
-        DataQuery OrderBy<T>(Expression<Func<T, object>> field, bool isDesc = true);
+        IQuery GroupBy<T>(Expression<Func<T, object>> field);
 
-        DataQuery GroupBy<T>(Expression<Func<T, object>> field);
-
-        DataQuery Take(int i);
+        IQuery Take(int i);
 
         string ToJson(DataContext db = null);
 
