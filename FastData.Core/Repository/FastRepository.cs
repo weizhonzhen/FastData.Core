@@ -1002,13 +1002,12 @@ namespace FastData.Core.Repository
             {
                 key = this.query.Data.Key;
                 this.query.Data = new DataQuery();
-                this.query.Data.Key = key;
+                this.query.Data.Config = DataConfig.Get(key);
             }
             else 
             {
                 this.query.Data = new DataQuery();
                 this.query.Data.Config = DataConfig.Get(key);
-                this.query.Data.Key = key;
             }
 
             var queryField = BaseField.QueryField<T>(predicate, field, this.query.Data.Config);
