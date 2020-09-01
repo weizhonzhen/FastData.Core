@@ -998,14 +998,14 @@ namespace FastData.Core.Repository
            if (DataConfig.DataType(key))
                 throw new Exception("数据库查询key不能为空,数据库类型有多个");
            
-            if (this.query.Data.Config != null)
+             if (this.query.Data.Config != null&&this.query.Data.Config.IsChangeDb )
             {
                 key = this.query.Data.Key;
                 this.query.Data = new DataQuery();
                 this.query.Data.Config = DataConfig.Get(key);
                 this.query.Data.Key = key;
             }
-            else 
+            else
             {
                 this.query.Data = new DataQuery();
                 this.query.Data.Config = DataConfig.Get(key);
@@ -1034,6 +1034,7 @@ namespace FastData.Core.Repository
         {
             this.query.Data.Config = DataConfig.Get(key);
             this.query.Data.Key = key;
+            this.query.Data.Config.IsChangeDb = true;
             return this;
         }
         #endregion
