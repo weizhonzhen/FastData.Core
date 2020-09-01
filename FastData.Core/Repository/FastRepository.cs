@@ -995,18 +995,19 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null)
         {
-           if (this.query.Data.Config == null && string.IsNullOrEmpty(key))
-                throw new Exception("数据库查询key不能为空");
-            else if (!string.IsNullOrEmpty(key))
-            {
-                this.query.Data = new DataQuery();
-                this.query.Data.Config = DataConfig.Get(key);
-                this.query.Data.Key = key;
-            }
-            else
+           if (DataConfig.DataType(key))
+                throw new Exception("数据库查询key不能为空,数据库类型有多个");
+           
+            if (this.query.Data.Config != null)
             {
                 key = this.query.Data.Key;
                 this.query.Data = new DataQuery();
+                this.query.Data.Key = key;
+            }
+            else 
+            {
+                this.query.Data = new DataQuery();
+                this.query.Data.Config = DataConfig.Get(key);
                 this.query.Data.Key = key;
             }
 
