@@ -1,6 +1,10 @@
 using FastData.Core.Model;
+using FastData.Core.Type;
 using FastUntility.Core.Base;
+using FastUntility.Core.BuilderMethod;
+using NPOI.SS.Formula.Functions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FastData.Core.Base
 {
@@ -11,14 +15,14 @@ namespace FastData.Core.Base
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static ConfigModel Get(string key=null)
+        public static ConfigModel Get(string key = null)
         {
             var list = new List<ConfigModel>();
             var item = new ConfigModel();
             var cacheKey = key == null ? "config" : string.Format("config.{0}", key);
 
             if (DbCache.Exists(CacheType.Web, cacheKey))
-                list = DbCache.Get<List<ConfigModel>>(CacheType.Web,cacheKey);
+                list = DbCache.Get<List<ConfigModel>>(CacheType.Web, cacheKey);
             else
             {
                 list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, "db.json");
@@ -43,6 +47,30 @@ namespace FastData.Core.Base
             item.DbType = item.DbType.ToLower();
 
             return item;
+        }
+
+        public static bool DataType(string key = null)
+        {
+            var list = new List<ConfigModel>();
+            var cacheKey = key == null ? "config" : string.Format("config.{0}", key);
+
+            if (DbCache.Exists(CacheType.Web, cacheKey))
+                list = DbCache.Get<List<ConfigModel>>(CacheType.Web, cacheKey);
+            else
+            {
+                list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, "db.json");
+                DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
+            }
+
+            var result = new List<bool>();
+            result.Add(list.Count(a => a.DbType == DataDbType.Oracle) > 1);
+            result.Add(list.Count(a => a.DbType == DataDbType.DB2) > 1);
+            result.Add(list.Count(a => a.DbType == DataDbType.MySql) > 1);
+            result.Add(list.Count(a => a.DbType == DataDbType.PostgreSql) > 1);
+            result.Add(list.Count(a => a.DbType == DataDbType.SQLite) > 1);
+            result.Add(list.Count(a => a.DbType == DataDbType.SqlServer) > 1);
+
+            return result.Count(a => a == true) > 1;
         }
     }
 }
