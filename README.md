@@ -18,7 +18,7 @@ in Startup.cs Startup mothod
             FastMap.InstanceMap();
             
             //by Repository
-            services.AddTransient<IRedisRepository, RedisRepository>();
+            services.AddSingleton<IRedisRepository, RedisRepository>();
             services.AddTransient<IFastRepository, FastRepository>(); 
             ServiceContext.Init(new ServiceEngine(services.BuildServiceProvider())); //reader all Repository
        
