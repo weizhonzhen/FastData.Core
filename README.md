@@ -18,7 +18,9 @@ in Startup.cs Startup mothod
             FastMap.InstanceMap();
             
             //by Repository
-            services.AddTransient<IFastRepository, FastRepository>();
+            services.AddTransient<IFastRedisRepository, FastRedisRepository>(); //redis
+            services.AddTransient<IFastRepository, FastRepository>(); 
+            ServiceContext.Init(new ServiceEngine(services.BuildServiceProvider())); //reader all Repository
        
 in db.json         
 ```csharp
