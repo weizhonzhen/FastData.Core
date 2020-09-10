@@ -1,5 +1,6 @@
 ﻿using FastRedis.Core.Repository;
 using FastUntility.Core;
+using FastUntility.Core.Cache;
 
 namespace FastData.Core.Base
 {
@@ -13,13 +14,11 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Set(string cacheType, string key, string value, int Hours = 8640)
         {
-            var IFast = ServiceContext.Engine.Resolve<IFastRedisRepository>();
+            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
-                FastUntility.Core.Cache.BaseCache.Set(key, value, Hours);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast == null)
-                FastRedis.Core.RedisInfo.SetAsy(key, value, Hours);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast != null)
-                IFast.SetAsy(key, value, Hours);
+                BaseCache.Set(key, value, Hours);
+            else if (cacheType.ToLower() == CacheType.Redis)
+                IRedis.SetAsy(key, value, Hours);
         }
 
         /// <summary>
@@ -27,13 +26,11 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Set<T>(string cacheType, string key, T value, int Hours = 8640) where T : class, new()
         {
-            var IFast = ServiceContext.Engine.Resolve<IFastRedisRepository>();
+            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
-                FastUntility.Core.Cache.BaseCache.Set<T>(key, value, Hours);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast == null)
-                FastRedis.Core.RedisInfo.SetAsy<T>(key, value, Hours);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast != null)
-                IFast.SetAsy<T>(key, value, Hours);
+                BaseCache.Set<T>(key, value, Hours);
+            else if (cacheType.ToLower() == CacheType.Redis)
+                IRedis.SetAsy<T>(key, value, Hours);
         }
 
         /// <summary>
@@ -41,13 +38,11 @@ namespace FastData.Core.Base
         /// </summary>
         public static string Get(string cacheType, string key)
         {
-            var IFast = ServiceContext.Engine.Resolve<IFastRedisRepository>();
+            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
-                return FastUntility.Core.Cache.BaseCache.Get(key);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast == null)
-                return FastRedis.Core.RedisInfo.GetAsy(key).Result;
-            else if (cacheType.ToLower() == CacheType.Redis && IFast != null)
-               return IFast.GetAsy(key).Result;
+                return BaseCache.Get(key);
+            else if (cacheType.ToLower() == CacheType.Redis)
+               return IRedis.GetAsy(key).Result;
 
             return "";
         }
@@ -57,13 +52,11 @@ namespace FastData.Core.Base
         /// </summary>
         public static T Get<T>(string cacheType, string key) where T : class, new()
         {
-            var IFast = ServiceContext.Engine.Resolve<IFastRedisRepository>();
+            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
-                return FastUntility.Core.Cache.BaseCache.Get<T>(key);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast == null)
-                return FastRedis.Core.RedisInfo.GetAsy<T>(key).Result;
-            else if (cacheType.ToLower() == CacheType.Redis && IFast != null)
-                return IFast.GetAsy<T>(key).Result;
+                return BaseCache.Get<T>(key);
+            else if (cacheType.ToLower() == CacheType.Redis)
+                return IRedis.GetAsy<T>(key).Result;
             return new T();
         }
 
@@ -72,13 +65,11 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Remove(string cacheType, string key)
         {
-            var IFast = ServiceContext.Engine.Resolve<IFastRedisRepository>();
+            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
-                FastUntility.Core.Cache.BaseCache.Remove(key);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast == null)
-                FastRedis.Core.RedisInfo.RemoveAsy(key);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast !=null)
-                IFast.RemoveAsy(key);
+                BaseCache.Remove(key);
+            else if (cacheType.ToLower() == CacheType.Redis)
+                IRedis.RemoveAsy(key);
         }
 
         /// <summary>
@@ -86,13 +77,11 @@ namespace FastData.Core.Base
         /// </summary>
         public static bool Exists(string cacheType, string key)
         {
-            var IFast = ServiceContext.Engine.Resolve<IFastRedisRepository>();
+            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
-               return  FastUntility.Core.Cache.BaseCache.Exists(key);
-            else if (cacheType.ToLower() == CacheType.Redis && IFast == null)
-               return  FastRedis.Core.RedisInfo.ExistsAsy(key).Result;
-            else if (cacheType.ToLower() == CacheType.Redis && IFast != null)
-                return IFast.ExistsAsy(key).Result;
+               return  BaseCache.Exists(key);
+            else if (cacheType.ToLower() == CacheType.Redis)
+                return IRedis.ExistsAsy(key).Result;
             return false;
         }
     }
