@@ -592,6 +592,7 @@ namespace FastData.Core
         }
         #endregion
 
+
         #region 验证xml
         /// <summary>
         /// 验证xml
@@ -635,7 +636,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static string MapDb(string name)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower())).ToStr();
         }
         #endregion
 
@@ -647,7 +648,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static string MapType(string name)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.type", name.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.type", name.ToLower())).ToStr();
         }
         #endregion
 
@@ -679,14 +680,14 @@ namespace FastData.Core
         #region 获取map备注
         public static string MapRemark(string name)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.remark", name.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.remark", name.ToLower())).ToStr();
         }
         #endregion
 
         #region 获取map参数备注
         public static string MapParamRemark(string name, string param)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.remark", name.ToLower(), param.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.remark", name.ToLower(), param.ToLower())).ToStr();
         }
         #endregion
 
@@ -699,7 +700,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static string MapRequired(string name, string param)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.required", name.ToLower(), param.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.required", name.ToLower(), param.ToLower())).ToStr();
         }
         #endregion
 
@@ -712,7 +713,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static string MapMaxlength(string name, string param)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.maxlength", name.ToLower(), param.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.maxlength", name.ToLower(), param.ToLower())).ToStr();
         }
         #endregion
 
@@ -725,7 +726,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static string MapDate(string name, string param)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.date", name.ToLower(), param.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.date", name.ToLower(), param.ToLower())).ToStr();
         }
         #endregion
 
@@ -738,7 +739,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static string MapCheckMap(string name, string param)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.checkmap", name.ToLower(), param.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.checkmap", name.ToLower(), param.ToLower())).ToStr();
         }
         #endregion
 
@@ -751,7 +752,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static string MapExistsMap(string name, string param)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.existsmap", name.ToLower(), param.ToLower()));
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.existsmap", name.ToLower(), param.ToLower())).ToStr();
         }
         #endregion
     }
