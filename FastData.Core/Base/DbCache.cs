@@ -14,7 +14,6 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Set(string cacheType, string key, string value, int Hours = 8640)
         {
-            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
                 BaseCache.Set(key, value, Hours);
             else if (cacheType.ToLower() == CacheType.Redis)
@@ -26,7 +25,6 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Set<T>(string cacheType, string key, T value, int Hours = 8640) where T : class, new()
         {
-            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
                 BaseCache.Set<T>(key, value, Hours);
             else if (cacheType.ToLower() == CacheType.Redis)
@@ -37,8 +35,7 @@ namespace FastData.Core.Base
         /// 获取缓存
         /// </summary>
         public static string Get(string cacheType, string key)
-        {
-            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
+        {           
             if (cacheType.ToLower() == CacheType.Web)
                 return BaseCache.Get(key);
             else if (cacheType.ToLower() == CacheType.Redis)
@@ -52,7 +49,6 @@ namespace FastData.Core.Base
         /// </summary>
         public static T Get<T>(string cacheType, string key) where T : class, new()
         {
-            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
                 return BaseCache.Get<T>(key);
             else if (cacheType.ToLower() == CacheType.Redis)
@@ -65,7 +61,6 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Remove(string cacheType, string key)
         {
-            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
                 BaseCache.Remove(key);
             else if (cacheType.ToLower() == CacheType.Redis)
@@ -77,12 +72,22 @@ namespace FastData.Core.Base
         /// </summary>
         public static bool Exists(string cacheType, string key)
         {
-            var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
             if (cacheType.ToLower() == CacheType.Web)
                return  BaseCache.Exists(key);
             else if (cacheType.ToLower() == CacheType.Redis)
                 return IRedis.ExistsAsy(key).Result;
             return false;
+        }
+
+        private static IRedisRepository IRedis 
+        {
+            get
+            {
+                var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
+                if (IRedis == null)
+                    throw new System.Exception("ConfigureServices add ServiceContext.Init(new ServiceEngine(services.BuildServiceProvider()));");
+                return IRedis;
+            }
         }
     }
 }
