@@ -3,7 +3,6 @@ using FastData.Core.Model;
 using FastUntility.Core.Page;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -57,6 +56,26 @@ namespace FastData.Core.Repository
         List<string> MapParam(string name);
 
         Dictionary<string, object> Api();
+
+        bool CheckMap(string xml, string dbKey = null);
+
+        string MapDb(string name);
+
+        string MapType(string name);
+
+        bool IsExists(string name);
+
+        string MapRemark(string name);
+
+        string MapRequired(string name, string param);
+
+        string MapMaxlength(string name, string param);
+
+        string MapDate(string name, string param);
+
+        string MapCheckMap(string name, string param);
+
+        string MapExistsMap(string name, string param);
 
         WriteReturn AddList<T>(List<T> list, DataContext db = null, string key = null, bool isLog = false) where T : class, new();
 

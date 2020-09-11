@@ -450,6 +450,7 @@ namespace FastData.Core.Repository
         }
         #endregion
 
+
         #region map db
         /// <summary>
         /// map db
@@ -477,7 +478,7 @@ namespace FastData.Core.Repository
         }
         #endregion
 
-        #region 初始化map 3
+        #region 初始化map
         /// <summary>
         /// 初始化map 3
         /// </summary>
@@ -555,6 +556,145 @@ namespace FastData.Core.Repository
             return DbCache.Get<Dictionary<string, object>>(DataConfig.Get().CacheType, "FastMap.Api") ?? new Dictionary<string, object>();
         }
         #endregion
+
+        #region 验证xml
+        /// <summary>
+        /// 验证xml
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckMap(string xml, string dbKey = null)
+        {
+            var config = DataConfig.Get(dbKey);
+            var info = new FileInfo(xml);
+
+            var key = new List<string>();
+            var sql = new List<string>();
+            var db = new Dictionary<string, object>();
+            var type = new Dictionary<string, object>();
+            var param = new Dictionary<string, object>();
+            var check = new Dictionary<string, object>();
+            var name = new Dictionary<string, object>();
+            var parameName = new Dictionary<string, object>();
+
+            return MapXml.GetXmlList(info.FullName, "sqlMap", ref key, ref sql, ref db, ref type, ref check, ref param, ref name, ref parameName, config);
+        }
+        #endregion
+
+        #region map db
+        /// <summary>
+        /// map db
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string MapDb(string name)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region map type
+        /// <summary>
+        /// map db
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string MapType(string name)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.type", name.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region 是否存在map id
+        /// <summary>
+        /// 是否存在map id
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool IsExists(string name)
+        {
+            return DbCache.Exists(DataConfig.Get().CacheType, name.ToLower());
+        }
+        #endregion
+
+        #region 获取map备注
+        public string MapRemark(string name)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.remark", name.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region 获取map参数备注
+        public string MapParamRemark(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.remark", name.ToLower(), param.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region 获取map验证必填
+        /// <summary>
+        /// 获取map验证必填
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public string MapRequired(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.required", name.ToLower(), param.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region 获取map验证长度
+        /// <summary>
+        /// 获取map验证长度
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public string MapMaxlength(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.maxlength", name.ToLower(), param.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region 获取map验证日期
+        /// <summary>
+        /// 获取map验证长度
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public string MapDate(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.date", name.ToLower(), param.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region 获取map验证map
+        /// <summary>
+        /// 获取map验证map
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public string MapCheckMap(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.checkmap", name.ToLower(), param.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region 获取map验证map
+        /// <summary>
+        /// 获取map验证map
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public string MapExistsMap(string name, string param)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.existsmap", name.ToLower(), param.ToLower())).ToStr();
+        }
+        #endregion
+
 
         #region 批量增加
         /// <summary>
@@ -995,10 +1135,10 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null)
         {
-           if (DataConfig.DataType(key))
+            if (DataConfig.DataType(key))
                 throw new Exception("数据库查询key不能为空,数据库类型有多个");
-           
-             if (this.query.Data.Config != null&&this.query.Data.Config.IsChangeDb )
+
+            if (this.query.Data.Config != null&&this.query.Data.Config.IsChangeDb )
             {
                 key = this.query.Data.Key;
                 this.query.Data = new DataQuery();
