@@ -67,6 +67,8 @@ namespace FastData.Core.Repository
 
         string MapRemark(string name);
 
+        string MapParamRemark(string name, string param);
+
         string MapRequired(string name, string param);
 
         string MapMaxlength(string name, string param);
