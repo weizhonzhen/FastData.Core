@@ -185,12 +185,12 @@ namespace FastData.Core
 
                             for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
                             {
-                                result = MapXml.MapForEach<T>(result, name, tempDb, key, config, i);
+                                result = MapXml.MapForEach<T>(result, name, tempDb, config, i);
                             }
                         }
                     }
                     else
-                        result = MapXml.MapForEach<T>(result, name, db, key, config);
+                        result = MapXml.MapForEach<T>(result, name, db, config);
                 }
                 return result;
             }
@@ -541,12 +541,12 @@ namespace FastData.Core
 
                             for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
                             {
-                                result.list = MapXml.MapForEach<T>(result.list, name, tempDb, key, config, i);
+                                result.list = MapXml.MapForEach<T>(result.list, name, tempDb, config, i);
                             }
                         }
                     }
                     else
-                        result.list = MapXml.MapForEach<T>(result.list, name, db, key, config);
+                        result.list = MapXml.MapForEach<T>(result.list, name, db, config);
                 }
 
                 return result;
