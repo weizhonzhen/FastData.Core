@@ -22,9 +22,8 @@ namespace FastUntility.Core.Base
         public static T DicToModel<T>(Dictionary<string, object> dic, bool isCache = true) where T : class, new()
         {
             var result = new T();
-
+            var info = new DynamicSet<T>();
             PropertyInfo<T>(isCache).ForEach(a => {
-                var info = new DynamicSet<T>();
                 if (dic.ContainsKey(a.Name.ToLower()) && !string.IsNullOrEmpty(dic[a.Name.ToLower()].ToStr()))
                     info.SetValue(result, a.Name, Convert.ChangeType(dic[a.Name.ToLower()], a.PropertyType), isCache);
             });
@@ -41,9 +40,8 @@ namespace FastUntility.Core.Base
         public static Dictionary<string, object> ModelToDic<T>(T model, bool isCache = true) where T : class, new()
         {
             var dic = new Dictionary<string, object>();
-
+            var info = new DynamicGet<T>();
             PropertyInfo<T>(isCache).ForEach(a => {
-                var info = new DynamicGet<T>();
                 dic.Add(a.Name, info.GetValue(model, a.Name, isCache));
             });
 

@@ -21,19 +21,18 @@ namespace FastUntility.Core.Base
             var dynSet = new DynamicSet<T>();
             var list = BaseDic.PropertyInfo<T>();
 
-            foreach (var item in BaseDic.PropertyInfo<T1>())
-            {
-                if (list.Exists(a => a.Name.ToLower() == item.Name.ToLower()))
+            BaseDic.PropertyInfo<T1>().ForEach(m => {
+                if (list.Exists(a => a.Name.ToLower() == m.Name.ToLower()))
                 {
-                    var property = list.Find(a => a.Name.ToLower() == item.Name.ToLower());
-                    var isList = item.PropertyType.GetGenericArguments().Length > 0;
-                    var isLeafSystemType = isList && item.PropertyType.GetGenericArguments()[0].FullName.StartsWith("System.");
-                    var isSystemType = item.PropertyType.FullName.StartsWith("System.");
+                    var property = list.Find(a => a.Name.ToLower() == m.Name.ToLower());
+                    var isList = m.PropertyType.GetGenericArguments().Length > 0;
+                    var isLeafSystemType = isList && m.PropertyType.GetGenericArguments()[0].FullName.StartsWith("System.");
+                    var isSystemType = m.PropertyType.FullName.StartsWith("System.");
 
                     if (isList && !isLeafSystemType)
                     {
                         var leafList = Activator.CreateInstance(typeof(List<>).MakeGenericType(property.PropertyType.GetGenericArguments()[0]));
-                        var tempList = Convert.ChangeType(dynGet.GetValue(model, item.Name, true), item.PropertyType) as IEnumerable;
+                        var tempList = Convert.ChangeType(dynGet.GetValue(model, m.Name, true), m.PropertyType) as IEnumerable;
 
                         if (tempList != null)
                         {
@@ -58,18 +57,18 @@ namespace FastUntility.Core.Base
                     }
                     else if (isSystemType)
                     {
-                        if (item.PropertyType.Name == "Nullable`1" && item.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(result, property.Name, dynGet.GetValue(model, item.Name, true), true);
+                        if (m.PropertyType.Name == "Nullable`1" && m.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                            dynSet.SetValue(result, property.Name, dynGet.GetValue(model, m.Name, true), true);
                         else
-                            dynSet.SetValue(result, property.Name, Convert.ChangeType(dynGet.GetValue(model, item.Name, true), item.PropertyType), true);
+                            dynSet.SetValue(result, property.Name, Convert.ChangeType(dynGet.GetValue(model, m.Name, true), m.PropertyType), true);
                     }
                     else
                     {
-                        var tempModel = Convert.ChangeType(dynGet.GetValue(model, item.Name, true), item.PropertyType);
+                        var tempModel = Convert.ChangeType(dynGet.GetValue(model, m.Name, true), m.PropertyType);
                         var leafModel = Activator.CreateInstance(property.PropertyType);
                         var propertyList = (property.PropertyType as TypeInfo).GetProperties().ToList();
-                        
-                        (item.PropertyType as TypeInfo).GetProperties().ToList().ForEach(p => {
+
+                        (m.PropertyType as TypeInfo).GetProperties().ToList().ForEach(p => {
                             if (propertyList.Exists(a => a.Name == p.Name))
                             {
                                 var temp = propertyList.Find(a => a.Name.ToLower() == p.Name.ToLower());
@@ -79,8 +78,7 @@ namespace FastUntility.Core.Base
                         dynSet.SetValue(result, property.Name, leafModel, true);
                     }
                 }
-            }
-
+            });
             return result;
         }
     }

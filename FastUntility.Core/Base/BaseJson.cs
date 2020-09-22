@@ -225,13 +225,13 @@ namespace FastUntility.Core.Base
             while (reader.Read())
             {
                 var dic = new Dictionary<string, object>();
-                foreach (var col in cols)
-                {
-                    if (reader[col] is DBNull)
-                        dic.Add(col, "");
+              
+                cols.ForEach(a => {
+                    if (reader[a] is DBNull)
+                        dic.Add(a, "");
                     else
-                        dic.Add(col, reader[col]);
-                }
+                        dic.Add(a, reader[a]);
+                });
 
                 result.Add(dic);
             }
@@ -261,13 +261,12 @@ namespace FastUntility.Core.Base
             while (reader.Read())
             {
                 var dic = new Dictionary<string, object>();
-                foreach (var col in cols)
-                {
-                    if (reader[col] is DBNull)
-                        dic.Add(col.ToLower(), "");
+                cols.ForEach(a => {
+                    if (reader[a] is DBNull)
+                        dic.Add(a.ToLower(), "");
                     else
-                        dic.Add(col.ToLower(), reader[col]);
-                }
+                        dic.Add(a.ToLower(), reader[a]);
+                });
 
                 result.Add(dic);
             }
