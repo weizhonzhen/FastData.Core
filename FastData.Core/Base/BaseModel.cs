@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +8,9 @@ using FastData.Core.Property;
 using FastData.Core.Model;
 using System.Data.Common;
 using FastData.Core.Type;
+using System.Data;
+using NPOI.SS.Util;
+using System.Linq;
 
 namespace FastData.Core.Base
 {
@@ -40,32 +43,27 @@ namespace FastData.Core.Base
                 if (field == null)
                 {
                     #region 属性
-                    foreach (var item in pInfo)
-                    {
-                        result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
-
-                        var itemValue = dynGet.GetValue(model, item.Name, config.IsPropertyCache);
+                    pInfo.ForEach(a => {
+                        result.Sql = string.Format("{2} {0}={1}{0},", a.Name, config.Flag, result.Sql);
+                        var itemValue = dynGet.GetValue(model, a.Name, config.IsPropertyCache);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
-                        temp.ParameterName = item.Name;
+                        temp.ParameterName = a.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
-                        result.Param.Add(temp);                        
-                    }
+                        result.Param.Add(temp);
+                    });
                     #endregion
                 }
                 else
                 {
                     #region lambda
-                    var list = (field.Body as NewExpression).Members;
-                    foreach (var item in list)
-                    {
-                        result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
-
-                        var itemValue = dynGet.GetValue(model, item.Name, config.IsPropertyCache);
+                    (field.Body as NewExpression).Members.ToList().ForEach(a => {
+                        result.Sql = string.Format("{2} {0}={1}{0},", a.Name, config.Flag, result.Sql);
+                        var itemValue = dynGet.GetValue(model, a.Name, config.IsPropertyCache);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
-                        temp.ParameterName = item.Name;
+                        temp.ParameterName = a.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
                         result.Param.Add(temp);
-                    }
+                    });
                     #endregion
                 }
 
@@ -110,24 +108,18 @@ namespace FastData.Core.Base
             {
                 sbName.AppendFormat("insert into {0} (", typeof(T).Name);
                 sbValue.Append(" values (");
-                
-                var pInfo = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
-
-                foreach (var item in pInfo)
-                {
-                    if (!list.Exists(a => a.Name == item.Name))
+                PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache).ForEach(p => {
+                    if (!list.Exists(a => a.Name == p.Name))
                     {
-                        sbName.AppendFormat("{0},", item.Name);
-
-                        sbValue.AppendFormat("{1}{0},", item.Name, config.Flag);
-
-                        var itemValue = dynGet.GetValue(model, item.Name, config.IsPropertyCache);
+                        sbName.AppendFormat("{0},", p.Name);
+                        sbValue.AppendFormat("{1}{0},", p.Name, config.Flag);
+                        var itemValue = dynGet.GetValue(model, p.Name, config.IsPropertyCache);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
-                        temp.ParameterName = item.Name;
+                        temp.ParameterName = p.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
                         result.Param.Add(temp);
                     }
-                }
+                });
 
                 result.Sql = string.Format("{0}) {1})", sbName.ToString().Substring(0, sbName.ToString().Length - 1)
                                                 , sbValue.ToString().Substring(0, sbValue.ToString().Length - 1));
@@ -326,46 +318,42 @@ namespace FastData.Core.Base
                 result.Sql = result.Sql.Substring(0, result.Sql.Length - 1);
 
                 var count = 1;
-                foreach (var item in where)
-                {
+                where.ForEach(a => {
                     if (count == 1)
-                        result.Sql = string.Format("{2} where {0}={1}{0} ", item, config.Flag, result.Sql);
+                        result.Sql = string.Format("{2} where {0}={1}{0} ", a, config.Flag, result.Sql);
                     else
-                        result.Sql = string.Format("{2} and {0}={1}{0} ", item, config.Flag, result.Sql);
+                        result.Sql = string.Format("{2} and {0}={1}{0} ", a, config.Flag, result.Sql);
 
                     var temp = DbProviderFactories.GetFactory(config).CreateParameter();
-                    temp.ParameterName = item;
-                    temp.SourceColumn = item;
+                    temp.ParameterName = a;
+                    temp.SourceColumn = a;
                     result.Param.Add(temp);
                     count++;
-                }
+                });
 
                 result.IsSuccess = true;
 
-                foreach(var model in list)
-                {
+                list.ForEach(p => {
                     var row = result.table.NewRow();
-                    foreach (var item in where)
-                    {
-                        row[item] = dynGet.GetValue(model, item, true);
-                    }
+                    where.ForEach(a => {
+                        row[a] = dynGet.GetValue(p, a, true);
+                    });
 
                     if (field == null)
                     {
-                        foreach (var info in PropertyCache.GetPropertyInfo<T>())
-                        {
-                            row[info.Name] = dynGet.GetValue(model, info.Name, true);
-                        }
+                        PropertyCache.GetPropertyInfo<T>().ForEach(a => {
+                            row[a.Name] = dynGet.GetValue(p, a.Name, true);
+                        });
                     }
                     else
                     {
-                        foreach (var info in (field.Body as NewExpression).Members)
-                        {
-                            row[info.Name] = dynGet.GetValue(model, info.Name, true);
-                        }
+                        (field.Body as NewExpression).Members.ToList().ForEach(a => {
+                            row[a.Name] = dynGet.GetValue(p, a.Name, true);
+                        });
                     }
                     result.table.Rows.Add(row);
-                }
+
+                });
 
                 return result;
             }

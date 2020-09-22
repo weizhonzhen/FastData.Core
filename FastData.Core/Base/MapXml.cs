@@ -350,8 +350,7 @@ namespace FastData.Core.Base
             var field = DbCache.Get(config.CacheType, string.Format("{0}.foreach.field.{1}", name.ToLower(), i));
             var sql = DbCache.Get(config.CacheType, string.Format("{0}.foreach.sql.{1}", name.ToLower(), i));
 
-            foreach (var item in data)
-            {
+            data.ForEach(a => {
                 param.Clear();
                 if (field.IndexOf(',') > 0)
                 {
@@ -359,7 +358,7 @@ namespace FastData.Core.Base
                     {
                         var tempParam = DbProviderFactories.GetFactory(config).CreateParameter();
                         tempParam.ParameterName = split;
-                        tempParam.Value = item.GetValue(split);
+                        tempParam.Value = a.GetValue(split);
                         param.Add(tempParam);
                     }
                 }
@@ -367,13 +366,13 @@ namespace FastData.Core.Base
                 {
                     var tempParam = DbProviderFactories.GetFactory(config).CreateParameter();
                     tempParam.ParameterName = field;
-                    tempParam.Value = item.GetValue(field);
+                    tempParam.Value = a.GetValue(field);
                     param.Add(tempParam);
                 }
 
-                item.Add(dicName, FastRead.ExecuteSql(sql, param.ToArray(), db, key));
-                result.Add(item);
-            }
+                a.Add(dicName, FastRead.ExecuteSql(sql, param.ToArray(), db, key));
+                result.Add(a);
+            });
 
             return result;
         }
@@ -587,46 +586,39 @@ namespace FastData.Core.Base
             }
 
             var apilist = new List<string>();
-            foreach (KeyValuePair<string, object> item in db)
-            {
-                DbCache.Set(config.CacheType, string.Format("{0}.db", item.Key.ToLower()), item.Value.ToStr());
-                apilist.Add(item.Key.ToLower());
-            }
+            db.ToList().ForEach(a => {
+                DbCache.Set(config.CacheType, string.Format("{0}.db", a.Key.ToLower()), a.Value.ToStr());
+                apilist.Add(a.Key.ToLower());
+            });
 
             map.Remove(fileName);
             map.Add(fileName, apilist);
             DbCache.Set<Dictionary<string, object>>(config.CacheType, "FastMap.Api", map);
 
-            foreach (KeyValuePair<string, object> item in type)
-            {
-                DbCache.Set(config.CacheType, string.Format("{0}.type", item.Key.ToLower()), item.Value.ToStr());
-                key.Add(string.Format("{0}.type", item.Key.ToLower()));
-            }
+            type.ToList().ForEach(a => {
+                DbCache.Set(config.CacheType, string.Format("{0}.type", a.Key.ToLower()), a.Value.ToStr());
+                key.Add(string.Format("{0}.type", a.Key.ToLower()));
+            });
 
-            foreach (KeyValuePair<string, object> item in param)
-            {
-                DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", item.Key.ToLower()), item.Value as List<string>);
-                key.Add(string.Format("{0}.param", item.Key.ToLower()));
-            }
+            param.ToList().ForEach(a => {
+                DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", a.Key.ToLower()), a.Value as List<string>);
+                key.Add(string.Format("{0}.param", a.Key.ToLower()));
+            });
 
-            foreach (KeyValuePair<string, object> item in check)
-            {
-                DbCache.Set(config.CacheType, item.Key, item.Value.ToStr());
-                key.Add(item.Key);
-            }
+            check.ToList().ForEach(a => {
+                DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
+                key.Add(a.Key);
+            });
 
-            foreach (KeyValuePair<string, object> item in name)
-            {
-                DbCache.Set(config.CacheType, item.Key, item.Value.ToStr());
-                key.Add(item.Key);
-            }
+            name.ToList().ForEach(a => {
+                DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
+                key.Add(a.Key);
+            });
 
-            foreach (KeyValuePair<string, object> item in parameName)
-            {
-                DbCache.Set(config.CacheType, item.Key, item.Value.ToStr());
-                key.Add(item.Key);
-            }
-
+            parameName.ToList().ForEach(a => {
+                DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
+                key.Add(a.Key);
+            });
             return key;
         }
         #endregion
@@ -839,7 +831,7 @@ namespace FastData.Core.Base
 
                                 i++;
                             }
-
+                            
                             //db
                             if (temp.Attributes["db"] != null)
                                 db.Add(tempKey, temp.Attributes["db"].Value.ToStr());

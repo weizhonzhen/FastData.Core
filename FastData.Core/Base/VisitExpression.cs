@@ -7,6 +7,7 @@ using FastUntility.Core.Base;
 using FastData.Core.Type;
 using FastData.Core.Model;
 using System.Data;
+using System.Linq;
 
 namespace FastData.Core.Base
 {
@@ -215,7 +216,12 @@ namespace FastData.Core.Base
                         }
                         #endregion
 
-                        if ((MemberExpression)meExp.Object != null)
+                        if(meExp.Object is MethodCallExpression)
+                        {
+
+                        }
+
+                        if (meExp.Object is MemberExpression)
                         {
                             #region system的方法转sql的系统函数
                             var mMethod = meExp.Method.Name;
@@ -225,20 +231,19 @@ namespace FastData.Core.Base
                             var mLength = "";
                             var mCount = 0;
 
-                            foreach (var item in meExp.Arguments)
-                            {
+                            meExp.Arguments.ToList().ForEach(a => {
                                 mCount++;
-                                mValue = Expression.Lambda(item).Compile().DynamicInvoke().ToString();
+                                mValue = Expression.Lambda(a).Compile().DynamicInvoke().ToString();
 
                                 if (meExp.Arguments.Count == 2)
                                 {
                                     if (mCount == 1)
-                                        mStar = Expression.Lambda(item).Compile().DynamicInvoke().ToString();
+                                        mStar = Expression.Lambda(a).Compile().DynamicInvoke().ToString();
 
                                     if (mCount == 2)
-                                        mLength = Expression.Lambda(item).Compile().DynamicInvoke().ToString();
+                                        mLength = Expression.Lambda(a).Compile().DynamicInvoke().ToString();
                                 }
-                            }
+                            });
 
                             if (mMethod.ToLower() == "contains")
                             {
@@ -305,7 +310,7 @@ namespace FastData.Core.Base
                             }
                             #endregion
                         }
-
+                        
                         if (isReturnNull)
                             return "";
                         else
@@ -504,15 +509,14 @@ namespace FastData.Core.Base
             result.Where = item.Where;
             result.Param = item.Param;
 
-            foreach (var temp in item.Param)
-            {
-                var replace = string.Format("#{0}#", temp.ParameterName.ToLower());
+            item.Param.ForEach(p => {
+                var replace = string.Format("#{0}#", p.ParameterName.ToLower());
                 if (item.Where.ToLower().IndexOf(replace) >= 0)
                 {
-                    result.Param.RemoveAll(a => a.ParameterName == temp.ParameterName);
-                    result.Where = result.Where.ToLower().Replace(replace, temp.Value.ToString());
+                    result.Param.RemoveAll(a => a.ParameterName == p.ParameterName);
+                    result.Where = result.Where.ToLower().Replace(replace, p.Value.ToString());
                 }
-            }
+            });
 
             return result;
         }

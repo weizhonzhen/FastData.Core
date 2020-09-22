@@ -21,11 +21,11 @@ namespace FastData.Core.Base
             if (param == null)
                 return Sql;
             Sql = string.Format("sql:{0},param:", Sql);
-            foreach (var item in param)
-            {
-                if (item != null)
-                    Sql = string.Format("{0}{1}={2},", Sql, item.ParameterName, item.Value);                   
-            }
+         
+            param.ForEach(a => {
+                if (a != null)
+                    Sql = string.Format("{0}{1}={2},", Sql, a.ParameterName, a.Value);
+            });
 
             return Sql;
         }

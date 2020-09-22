@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -371,24 +371,11 @@ namespace FastData.Core.Base
             var sql = new List<string>();
 
             if (field == null)
-            {
-                foreach (var item in PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache))
-                {
-                    sql.Add(item.Name);
-                }
-            }
+                PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache).ForEach(a => { sql.Add(a.Name); });
             else
-            {
-                foreach (var item in (field.Body as NewExpression).Members)
-                {
-                    sql.Add(item.Name);
-                }
-            }
+                (field.Body as NewExpression).Members.ToList().ForEach(a => { sql.Add(a.Name); });
 
-            foreach (var item in where)
-            {
-                sql.Add(item);
-            }
+            where.ForEach(a => { sql.Add(a); });
 
             cmd.CommandText = string.Format("select {1} from {0} where 1=0", typeof(T).Name, string.Join(",", sql.ToArray()));
 

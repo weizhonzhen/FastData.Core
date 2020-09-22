@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using FastData.Core.Property;
 using FastData.Core.Type;
 using FastData.Core.Model;
+using System.Linq;
 
 namespace FastData.Core.Base
 {
@@ -33,15 +34,10 @@ namespace FastData.Core.Base
                     #region 无返回列
                     var list = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
 
-                    foreach (var item in PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache))
-                    {
-                        if (list.Exists(a => a.Name == item.Name))
-                            queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[0].Name, item.Name));
-                        else
-                            queryFields.Add(item.Name);
-
-                        result.AsName.Add(item.Name);
-                    }
+                    list.ForEach(a => {
+                        queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[0].Name, a.Name));
+                        result.AsName.Add(a.Name);
+                    });
 
                     result.Field = string.Join(",", queryFields);
 
@@ -50,18 +46,17 @@ namespace FastData.Core.Base
                 else
                 {
                     #region 有返回列
-                    foreach (var item in (field.Body as NewExpression).Arguments)
-                    {
-                        if (item is MethodCallExpression)
+                    (field.Body as NewExpression).Arguments.ToList().ForEach(a => {
+                        if (a is MethodCallExpression)
                         {
                             var methodName = "";
                             var ower = "";
-                            var propertyName = GetPropertyMethod(item, out methodName, false, out ower);
+                            var propertyName = GetPropertyMethod(a, out methodName, false, out ower);
 
                             if (methodName.ToLower() == "distinct")
                             {
                                 queryFields.Add(string.Format("{2}{0} {3}.{1} ", methodName, propertyName, ower, predicate.Parameters[0].Name));
-                                result.AsName.Add((item as MemberExpression).Member.Name);
+                                result.AsName.Add((a as MemberExpression).Member.Name);
                             }
                             else if (methodName.ToLower() == "sum")
                             {
@@ -88,11 +83,11 @@ namespace FastData.Core.Base
                         }
                         else
                         {
-                            queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[0].Name, (item as MemberExpression).Member.Name));
-                            result.AsName.Add((item as MemberExpression).Member.Name);
+                            queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[0].Name, (a as MemberExpression).Member.Name));
+                            result.AsName.Add((a as MemberExpression).Member.Name);
                         }
                         i++;
-                    }
+                    });
                     #endregion
                 }
 
@@ -102,7 +97,7 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
                         DbLogTable.LogException<T>(config, ex, "QueryField<T>", "");
@@ -137,33 +132,27 @@ namespace FastData.Core.Base
                 {
                     var list = PropertyCache.GetPropertyInfo<T1>(config.IsPropertyCache);
 
-                    foreach (var item in PropertyCache.GetPropertyInfo<T1>(config.IsPropertyCache))
-                    {
-                        if (list.Exists(a => a.Name == item.Name))
-                            queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[1].Name, item.Name));
-                        else
-                            queryFields.Add(item.Name);
-
-                        result.AsName.Add(item.Name);
-                    }
+                    list.ForEach(a => {
+                        queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[1].Name, a.Name));
+                        result.AsName.Add(a.Name);
+                    });
 
                     result.Field = string.Join(",", queryFields);
                     return result;
                 }
 
                 var i = 0;
-                foreach (var item in (field.Body as NewExpression).Arguments)
-                {
-                    if (item is MethodCallExpression)
+                (field.Body as NewExpression).Arguments.ToList().ForEach(a => {
+                    if (a is MethodCallExpression)
                     {
                         var methodName = "";
                         var ower = "";
-                        var propertyName = GetPropertyMethod(item, out methodName, true, out ower);
+                        var propertyName = GetPropertyMethod(a, out methodName, true, out ower);
 
                         if (methodName.ToLower() == "distinct")
                         {
                             queryFields.Add(string.Format("{2}{0} {2}.{1}", methodName, propertyName, ower, predicate.Parameters[0].Name));
-                            result.AsName.Add((item as MemberExpression).Member.Name);
+                            result.AsName.Add((a as MemberExpression).Member.Name);
                         }
                         else if (methodName.ToLower() == "sum")
                         {
@@ -190,21 +179,22 @@ namespace FastData.Core.Base
                     }
                     else
                     {
-                        if (item is MemberExpression)
+                        if (a is MemberExpression)
                         {
-                            queryFields.Add(string.Format("{0}.{1}", ((item as MemberExpression).Expression as ParameterExpression).Name, (item as MemberExpression).Member.Name));
-                            result.AsName.Add((item as MemberExpression).Member.Name);
+                            queryFields.Add(string.Format("{0}.{1}", ((a as MemberExpression).Expression as ParameterExpression).Name, (a as MemberExpression).Member.Name));
+                            result.AsName.Add((a as MemberExpression).Member.Name);
                         }
                     }
                     i++;
-                }
+                });
+
 
                 result.Field = string.Join(",", queryFields);
                 return result;
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (config.SqlErrorType == SqlErrorType.Db)
                         DbLogTable.LogException<T>(config, ex, "QueryField<T1,T2,T>", "");
@@ -229,18 +219,16 @@ namespace FastData.Core.Base
             {
                 var result = new List<string>();
 
-                foreach (var item in (field.Body as NewExpression).Arguments)
-                {
-                    var asName = ((item as MemberExpression).Expression as ParameterExpression).Name;
-
-                    result.Add(string.Format("{0}.{1}", asName, (item as MemberExpression).Member.Name));
-                }
+                (field.Body as NewExpression).Arguments.ToList().ForEach(a => {
+                    var asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                    result.Add(string.Format("{0}.{1}", asName, (a as MemberExpression).Member.Name));
+                });
 
                 return result;
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (config.SqlErrorType == SqlErrorType.Db)
                         DbLogTable.LogException<T>(config, ex, "GroupBy<T>", "");
@@ -268,18 +256,16 @@ namespace FastData.Core.Base
             {
                 var result = new List<string>();
 
-                foreach (var item in (field.Body as NewExpression).Arguments)
-                {
-                    var asName = ((item as MemberExpression).Expression as ParameterExpression).Name;
-
-                    result.Add(string.Format("{0}.{1} {2}", asName, (item as MemberExpression).Member.Name, isDesc ? "desc" : "asc"));
-                }
+                (field.Body as NewExpression).Arguments.ToList().ForEach(a => {
+                    var asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                    result.Add(string.Format("{0}.{1} {2}", asName, (a as MemberExpression).Member.Name, isDesc ? "desc" : "asc"));
+                });
 
                 return result;
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     if (config.SqlErrorType == SqlErrorType.Db)
                         DbLogTable.LogException<T>(config, ex, "OrderBy<T>", "");
@@ -302,52 +288,53 @@ namespace FastData.Core.Base
         {
             var result = new List<string>();
             methodName = (item as MethodCallExpression).Method.Name;
-            ower = "";
+            var _ower = "";
 
             var meExp = (MethodCallExpression)(item.ReduceExtensions().Reduce());
             var count = 0;
-            foreach (var temp in meExp.Arguments)
-            {
+
+            meExp.Arguments.ToList().ForEach(a => {
                 count++;
-                if (temp is UnaryExpression)
+                if (a is UnaryExpression)
                 {
                     if (IsMoreTable)
                     {
                         var asName = "";
                         var name = "";
-                        if (temp is MemberExpression)
+                        if (a is MemberExpression)
                         {
-                            asName = ((temp as MemberExpression).Expression as ParameterExpression).Name;
-                            name = (temp as MemberExpression).Member.Name;
+                            asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                            name = (a as MemberExpression).Member.Name;
                         }
-                        else if (temp is UnaryExpression)
+                        else if (a is UnaryExpression)
                         {
-                            asName = (((temp as UnaryExpression).Operand as MemberExpression).Expression as ParameterExpression).Name;
-                            name = ((temp as UnaryExpression).Operand as MemberExpression).Member.Name;
+                            asName = (((a as UnaryExpression).Operand as MemberExpression).Expression as ParameterExpression).Name;
+                            name = ((a as UnaryExpression).Operand as MemberExpression).Member.Name;
                         }
 
                         result.Add(string.Format("{0}.{1}", asName, name));
                     }
                     else
-                        result.Add(temp is MemberExpression ? (temp as MemberExpression).Member.Name : ((temp as UnaryExpression).Operand as MemberExpression).Member.Name);
+                        result.Add(a is MemberExpression ? (a as MemberExpression).Member.Name : ((a as UnaryExpression).Operand as MemberExpression).Member.Name);
                 }
 
-                if (temp is MemberExpression || temp is NewArrayExpression)
+                if (a is MemberExpression || a is NewArrayExpression)
                 {
-                    if ((temp as MemberExpression).Expression is ConstantExpression)
-                        result.Add(Expression.Lambda(temp).Compile().DynamicInvoke().ToString());
+                    if ((a as MemberExpression).Expression is ConstantExpression)
+                        result.Add(Expression.Lambda(a).Compile().DynamicInvoke().ToString());
 
-                    if ((temp as MemberExpression).Expression is MemberExpression)
-                        result.Add(Expression.Lambda(temp).Compile().DynamicInvoke().ToString());
+                    if ((a as MemberExpression).Expression is MemberExpression)
+                        result.Add(Expression.Lambda(a).Compile().DynamicInvoke().ToString());
                 }
 
-                if (temp is ConstantExpression && count != meExp.Arguments.Count)
-                    result.Add((temp as ConstantExpression).Value.ToString());
+                if (a is ConstantExpression && count != meExp.Arguments.Count)
+                    result.Add((a as ConstantExpression).Value.ToString());
 
-                if (temp is ConstantExpression && count == meExp.Arguments.Count)
-                    ower = (temp as ConstantExpression).Value.ToString();
-            }
+                if (a is ConstantExpression && count == meExp.Arguments.Count)
+                    _ower = (a as ConstantExpression).Value.ToString();
+            });
 
+            ower = _ower;
             return string.Join(",", result);
 
         }
