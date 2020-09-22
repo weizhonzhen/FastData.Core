@@ -6,6 +6,7 @@ using NPOI.SS.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace FastUntility.Core.Base
 {
@@ -84,13 +85,12 @@ namespace FastUntility.Core.Base
                 result.row = result.sheet.CreateRow(1);
                 int i = 0;
 
-                foreach (var item in title)
-                {
+                title.ToList().ForEach(a => {
                     result.cell = result.row.CreateCell(i++);
                     result.cell.Row.Height = 420;
-                    result.cell.SetCellValue(item.Value.ToStr());
+                    result.cell.SetCellValue(a.Value.ToStr());
                     result.cell.CellStyle = GetStyle(result.workbook, true);
-                }
+                });
 
                 return result;
             }
@@ -159,12 +159,11 @@ namespace FastUntility.Core.Base
             {
                 //自动列宽
                 var i = 0;
-                foreach (var item in title)
-                {
+                title.ToList().ForEach(a => {
                     model.sheet.AutoSizeColumn(i++, true);
                     model.sheet.Autobreaks = true;
                     model.sheet.HorizontallyCenter = true;
-                }
+                });
 
                 var file = new MemoryStream();
                 model.workbook.Write(file);

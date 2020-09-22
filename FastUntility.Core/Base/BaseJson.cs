@@ -58,10 +58,7 @@ namespace FastUntility.Core.Base
             sb.Append("[");
             try
             {
-                foreach (var item in list)
-                {
-                    sb.Append(ModelToJson(item) + ",");
-                }
+                list.ForEach(a => { sb.Append(ModelToJson(a) + ","); });
 
                 sb.Append("]").Replace(",]", "]");
 
@@ -137,6 +134,7 @@ namespace FastUntility.Core.Base
                 {
                     list.Add(JsonToModel<T>(jo.ToString()));
                 }
+
                 return list;
             }
             catch
@@ -256,7 +254,7 @@ namespace FastUntility.Core.Base
             //列名
             for (var i = 0; i < reader.FieldCount; i++)
             {
-                 if (!cols.Exists(a => a.ToLower() == reader.GetName(i).ToLower()))
+                if (!cols.Exists(a => a.ToLower() == reader.GetName(i).ToLower()))
                     cols.Add(reader.GetName(i));
             }
 

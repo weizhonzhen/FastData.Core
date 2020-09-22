@@ -1,4 +1,4 @@
-using FastUntility.Core.Cache;
+﻿using FastUntility.Core.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,12 +23,11 @@ namespace FastUntility.Core.Base
         {
             var result = new T();
 
-            foreach (var item in PropertyInfo<T>(isCache))
-            {
+            PropertyInfo<T>(isCache).ForEach(a => {
                 var info = new DynamicSet<T>();
-                if (dic.ContainsKey(item.Name.ToLower()) && !string.IsNullOrEmpty(dic[item.Name.ToLower()].ToStr()))
-                    info.SetValue(result, item.Name, Convert.ChangeType(dic[item.Name.ToLower()], item.PropertyType), isCache);
-            }
+                if (dic.ContainsKey(a.Name.ToLower()) && !string.IsNullOrEmpty(dic[a.Name.ToLower()].ToStr()))
+                    info.SetValue(result, a.Name, Convert.ChangeType(dic[a.Name.ToLower()], a.PropertyType), isCache);
+            });
 
             return result;
         }
@@ -43,11 +42,10 @@ namespace FastUntility.Core.Base
         {
             var dic = new Dictionary<string, object>();
 
-            foreach (var item in PropertyInfo<T>(isCache))
-            {
+            PropertyInfo<T>(isCache).ForEach(a => {
                 var info = new DynamicGet<T>();
-                dic.Add(item.Name, info.GetValue(model, item.Name, isCache));
-            }
+                dic.Add(a.Name, info.GetValue(model, a.Name, isCache));
+            });
 
             return dic;
         }
@@ -64,10 +62,9 @@ namespace FastUntility.Core.Base
         {
             var result = new List<T>();
 
-            foreach (var item in dic)
-            {
-                result.Add(DicToModel<T>(item, isCache));
-            }
+            dic.ForEach(a => {
+                result.Add(DicToModel<T>(a, isCache));
+            });
 
             return result;
         }

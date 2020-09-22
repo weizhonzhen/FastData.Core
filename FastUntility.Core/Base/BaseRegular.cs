@@ -5,6 +5,7 @@ using System.Reflection;
 using FastUntility.Core.Attributes;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Linq;
 
 namespace FastUntility.Core.Base
 {
@@ -500,11 +501,7 @@ namespace FastUntility.Core.Base
         public static List<T> ToList<T>(T[] list)
         {
             var result = new List<T>();
-            foreach(var item in list)
-            {
-                result.Add(item);
-            }
-
+            list.ToList().ForEach(a => { result.Add(a); });
             return result;
         }
         #endregion
