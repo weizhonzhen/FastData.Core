@@ -39,25 +39,22 @@ namespace FastData.Core
 
             if (assembly != null)
             {
-                foreach (var temp in assembly.ExportedTypes)
-                {
-                    var typeInfo = (temp as TypeInfo);
+                assembly.ExportedTypes.ToList().ForEach(p => {
+                    var typeInfo = (p as TypeInfo);
                     if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
                     {
                         var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
-
                         var cacheList = new List<PropertyModel>();
-                        foreach (var info in typeInfo.DeclaredProperties)
-                        {
+                        typeInfo.DeclaredProperties.ToList().ForEach(a => {
                             var model = new PropertyModel();
-                            model.Name = info.Name;
-                            model.PropertyType = info.PropertyType;
+                            model.Name = a.Name;
+                            model.PropertyType = a.PropertyType;
                             cacheList.Add(model);
-                        }
+                        });
 
                         DbCache.Set<List<PropertyModel>>(config.CacheType, key, cacheList);
                     }
-                }
+                });
             }
         }
         #endregion
@@ -83,12 +80,11 @@ namespace FastData.Core
 
             if (assembly != null)
             {
-                foreach (var temp in assembly.ExportedTypes)
-                {
-                    var typeInfo = (temp as TypeInfo);
+                assembly.ExportedTypes.ToList().ForEach(a => {
+                    var typeInfo = (a as TypeInfo);
                     if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
-                        BaseTable.Check(query, temp.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
-                }
+                        BaseTable.Check(query, a.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
+                });
             }
         }
         #endregion
@@ -105,11 +101,9 @@ namespace FastData.Core
             var db = new DataContext(dbKey);
             var query = new DataQuery { Config = config, Key = dbKey };
 
-            foreach (var item in list.Path)
-            {
-                var info = new FileInfo(item);
+            list.Path.ForEach(p => {
+                var info = new FileInfo(p);
                 var key = BaseSymmetric.Generate(info.FullName);
-
                 if (!DbCache.Exists(config.CacheType, key))
                 {
                     var temp = new MapXmlModel();
@@ -121,8 +115,7 @@ namespace FastData.Core
                 }
                 else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
                 {
-                    foreach (var temp in DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey)
-                        DbCache.Remove(config.CacheType, temp);
+                    DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(a => { DbCache.Remove(config.CacheType, a); });
 
                     var model = new MapXmlModel();
                     model.LastWrite = info.LastWriteTime;
@@ -131,7 +124,7 @@ namespace FastData.Core
                     if (MapXml.SaveXml(dbKey, key, info, config, db))
                         DbCache.Set<MapXmlModel>(config.CacheType, key, model);
                 }
-            }
+            });
 
             if (config.IsMapSave)
             {
