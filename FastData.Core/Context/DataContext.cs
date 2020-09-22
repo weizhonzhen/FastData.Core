@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -129,6 +129,7 @@ namespace FastData.Core.Context
 
                 dr.Close();
                 dr.Dispose();
+                dr = null;
 
                 return result;
             }
@@ -1168,41 +1169,38 @@ namespace FastData.Core.Context
                         cmd.ExecuteNonQuery();
                     }
 
-                    foreach (var method in cmd.GetType().GetMethods())
-                    {
-                        if (method.Name == "set_ArrayBindCount")
+                    cmd.GetType().GetMethods().ToList().ForEach(a => {
+                        if (a.Name == "set_ArrayBindCount")
                         {
                             var param = new object[1];
                             param[0] = list.Count;
-                            method.Invoke(cmd, param);
+                            a.Invoke(cmd, param);
                         }
 
-                        if (method.Name == "set_BindByName")
+                        if (a.Name == "set_BindByName")
                         {
                             var param = new object[1];
                             param[0] = true;
-                            method.Invoke(cmd, param);
+                            a.Invoke(cmd, param);
                         }
-                    }
+                    });
 
                     sql.AppendFormat("insert into {0} values(", typeof(T).Name);
-                    foreach (var info in PropertyCache.GetPropertyInfo<T>())
-                    {
+                    PropertyCache.GetPropertyInfo<T>().ForEach(a => {
                         object[] pValue = new object[list.Count];
                         var param = DbProviderFactories.GetFactory(config).CreateParameter();
-                      
-                        if (info.PropertyType.Name.ToLower() == "nullable`1")
-                            param.DbType = CommandParam.GetOracleDbType(info.PropertyType.GetGenericArguments()[0].Name);
+                        if (a.PropertyType.Name.ToLower() == "nullable`1")
+                            param.DbType = CommandParam.GetOracleDbType(a.PropertyType.GetGenericArguments()[0].Name);
                         else
-                            param.DbType = CommandParam.GetOracleDbType(info.PropertyType.Name);
+                            param.DbType = CommandParam.GetOracleDbType(a.PropertyType.Name);
 
                         param.Direction = ParameterDirection.Input;
-                        param.ParameterName = info.Name;
-                        sql.AppendFormat("{0}{1},", config.Flag, info.Name);
+                        param.ParameterName = a.Name;
+                        sql.AppendFormat("{0}{1},", config.Flag, a.Name);
 
                         for (var i = 0; i < list.Count; i++)
                         {
-                            var value = dyn.GetValue(list[i], info.Name, true);
+                            var value = dyn.GetValue(list[i], a.Name, true);
                             if (value == null)
                                 value = DBNull.Value;
                             pValue[i] = value;
@@ -1210,7 +1208,7 @@ namespace FastData.Core.Context
 
                         param.Value = pValue;
                         cmd.Parameters.Add(param);
-                    }
+                    });
 
                     sql.Append(")");
                     cmd.CommandText = sql.ToString().Replace(",)", ")");
@@ -1256,6 +1254,7 @@ namespace FastData.Core.Context
                             break;
                         }
                     }
+
                     cmd.CommandText = CommandParam.GetTvps<T>();
                     result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
                     #endregion
