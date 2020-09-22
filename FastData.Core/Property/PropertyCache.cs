@@ -103,27 +103,24 @@ namespace FastData.Core.Property
         {
             var list = new List<ColumnModel>();
 
-            foreach (var info in ListInfo)
-            {
+            ListInfo.ForEach(a => {
                 var temp = new ColumnModel();
-                temp.Name = info.Name;
+                temp.Name = a.Name;
                 var dynSet = new DynamicSet<ColumnModel>();
                 var paramList = GetPropertyInfo<ColumnModel>(true);
 
-                foreach (var item in info.CustomAttributes)
-                {
-                    if (item.AttributeType.Name == typeof(ColumnAttribute).Name)
+                a.CustomAttributes.ToList().ForEach(b => {
+                    if (b.AttributeType.Name == typeof(ColumnAttribute).Name)
                     {
-                        foreach (var param in item.NamedArguments)
-                        {
-                            if (paramList.Exists(b => b.Name.ToLower() == param.MemberName.ToLower()))
-                                dynSet.SetValue(temp, param.MemberName, param.TypedValue.Value, true);
-                        }
+                        b.NamedArguments.ToList().ForEach(c => {
+                            if (paramList.Exists(p => p.Name.ToLower() == c.MemberName.ToLower()))
+                                dynSet.SetValue(temp, c.MemberName, c.TypedValue.Value, true);
+                        });
                     }
-                }
+                });
 
                 list.Add(temp);
-            }
+            });
 
             return list;
         }
@@ -136,11 +133,11 @@ namespace FastData.Core.Property
         public static string GetAttributesTableInfo(List<Attribute> listAttribute)
         {
             var result = "";
-            foreach (var item in listAttribute)
-            {
-                if (item is TableAttribute)
-                    result = (item as TableAttribute).Comments;
-            }
+
+            listAttribute.ForEach(a => {
+                if (a is TableAttribute)
+                    result = (a as TableAttribute).Comments;
+            });
 
             return result;
         }
