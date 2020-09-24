@@ -42,7 +42,7 @@ namespace FastData.Core
             }
             else
             {
-                result = db.AddList<T>(list,isLog);
+                result = db.AddList<T>(list,IsTrans,isLog);
                 config = db.config;
             }
 
