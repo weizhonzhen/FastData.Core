@@ -1236,21 +1236,20 @@ namespace FastData.Core.Context
                             param[1] = CommandParam.GetTable<T>(cmd, list);
                             var sqlParam = method.Invoke(cmd.Parameters, param);
 
-                            foreach (var tempMethod in sqlParam.GetType().GetMethods())
-                            {
-                                if (tempMethod.Name == "set_SqlDbType")
+                            sqlParam.GetType().GetMethods().ToList().ForEach(a => {
+                                if (a.Name == "set_SqlDbType")
                                 {
                                     param = new object[1];
                                     param[0] = SqlDbType.Structured;
-                                    tempMethod.Invoke(sqlParam, param);
+                                    a.Invoke(sqlParam, param);
                                 }
-                                if (tempMethod.Name == "set_TypeName")
+                                if (a.Name == "set_TypeName")
                                 {
                                     param = new object[1];
                                     param[0] = typeof(T).Name;
-                                    tempMethod.Invoke(sqlParam, param);
+                                    a.Invoke(sqlParam, param);
                                 }
-                            }
+                            });
                             break;
                         }
                     }
