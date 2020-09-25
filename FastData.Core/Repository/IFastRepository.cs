@@ -79,9 +79,9 @@ namespace FastData.Core.Repository
 
         string MapExistsMap(string name, string param);
 
-        WriteReturn AddList<T>(List<T> list, DataContext db = null, string key = null, bool IsTrans = false, bool isLog = false) where T : class, new();
+        WriteReturn AddList<T>(List<T> list, string key = null, bool IsTrans = false, bool isLog = true) where T : class, new();
 
-        Task<WriteReturn> AddListAsy<T>(List<T> list, DataContext db = null, string key = null, bool IsTrans = false, bool isLog = false) where T : class, new();
+        Task<WriteReturn> AddListAsy<T>(List<T> list, string key = null, bool IsTrans = false, bool isLog = true) where T : class, new();
 
         WriteReturn Add<T>(T model, DataContext db = null, string key = null) where T : class, new();
 
