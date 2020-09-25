@@ -1149,7 +1149,7 @@ namespace FastData.Core.Context
         /// <param name="IsTrans"></param>
         /// <param name="IsAsync"></param>
         /// <returns></returns>
-        public DataReturn<T> AddList<T>(List<T> list, bool IsTrans = false, bool isLog=false) where T : class, new()
+        public DataReturn<T> AddList<T>(List<T> list, bool IsTrans = false, bool isLog=true) where T : class, new()
         {
             var result = new DataReturn<T>();
             var sql = new StringBuilder();
@@ -1190,7 +1190,7 @@ namespace FastData.Core.Context
                     sql.AppendFormat("insert into {0} values(", typeof(T).Name);
                     PropertyCache.GetPropertyInfo<T>().ForEach(a =>
                     {
-                        object[] pValue = new object[list.Count];
+                        var pValue = new List<object>();
                         var param = DbProviderFactories.GetFactory(config).CreateParameter();
                         if (a.PropertyType.Name.ToLower() == "nullable`1")
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.GetGenericArguments()[0].Name);
@@ -1199,17 +1199,18 @@ namespace FastData.Core.Context
 
                         param.Direction = ParameterDirection.Input;
                         param.ParameterName = a.Name;
+                                                
                         sql.AppendFormat("{0}{1},", config.Flag, a.Name);
 
-                        for (var i = 0; i < list.Count; i++)
+                        list.ForEach(l =>
                         {
-                            var value = dyn.GetValue(list[i], a.Name, true);
+                            var value = dyn.GetValue(l, a.Name, true);
                             if (value == null)
                                 value = DBNull.Value;
-                            pValue[i] = value;
-                        }
+                            pValue.Add(value);
+                        });
 
-                        param.Value = pValue;
+                        param.Value = pValue.ToArray();
                         cmd.Parameters.Add(param);
                     });
 
