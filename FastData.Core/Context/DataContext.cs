@@ -1163,9 +1163,9 @@ namespace FastData.Core.Context
                 if (config.DbType == DataDbType.Oracle)
                 {
                     #region oracle
+                    cmd.Parameters.Clear();
                     if (!isLog)
                     {
-                        cmd.Parameters.Clear();
                         cmd.CommandText = string.Format("alter table {0} nologging", typeof(T).Name);
                         cmd.ExecuteNonQuery();
                     }
@@ -1229,8 +1229,8 @@ namespace FastData.Core.Context
                 if (config.DbType == DataDbType.SqlServer)
                 {
                     #region sqlserver
-                    CommandParam.InitTvps<T>(cmd);
                     cmd.Parameters.Clear();
+                    CommandParam.InitTvps<T>(cmd);
                     foreach (var method in cmd.Parameters.GetType().GetMethods())
                     {
                         if (method.Name == "AddWithValue")
@@ -1267,6 +1267,7 @@ namespace FastData.Core.Context
                 if (config.DbType == DataDbType.MySql)
                 {
                     #region mysql
+                    cmd.Parameters.Clear();
                     cmd.CommandText = CommandParam.GetMySql<T>(list);
                     result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
                     #endregion
