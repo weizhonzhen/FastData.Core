@@ -24,7 +24,7 @@ namespace FastData.Core
         /// <param name="model">实体</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public static WriteReturn AddList<T>(List<T> list, DataContext db = null, string key = null, bool IsTrans = false, bool isLog=false) where T : class, new()
+        public static WriteReturn AddList<T>(List<T> list, string key = null, bool IsTrans = false, bool isLog = true) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -32,18 +32,10 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
+            using (var tempDb = new DataContext(key))
             {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.AddList<T>(list,IsTrans,isLog);
-                    config = tempDb.config;
-                }
-            }
-            else
-            {
-                result = db.AddList<T>(list,IsTrans,isLog);
-                config = db.config;
+                result = tempDb.AddList<T>(list, IsTrans, isLog);
+                config = tempDb.config;
             }
 
             stopwatch.Stop();
@@ -62,11 +54,11 @@ namespace FastData.Core
         /// <param name="model">实体</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> AddListAsy<T>(List<T> list, DataContext db = null, string key = null, bool IsTrans = false, bool isLog = false) where T : class, new()
+        public static async Task<WriteReturn> AddListAsy<T>(List<T> list, string key = null, bool IsTrans = false, bool isLog = true) where T : class, new()
         {
             return await Task.Run(() =>
             {
-                return AddList<T>(list, db, key,IsTrans,isLog);
+                return AddList<T>(list, key,IsTrans,isLog);
             });
         }
         #endregion
