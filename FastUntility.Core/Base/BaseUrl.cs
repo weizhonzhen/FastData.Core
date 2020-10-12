@@ -197,7 +197,7 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post content(insert)
         /// </summary>
-        public static string PostSoap(string url, string method, Dictionary<string, object> param, string Namespace = "http://tempuri.org/", IHttpClientFactory client, int version = 1, int minor = 1)
+        public static string PostSoap(string url, string method, Dictionary<string, object> param, IHttpClientFactory client, string Namespace = "http://tempuri.org/", int version = 1, int minor = 1)
         {
             try
             {
