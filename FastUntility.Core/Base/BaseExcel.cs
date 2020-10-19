@@ -167,7 +167,7 @@ namespace FastUntility.Core.Base
 
                 var file = new MemoryStream();
                 model.workbook.Write(file);
-
+                file.Dispose();
                 return file.ToArray();
             }
             catch (Exception ex)
