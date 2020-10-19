@@ -62,21 +62,21 @@ namespace FastUntility.Core.Base
         public static string Encrypto(string Source)
         {
             byte[] bytIn = UTF8Encoding.UTF8.GetBytes(Source);
-            MemoryStream ms = new MemoryStream();
-            mobjCryptoService.Key = GetLegalKey();
-            mobjCryptoService.IV = GetLegalIV();
-            ICryptoTransform encrypto = mobjCryptoService.CreateEncryptor();
-            CryptoStream cs = new CryptoStream(ms, encrypto, CryptoStreamMode.Write);
-            cs.Write(bytIn, 0, bytIn.Length);
-            cs.FlushFinalBlock();
-            ms.Close();
-            byte[] bytOut = ms.ToArray();
-            cs.Close();
-            cs.Dispose();
-            encrypto.Dispose();
-            ms.Close();
-            ms.Dispose();
-            return Convert.ToBase64String(bytOut);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                mobjCryptoService.Key = GetLegalKey();
+                mobjCryptoService.IV = GetLegalIV();
+                using (ICryptoTransform encrypto = mobjCryptoService.CreateEncryptor())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encrypto, CryptoStreamMode.Write))
+                    {
+                        cs.Write(bytIn, 0, bytIn.Length);
+                        cs.FlushFinalBlock();
+                        byte[] bytOut = ms.ToArray();
+                        return Convert.ToBase64String(bytOut);
+                    }
+                }
+            }
         }
         #endregion
 
@@ -91,19 +91,21 @@ namespace FastUntility.Core.Base
             try
             {
                 byte[] bytIn = Convert.FromBase64String(Source);
-                MemoryStream ms = new MemoryStream(bytIn, 0, bytIn.Length);
-                mobjCryptoService.Key = GetLegalKey();
-                mobjCryptoService.IV = GetLegalIV();
-                ICryptoTransform encrypto = mobjCryptoService.CreateDecryptor();
-                CryptoStream cs = new CryptoStream(ms, encrypto, CryptoStreamMode.Read);
-                StreamReader sr = new StreamReader(cs);
-
-                encrypto.Dispose();
-                cs.Close();
-                cs.Dispose();
-                sr.Close();
-                sr.Dispose();
-                return sr.ReadToEnd();
+                using (MemoryStream ms = new MemoryStream(bytIn, 0, bytIn.Length))
+                {
+                    mobjCryptoService.Key = GetLegalKey();
+                    mobjCryptoService.IV = GetLegalIV();
+                    using (ICryptoTransform encrypto = mobjCryptoService.CreateDecryptor())
+                    {
+                        using (CryptoStream cs = new CryptoStream(ms, encrypto, CryptoStreamMode.Read))
+                        {
+                            using (StreamReader sr = new StreamReader(cs))
+                            {
+                                return sr.ReadToEnd();
+                            }
+                        }
+                    }
+                }
             }
             catch
             {
@@ -121,27 +123,27 @@ namespace FastUntility.Core.Base
         /// <returns></returns>
         public static string EncodeGB2312(string Source)
         {
-            DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
-            provider.Key = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-            provider.IV = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-            byte[] bytes = Encoding.GetEncoding("GB2312").GetBytes(Source);
-            MemoryStream stream = new MemoryStream();
-            CryptoStream stream2 = new CryptoStream(stream, provider.CreateEncryptor(), CryptoStreamMode.Write);
-            stream2.Write(bytes, 0, bytes.Length);
-            stream2.FlushFinalBlock();
-            StringBuilder builder = new StringBuilder();
-            foreach (byte num in stream.ToArray())
+            using (DESCryptoServiceProvider provider = new DESCryptoServiceProvider())
             {
-                builder.AppendFormat("{0:X2}", num);
-            }
+                provider.Key = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
+                provider.IV = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
+                byte[] bytes = Encoding.GetEncoding("GB2312").GetBytes(Source);
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    using (CryptoStream stream2 = new CryptoStream(stream, provider.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        stream2.Write(bytes, 0, bytes.Length);
+                        stream2.FlushFinalBlock();
+                        StringBuilder builder = new StringBuilder();
+                        foreach (byte num in stream.ToArray())
+                        {
+                            builder.AppendFormat("{0:X2}", num);
+                        }
 
-            provider.Clear();
-            provider.Dispose();
-            stream.Close();
-            stream.Dispose();
-            stream2.Close();
-            stream2.Dispose();
-            return builder.ToString();
+                        return builder.ToString();
+                    }
+                }
+            }
         }
         #endregion
 
@@ -156,26 +158,26 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
-                provider.Key = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-                provider.IV = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-                byte[] buffer = new byte[Source.Length / 2];
-                for (int i = 0; i < (Source.Length / 2); i++)
+                using (DESCryptoServiceProvider provider = new DESCryptoServiceProvider())
                 {
-                    int num2 = Convert.ToInt32(Source.Substring(i * 2, 2), 0x10);
-                    buffer[i] = (byte)num2;
+                    provider.Key = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
+                    provider.IV = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
+                    byte[] buffer = new byte[Source.Length / 2];
+                    for (int i = 0; i < (Source.Length / 2); i++)
+                    {
+                        int num2 = Convert.ToInt32(Source.Substring(i * 2, 2), 0x10);
+                        buffer[i] = (byte)num2;
+                    }
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        using (CryptoStream stream2 = new CryptoStream(stream, provider.CreateDecryptor(), CryptoStreamMode.Write))
+                        {
+                            stream2.Write(buffer, 0, buffer.Length);
+                            stream2.FlushFinalBlock();
+                            return Encoding.GetEncoding("GB2312").GetString(stream.ToArray());
+                        }
+                    }
                 }
-                MemoryStream stream = new MemoryStream();
-                CryptoStream stream2 = new CryptoStream(stream, provider.CreateDecryptor(), CryptoStreamMode.Write);
-                stream2.Write(buffer, 0, buffer.Length);
-                stream2.FlushFinalBlock();
-                provider.Clear();
-                provider.Dispose();
-                stream.Close();
-                stream.Dispose();
-                stream2.Close();
-                stream2.Dispose();
-                return Encoding.GetEncoding("GB2312").GetString(stream.ToArray());
             }
             catch
             {
