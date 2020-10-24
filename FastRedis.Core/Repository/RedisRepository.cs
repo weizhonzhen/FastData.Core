@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace FastRedis.Core.Repository
 {
-    public class FastRedisRepository: IFastRedisRepository
+    public class RedisRepository: IRedisRepository
     {
         private int _db = 0;
         private ConnectionMultiplexer Context;
-        public FastRedisRepository()
+        public RedisRepository()
         {
             var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
             _db = config.Db;
@@ -53,7 +53,7 @@ namespace FastRedis.Core.Repository
                 if (string.IsNullOrEmpty(key))
                     return false;
                 else
-                    return await Context.GetDatabase(db).KeyExistsAsync(key);
+                    return await Context.GetDatabase(db).KeyExistsAsync(key).ConfigureAwait(false);
             }
             catch (RedisException ex)
             {
@@ -105,7 +105,7 @@ namespace FastRedis.Core.Repository
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return await Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
+                    return await Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours)).ConfigureAwait(false);
                 else
                     return false;
             }
@@ -159,7 +159,7 @@ namespace FastRedis.Core.Repository
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return await Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromHours(hours));
+                    return await Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromHours(hours)).ConfigureAwait(false);
                 else
                     return false;
             }
@@ -213,7 +213,7 @@ namespace FastRedis.Core.Repository
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return await Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromMilliseconds(Minutes));
+                    return await Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromMilliseconds(Minutes)).ConfigureAwait(false);
                 else
                     return false;
             }
@@ -265,7 +265,7 @@ namespace FastRedis.Core.Repository
                 if (string.IsNullOrEmpty(key))
                     return "";
                 else
-                    return await Context.GetDatabase(db).StringGetAsync(key);
+                    return await Context.GetDatabase(db).StringGetAsync(key).ConfigureAwait(false);
             }
             catch (RedisException ex)
             {
@@ -315,7 +315,7 @@ namespace FastRedis.Core.Repository
                 if (string.IsNullOrEmpty(key))
                     return new T();
                 else
-                    return BaseJson.JsonToModel<T>(await Context.GetDatabase(db).StringGetAsync(key)) ?? new T();
+                    return BaseJson.JsonToModel<T>(await Context.GetDatabase(db).StringGetAsync(key).ConfigureAwait(false)) ?? new T();
             }
             catch (RedisException ex)
             {
@@ -361,7 +361,7 @@ namespace FastRedis.Core.Repository
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return await Context.GetDatabase(db).KeyDeleteAsync(key);
+                    return await Context.GetDatabase(db).KeyDeleteAsync(key).ConfigureAwait(false);
                 else
                     return false;
             }
