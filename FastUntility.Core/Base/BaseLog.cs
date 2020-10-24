@@ -59,7 +59,7 @@ namespace FastUntility.Core.Base
             await Task.Factory.StartNew(() =>
             {
                 SaveLog(logContent, fileName);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
     }
