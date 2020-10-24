@@ -211,7 +211,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToList<T>(item, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -240,7 +240,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<List<T>>(() => ToList<T>(item, db));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -289,7 +289,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToJson(item, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -316,7 +316,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<string>(() => ToJson(item, db));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -369,7 +369,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToItem<T>(item, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -398,7 +398,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<T>(() => ToItem<T>(item, db));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -448,7 +448,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToCount(item, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -501,7 +501,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToPage<T>(item, pModel, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -532,7 +532,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<PageResult<T>>(() => ToPage<T>(item, pModel, db));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -583,7 +583,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToPage(item, pModel, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -613,7 +613,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<PageResult>(() => ToPage(item, pModel, db));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -663,7 +663,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToDataTable(item, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -690,7 +690,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<DataTable>(() => ToDataTable(item, db));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -746,7 +746,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ExecuteSql<T>(sql, param, db, key);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -777,7 +777,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<List<T>>(() => ExecuteSql<T>(sql, param, db, key));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -826,7 +826,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToDics(item, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -853,7 +853,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<List<Dictionary<string, object>>>(() => ToDics(item, db));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -903,7 +903,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ToDic(item, db);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -930,7 +930,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<Dictionary<string, object>>(() => ToDic(item, db));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -985,7 +985,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return ExecuteSql(sql, param, db, key);
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -1016,7 +1016,7 @@ namespace FastData.Core
             return await Task.Factory.StartNew(() =>
             {
                 return new Lazy<List<Dictionary<string, object>>>(() => ExecuteSql(sql, param, db, key));
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
     }
