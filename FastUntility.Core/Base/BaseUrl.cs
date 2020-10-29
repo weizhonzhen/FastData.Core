@@ -14,17 +14,23 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// get url(select)
         /// </summary>
-        public static string GetUrl(string url, IHttpClientFactory client, int version = 1, int minor = 1, string mediaType = "application/json")
+        public static string GetUrl(string url, IHttpClientFactory client, string key = null, int version = 1, int minor = 1, string mediaType = "application/json")
         {
             try
             {
-                var http = client.CreateClient();
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
                 var handle = new HttpRequestMessage();
                 handle.Version = new Version(version, minor);
                 handle.Content = new StringContent("", Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Get;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
+                handle.Content.Dispose();
+                handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -40,11 +46,15 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post url(insert)
         /// </summary>
-        public static string PostUrl( string url, Dictionary<string, object> dic, IHttpClientFactory client, int version = 1, int minor = 1, string mediaType = "application/json")
+        public static string PostUrl( string url, Dictionary<string, object> dic, IHttpClientFactory client, string key = null, int version = 1, int minor = 1, string mediaType = "application/json")
         {
             try
             {
-                var http = client.CreateClient();
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
                 var count = 0;
                 foreach (var item in dic)
                 {
@@ -66,6 +76,8 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Post;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
+                handle.Content.Dispose();
+                handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -80,17 +92,23 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post content(insert)
         /// </summary>
-        public static string PostContent(string url, string param, IHttpClientFactory client, int version = 1, int minor = 1, string mediaType = "application/json")
+        public static string PostContent(string url, string param, IHttpClientFactory client, string key = null, int version = 1, int minor = 1, string mediaType = "application/json")
         {
             try
             {
-               var http = client.CreateClient();
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
                 var handle = new HttpRequestMessage();
                 handle.Version = new Version(version, minor);
                 handle.Content = new StringContent(param, Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Post;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
+                handle.Content.Dispose();
+                handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -105,11 +123,15 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// put url(update)
         /// </summary>
-        public static string PutUrl(string url, Dictionary<string, object> dic, IHttpClientFactory client, int version = 1, int minor = 1, string mediaType = "application/json")
+        public static string PutUrl(string url, Dictionary<string, object> dic, IHttpClientFactory client, string key = null, int version = 1, int minor = 1, string mediaType = "application/json")
         {
             try
             {
-                var http = client.CreateClient();
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
                 var count = 0;
                 foreach (var item in dic)
                 {
@@ -131,6 +153,8 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Put;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
+                handle.Content.Dispose();
+                handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -145,17 +169,23 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// put content(update)
         /// </summary>
-        public static string PutContent(string url, string param, IHttpClientFactory client, int version = 1, int minor = 1, string mediaType = "application/json")
+        public static string PutContent(string url, string param, IHttpClientFactory client, string key = null, int version = 1, int minor = 1, string mediaType = "application/json")
         {
             try
             {
-                var http = client.CreateClient();
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
                 var handle = new HttpRequestMessage();
                 handle.Version = new Version(version, minor);
                 handle.Content = new StringContent(param, Encoding.UTF8, mediaType);
                 handle.Method = HttpMethod.Put;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
+                handle.Content.Dispose();
+                handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -170,11 +200,15 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// delete url (delete)
         /// </summary>
-        public static string DeleteUrl(string url, IHttpClientFactory client, int version = 1, int minor = 1, string mediaType = "application/json")
+        public static string DeleteUrl(string url, IHttpClientFactory client, string key = null, int version = 1, int minor = 1, string mediaType = "application/json")
         {
             try
             {
-                var http = client.CreateClient();
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
 
                 var handle = new HttpRequestMessage();
                 handle.Version = new Version(version, minor);
@@ -182,6 +216,8 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Delete;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
+                handle.Content.Dispose();
+                handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
@@ -197,11 +233,15 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post content(insert)
         /// </summary>
-        public static string PostSoap(string url, string method, Dictionary<string, object> param, IHttpClientFactory client, string Namespace = "http://tempuri.org/", int version = 1, int minor = 1)
+        public static string PostSoap(string url, string method, Dictionary<string, object> param, IHttpClientFactory client, string key = null, string Namespace = "http://tempuri.org/", int version = 1, int minor = 1)
         {
             try
             {
-                var http = client.CreateClient();
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
 
                 var xml = new StringBuilder();
                 xml.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
@@ -225,6 +265,8 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Post;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
+                handle.Content.Dispose();
+                handle.Dispose();
                 var result = response.Content.ReadAsStringAsync().Result;
 
                 result = result.Replace("soap:Envelope", "Envelope");
