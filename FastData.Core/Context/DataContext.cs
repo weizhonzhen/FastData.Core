@@ -29,6 +29,15 @@ namespace FastData.Core.Context
         /// </summary>
         public void Dispose()
         {
+            if (cmd.Parameters != null)
+                foreach (var param in cmd.Parameters)
+                {
+                    param.GetType().GetMethods().ToList().ForEach(m =>
+                    {
+                        if (m.Name == "Dispose")
+                            m.Invoke(param, null);
+                    });
+                }
             conn.Close();
             cmd.Dispose();
             conn.Dispose();
@@ -130,7 +139,6 @@ namespace FastData.Core.Context
                 dr.Close();
                 dr.Dispose();
                 dr = null;
-
                 return result;
             }
             catch (Exception ex)
@@ -1115,7 +1123,6 @@ namespace FastData.Core.Context
                         SubmitTrans();
                     else if (isTrans && result.writeReturn.IsSuccess == false)
                         RollbackTrans();
-
                     return result;
                 }
                 else
@@ -1211,7 +1218,7 @@ namespace FastData.Core.Context
                         });
 
                         param.Value = pValue.ToArray();
-                        cmd.Parameters.Add(param);
+                        cmd.Parameters.Add(param);                        
                     });
 
                     sql.Append(")");
