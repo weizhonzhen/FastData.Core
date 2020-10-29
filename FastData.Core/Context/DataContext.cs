@@ -29,7 +29,7 @@ namespace FastData.Core.Context
         /// </summary>
         public void Dispose()
         {
-            if (cmd.Parameters != null)
+            if (cmd.Parameters != null && config.DbType == DataDbType.Oracle)
                 foreach (var param in cmd.Parameters)
                 {
                     param.GetType().GetMethods().ToList().ForEach(m =>
