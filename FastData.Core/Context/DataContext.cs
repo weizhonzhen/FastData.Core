@@ -29,7 +29,7 @@ namespace FastData.Core.Context
         /// <param name="cmd"></param>
         private void Dispose(DbCommand cmd)
         {
-            if (cmd.Parameters != null && config.DbType == DataDbType.Oracle)
+            if (config.DbType == DataDbType.Oracle)
             {
                 foreach (var param in cmd.Parameters)
                 {
@@ -39,8 +39,8 @@ namespace FastData.Core.Context
                             m.Invoke(param, null);
                     });
                 }
-                cmd.Parameters.Clear();
             }
+            cmd.Parameters.Clear();
         }
 
         #region 回收资源
@@ -49,16 +49,7 @@ namespace FastData.Core.Context
         /// </summary>
         public void Dispose()
         {
-            if (cmd.Parameters != null && config.DbType == DataDbType.Oracle)
-                foreach (var param in cmd.Parameters)
-                {
-                    param.GetType().GetMethods().ToList().ForEach(m =>
-                    {
-                        if (m.Name == "Dispose")
-                            m.Invoke(param, null);
-                    });
-                }
-            
+            Dispose(cmd);           
             conn.Close();
             cmd.Dispose();
             conn.Dispose();
