@@ -175,7 +175,6 @@ namespace FastData.Core
                     {
                         using (var tempDb = new DataContext(key))
                         {
-
                             for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
                             {
                                 result = MapXml.MapForEach<T>(result, name, tempDb, config, i);
