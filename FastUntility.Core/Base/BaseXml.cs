@@ -11,6 +11,37 @@ namespace FastUntility.Core.Base
  /// </summary>
     public static class BaseXml
     {
+        #region 返回字符串列表 文件 
+        /// <summary>
+        /// 返回字符串列表 文件 
+        /// </summary>
+        /// <param name="FileName">文件名</param>
+        /// <param name="xmlNodel">结点</param>
+        /// <returns></returns>
+        public static List<string> GetXmlListForFile(string FileName, string xmlNodel)
+        {
+            try
+            {
+                var xmlDoc = new XmlDocument();
+                xmlDoc.Load(File.ReadAllText(FileName));
+                var nodelList = xmlDoc.SelectNodes(xmlNodel);
+                var list = new List<string>();
+
+                foreach (XmlNode item in nodelList)
+                {
+                    list.Add(item.InnerXml);
+                }
+
+                xmlDoc = null;
+                return list;
+            }
+            catch
+            {
+                return new List<string>();
+            }
+        }
+        #endregion
+
         #region 根据XML返回结点中的对象列表
         /// <summary>
         /// 根据XML返回结点中的对象列表
@@ -23,32 +54,24 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                //变量
                 var xmlHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
                 var xmlDoc = new XmlDocument();
                 var list = new List<T>();
-
-                //载入xml
                 xmlDoc.LoadXml(xmlValue);
-
-                //结点
                 var nodelList = xmlDoc.SelectNodes(xmlNodel);
 
                 foreach (XmlNode item in nodelList)
                 {
-                    //结点值
                     xmlValue = xmlHead + "<" + item.LocalName + ">" + item.InnerXml + "</" + item.LocalName + ">";
-
-                    //字符流
-                    StringReader sR = new StringReader(xmlValue);
-
-                    //xml反序列到对象
-                    var xmlDes = new XmlSerializer(typeof(T));
-
-                    //加入list
-                    list.Add((T)xmlDes.Deserialize(sR));
+                    using (var sR = new StringReader(xmlValue))
+                    {
+                        var xmlDes = new XmlSerializer(typeof(T));
+                        list.Add((T)xmlDes.Deserialize(sR));
+                        sR.Close();
+                    }
                 }
 
+                xmlDoc = null;
                 return list;
             }
             catch
@@ -69,22 +92,16 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                //变量
                 var xmlDoc = new XmlDocument();
-
-                //载入xml
                 xmlDoc.LoadXml(xmlValue);
-
-                //结点
                 var nodelList = xmlDoc.SelectNodes(xmlNodel);
-
                 var list = new List<string>();
 
                 foreach (XmlNode item in nodelList)
                 {
                     list.Add(item.InnerXml);
                 }
-
+                xmlDoc = null;
                 return list;
             }
             catch
