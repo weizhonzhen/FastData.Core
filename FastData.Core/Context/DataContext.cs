@@ -202,6 +202,7 @@ namespace FastData.Core.Context
 
                     dr.Close();
                     dr.Dispose();
+                    dr = null;
                 }
                 else
                     result.pageResult.list = new List<T>();
@@ -253,11 +254,12 @@ namespace FastData.Core.Context
 
                     Dispose(cmd);
                     var dr = BaseExecute.ToPageDataReader(item, cmd, pModel, ref sql);
-                    result.PageResult.list = BaseJson.DataReaderToDic(dr);
+                    result.PageResult.list = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle);
                     result.Sql = sql;
 
                     dr.Close();
                     dr.Dispose();
+                    dr = null;
                 }
                 else
                     result.PageResult.list = new List<Dictionary<string, object>>();
@@ -310,11 +312,12 @@ namespace FastData.Core.Context
                     Dispose(cmd);
                     var dr = BaseExecute.ToPageDataReaderSql(param, cmd, pModel, sql, config, ref pageSql);
 
-                    result.PageResult.list = BaseJson.DataReaderToDic(dr);
+                    result.PageResult.list = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle);
                     result.Sql = string.Format("count:{0},page:{1}", countSql, pageSql);
 
                     dr.Close();
                     dr.Dispose();
+                    dr = null;
                 }
                 else
                     result.PageResult.list = new List<Dictionary<string, object>>();
@@ -372,6 +375,7 @@ namespace FastData.Core.Context
 
                     dr.Close();
                     dr.Dispose();
+                    dr = null;
                 }
                 else
                     result.pageResult.list = new List<T>();
@@ -452,10 +456,11 @@ namespace FastData.Core.Context
 
                 var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
 
-                result.Json = BaseJson.DataReaderToJson(dr);
+                result.Json = BaseJson.DataReaderToJson(dr, config.DbType == DataDbType.Oracle);
 
                 dr.Close();
                 dr.Dispose();
+                dr = null;
 
                 return result;
             }
@@ -566,6 +571,7 @@ namespace FastData.Core.Context
 
                 dr.Close();
                 dr.Dispose();
+                dr = null;
             }
             catch (Exception ex)
             {
@@ -607,10 +613,11 @@ namespace FastData.Core.Context
                 var dr = BaseExecute.ToDataReader(cmd, sql);
 
                 result.writeReturn.IsSuccess = true;
-                result.DicList = BaseJson.DataReaderToDic(dr);
+                result.DicList = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle);
 
                 dr.Close();
                 dr.Dispose();
+                dr = null;
             }
             catch (Exception ex)
             {
@@ -689,12 +696,13 @@ namespace FastData.Core.Context
                 var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
 
                 if (item.Take == 1)
-                    result.Dic = BaseJson.DataReaderToDic(dr).FirstOrDefault()??new Dictionary<string, object>();
+                    result.Dic = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle).FirstOrDefault()??new Dictionary<string, object>();
                 else
-                    result.DicList = BaseJson.DataReaderToDic(dr);
+                    result.DicList = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle);
 
                 dr.Close();
                 dr.Dispose();
+                dr = null;
 
                 return result;
             }
@@ -775,6 +783,7 @@ namespace FastData.Core.Context
 
                 dr.Close();
                 dr.Dispose();
+                dr = null;
 
                 return result;
             }
