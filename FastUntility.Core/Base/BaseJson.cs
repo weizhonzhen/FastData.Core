@@ -251,6 +251,21 @@ namespace FastUntility.Core.Base
                                 }
                             });
                         }
+                        else if (typeName == "blob")
+                        {
+                            reader.GetType().GetMethods().ToList().ForEach(m => {
+                                if (m.Name == "GetOracleBlob")
+                                {
+                                    var param = new object[1];
+                                    param[0] = id;
+                                    var temp = m.Invoke(reader, param);
+                                    temp.GetType().GetMethods().ToList().ForEach(v => {
+                                        if (v.Name == "get_Value")
+                                            dic.Add(a, v.Invoke(temp, null));
+                                    });
+                                }
+                            });
+                        }
                         else
                             dic.Add(a, reader[a]);
                     }
@@ -297,6 +312,21 @@ namespace FastUntility.Core.Base
                         {
                             reader.GetType().GetMethods().ToList().ForEach(m => {
                                 if (m.Name == "GetOracleClob")
+                                {
+                                    var param = new object[1];
+                                    param[0] = id;
+                                    var temp = m.Invoke(reader, param);
+                                    temp.GetType().GetMethods().ToList().ForEach(v => {
+                                        if (v.Name == "get_Value")
+                                            dic.Add(a, v.Invoke(temp, null));
+                                    });
+                                }
+                            });
+                        }
+                        else if (typeName == "blob")
+                        {
+                            reader.GetType().GetMethods().ToList().ForEach(m => {
+                                if (m.Name == "GetOracleBlob")
                                 {
                                     var param = new object[1];
                                     param[0] = id;
