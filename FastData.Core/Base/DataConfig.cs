@@ -63,12 +63,12 @@ namespace FastData.Core.Base
             }
 
             var result = new List<bool>();
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.Oracle.ToLower()) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.DB2.ToLower()) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.MySql.ToLower()) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.PostgreSql.ToLower()) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.SQLite.ToLower()) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.SqlServer.ToLower()) > 0);
+            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.Oracle) > 0);
+            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.DB2) > 0);
+            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.MySql) > 0);
+            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.PostgreSql) > 0);
+            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.SQLite) > 0);
+            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.SqlServer) > 0);
 
             return result.Count(a => a == true) > 1;
         }
