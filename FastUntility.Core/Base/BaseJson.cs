@@ -303,7 +303,7 @@ namespace FastUntility.Core.Base
                 var dic = new Dictionary<string, object>();
                 cols.ForEach(a => {
                     if (reader[a] is DBNull)
-                        dic.Add(a.ToLower(), "");
+                        dic.Add(a, "");
                     else if (isOracle)
                     {
                         var id = reader.GetOrdinal(a.ToUpper());
@@ -342,7 +342,7 @@ namespace FastUntility.Core.Base
                             dic.Add(a, reader[a]);
                     }
                     else
-                        dic.Add(a.ToLower(), reader[a]);
+                        dic.Add(a, reader[a]);
                 });
 
                 result.Add(dic);
