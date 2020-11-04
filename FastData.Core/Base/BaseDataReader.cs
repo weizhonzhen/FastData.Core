@@ -85,35 +85,40 @@ namespace FastData.Core.Base
                     var typeName = dr.GetDataTypeName(id).ToLower();
                     if (typeName == "clob" || typeName == "nclob")
                     {
-                        dr.GetType().GetMethods().ToList().ForEach(m => {
+                        dr.GetType().GetMethods().ToList().ForEach(m =>
+                        {
                             if (m.Name == "GetOracleClob")
                             {
                                 var param = new object[1];
                                 param[0] = id;
                                 var temp = m.Invoke(dr, param);
-                                temp.GetType().GetMethods().ToList().ForEach(v => {
+                                temp.GetType().GetMethods().ToList().ForEach(v =>
+                                {
                                     if (v.Name == "get_Value")
                                         value = v.Invoke(temp, null);
                                 });
                             }
                         });
                     }
-
-                    if (typeName == "blob")
+                    else if (typeName == "blob")
                     {
-                        dr.GetType().GetMethods().ToList().ForEach(m => {
+                        dr.GetType().GetMethods().ToList().ForEach(m =>
+                        {
                             if (m.Name == "GetOracleBlob")
                             {
                                 var param = new object[1];
                                 param[0] = id;
                                 var temp = m.Invoke(dr, param);
-                                temp.GetType().GetMethods().ToList().ForEach(v => {
+                                temp.GetType().GetMethods().ToList().ForEach(v =>
+                                {
                                     if (v.Name == "get_Value")
                                         value = v.Invoke(temp, null);
                                 });
                             }
                         });
                     }
+                    else
+                        value = dr.GetValue(id);
 
                     if (!dr.IsDBNull(id))
                     {
