@@ -231,7 +231,7 @@ namespace FastUntility.Core.Base
                 cols.ForEach(a =>
                 {
                     if (reader[a] is DBNull)
-                        dic.Add(a, "");
+                        dic.Add(a.ToLower(), "");
                     else if(isOracle)
                     {
                         var id = reader.GetOrdinal(a.ToUpper());
@@ -246,7 +246,7 @@ namespace FastUntility.Core.Base
                                     var temp = m.Invoke(reader, param);
                                     temp.GetType().GetMethods().ToList().ForEach(v => {
                                         if (v.Name == "get_Value")
-                                            dic.Add(a, v.Invoke(temp, null));
+                                            dic.Add(a.ToLower(), v.Invoke(temp, null));
                                     });
                                 }
                             });
@@ -261,16 +261,16 @@ namespace FastUntility.Core.Base
                                     var temp = m.Invoke(reader, param);
                                     temp.GetType().GetMethods().ToList().ForEach(v => {
                                         if (v.Name == "get_Value")
-                                            dic.Add(a, v.Invoke(temp, null));
+                                            dic.Add(a.ToLower(), v.Invoke(temp, null));
                                     });
                                 }
                             });
                         }
                         else
-                            dic.Add(a, reader[a]);
+                            dic.Add(a.ToLower(), reader[a]);
                     }
                     else
-                        dic.Add(a, reader[a]);
+                        dic.Add(a.ToLower(), reader[a]);
                 });
 
                 result.Add(dic);
@@ -303,10 +303,10 @@ namespace FastUntility.Core.Base
                 var dic = new Dictionary<string, object>();
                 cols.ForEach(a => {
                     if (reader[a] is DBNull)
-                        dic.Add(a, "");
+                        dic.Add(a.ToLower(), "");
                     else if (isOracle)
                     {
-                        var id = reader.GetOrdinal(a.ToUpper());
+                        var id = reader.GetOrdinal(a);
                         var typeName = reader.GetDataTypeName(id).ToLower();
                         if (typeName == "clob" || typeName == "nclob")
                         {
@@ -318,7 +318,7 @@ namespace FastUntility.Core.Base
                                     var temp = m.Invoke(reader, param);
                                     temp.GetType().GetMethods().ToList().ForEach(v => {
                                         if (v.Name == "get_Value")
-                                            dic.Add(a, v.Invoke(temp, null));
+                                            dic.Add(a.ToLower(), v.Invoke(temp, null));
                                     });
                                 }
                             });
@@ -333,16 +333,16 @@ namespace FastUntility.Core.Base
                                     var temp = m.Invoke(reader, param);
                                     temp.GetType().GetMethods().ToList().ForEach(v => {
                                         if (v.Name == "get_Value")
-                                            dic.Add(a, v.Invoke(temp, null));
+                                            dic.Add(a.ToLower(), v.Invoke(temp, null));
                                     });
                                 }
                             });
                         }
                         else
-                            dic.Add(a, reader[a]);
+                            dic.Add(a.ToLower(), reader[a]);
                     }
                     else
-                        dic.Add(a, reader[a]);
+                        dic.Add(a.ToLower(), reader[a]);
                 });
 
                 result.Add(dic);
