@@ -332,6 +332,11 @@ namespace FastUntility.Core.Base
                                         if (v.Name == "get_Value")
                                             dic.Add(a.ToLower(), v.Invoke(temp, null));
                                     });
+                                    temp.GetType().GetMethods().ToList().ForEach(v =>
+                                    {
+                                        if (v.Name == "Dispose")
+                                            v.Invoke(temp, null);
+                                    });
                                 }
                             });
                         }
@@ -346,6 +351,11 @@ namespace FastUntility.Core.Base
                                     temp.GetType().GetMethods().ToList().ForEach(v => {
                                         if (v.Name == "get_Value")
                                             dic.Add(a.ToLower(), v.Invoke(temp, null));
+                                    });
+                                    temp.GetType().GetMethods().ToList().ForEach(v =>
+                                    {
+                                        if (v.Name == "Dispose")
+                                            v.Invoke(temp, null);
                                     });
                                 }
                             });
