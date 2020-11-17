@@ -17,6 +17,9 @@ in Startup.cs Startup mothod
             // init map cache
             FastMap.InstanceMap();
             
+            //init map cache by Resource xml
+            FastData.Core.FastMap.InstanceMapResource("Test1");
+            
             //by Repository
             services.AddSingleton<IRedisRepository, RedisRepository>();
             services.AddTransient<IFastRepository, FastRepository>(); 
