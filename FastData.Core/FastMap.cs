@@ -14,7 +14,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using FastUntility.Core.Base;
 using FastUntility.Core.Page;
-using System.IO.Compression;
 
 namespace FastData.Core
 {
@@ -90,7 +89,7 @@ namespace FastData.Core
         }
         #endregion
 
-        #region 初始化map 3  by EmbeddedResource
+        #region 初始化map 3  by Resource
         public static void InstanceMapResource(string projectName,string dbKey=null)
         {
             var config = DataConfig.Get(dbKey);
@@ -100,30 +99,33 @@ namespace FastData.Core
             {
                 using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName, a.Replace("/", "."))))
                 {
-                    using (var reader = new StreamReader(resource))
+                    if (resource != null)
                     {
-                        var content = reader.ReadToEnd();
-                        var info = new FileInfo(a);
-                        var key = BaseSymmetric.Generate(info.FullName);
-                        if (!DbCache.Exists(config.CacheType, key))
+                        using (var reader = new StreamReader(resource))
                         {
-                            var temp = new MapXmlModel();
-                            temp.LastWrite = info.LastWriteTime;
-                            temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
-                            temp.FileName = info.FullName;
-                            if (MapXml.SaveXml(dbKey, key, info, config, db))
-                                DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
-                        }
-                        else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
-                        {
-                            DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(f => { DbCache.Remove(config.CacheType, f); });
+                            var content = reader.ReadToEnd();
+                            var info = new FileInfo(a);
+                            var key = BaseSymmetric.Generate(info.FullName);
+                            if (!DbCache.Exists(config.CacheType, key))
+                            {
+                                var temp = new MapXmlModel();
+                                temp.LastWrite = info.LastWriteTime;
+                                temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
+                                temp.FileName = info.FullName;
+                                if (MapXml.SaveXml(dbKey, key, info, config, db))
+                                    DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
+                            }
+                            else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
+                            {
+                                DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(f => { DbCache.Remove(config.CacheType, f); });
 
-                            var model = new MapXmlModel();
-                            model.LastWrite = info.LastWriteTime;
-                            model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
-                            model.FileName = info.FullName;
-                            if (MapXml.SaveXml(dbKey, key, info, config, db))
-                                DbCache.Set<MapXmlModel>(config.CacheType, key, model);
+                                var model = new MapXmlModel();
+                                model.LastWrite = info.LastWriteTime;
+                                model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
+                                model.FileName = info.FullName;
+                                if (MapXml.SaveXml(dbKey, key, info, config, db))
+                                    DbCache.Set<MapXmlModel>(config.CacheType, key, model);
+                            }
                         }
                     }
                 }
