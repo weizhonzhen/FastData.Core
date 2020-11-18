@@ -14,37 +14,13 @@ namespace FastRedis.Core
     /// </summary>
     public static class RedisInfo
     {
-        internal static string configKey = "FastRedis.Core.Config";
         internal static readonly int _db = 0;
         internal static readonly Lazy<ConnectionMultiplexer> conn;
         static RedisInfo()
         {
-            var config = new ConfigModel();
-            if (BaseCache.Exists(configKey))
-                config = BaseCache.Get<ConfigModel>(configKey);
-            else
-                config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
+            var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
             _db = config.Db;
             conn = new Lazy<ConnectionMultiplexer>(() => { return ConnectionMultiplexer.Connect(config.Server); });
-        }
-
-        public static void Resource(string projectName)
-        {
-            var assembly = Assembly.Load(projectName);
-            using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.db.json", projectName)))
-            {
-                if (resource != null)
-                {
-                    using (var reader = new StreamReader(resource))
-                    {
-                        var config = new ConfigModel();
-                        var content = reader.ReadToEnd();
-                        config.Server = BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue("Redis"))).GetValue("Server").ToStr();
-                        config.Db = BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue("Redis"))).GetValue("Db").ToStr().ToInt(0);
-                        BaseCache.Set<ConfigModel>(configKey, config);
-                    }
-                }
-            }
         }
 
         /// <summary>

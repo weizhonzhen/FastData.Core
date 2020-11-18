@@ -1,9 +1,9 @@
-namespace FastRedis.Core
+﻿namespace FastRedis.Core
 {
     /// <summary>
     /// 配置实体
     /// </summary>
-    internal class ConfigModel
+    public class ConfigModel
     {
         /// <summary>
         /// 服务器
