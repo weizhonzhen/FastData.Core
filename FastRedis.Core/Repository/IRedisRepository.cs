@@ -2,8 +2,10 @@
 
 namespace FastRedis.Core.Repository
 {
-    public interface IFastRedisRepository
+    public interface IRedisRepository
     {
+        void Resource(string projectName);
+
         bool Exists(string key, int db = 0);
 
         Task<bool> ExistsAsy(string key, int db = 0);

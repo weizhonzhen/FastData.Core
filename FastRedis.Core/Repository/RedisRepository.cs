@@ -1,21 +1,48 @@
 ﻿using FastUntility.Core.Base;
+using FastUntility.Core.Cache;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace FastRedis.Core.Repository
 {
-    public class RedisRepository: IRedisRepository
+    public class RedisRepository : IRedisRepository
     {
+        private string configKey = "FastRedis.Core.Config";
         private int _db = 0;
         private ConnectionMultiplexer Context;
         public RedisRepository()
         {
-            var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
+            var config = new ConfigModel();
+            if (BaseCache.Exists(configKey))
+                config = BaseCache.Get<ConfigModel>(configKey);
+            else
+                config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
             _db = config.Db;
             Context = ConnectionMultiplexer.Connect(config.Server);
         }
 
+        public void Resource(string projectName)
+        {
+            var assembly = Assembly.Load(projectName);
+            using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.db.json", projectName)))
+            {
+                if (resource != null)
+                {
+                    using (var reader = new StreamReader(resource))
+                    {
+                        var config = new ConfigModel();
+                        var content = reader.ReadToEnd();
+                        config.Server = BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue("Redis"))).GetValue("Server").ToStr();
+                        config.Db = BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue("Redis"))).GetValue("Db").ToStr().ToInt(0);
+                        BaseCache.Set<ConfigModel>(configKey, config);
+                    }
+                }
+            }
+        }
 
         #region 是否存在
         /// <summary>
