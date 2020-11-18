@@ -17,7 +17,7 @@ in Startup.cs Startup mothod
             // init map cache
             FastMap.InstanceMap();
             
-            //init map cache by Resource xml
+            //init map cache by Resource （xml， db.json， map.json）
             FastData.Core.FastMap.InstanceMapResource("Test1");
             
             //by Repository
