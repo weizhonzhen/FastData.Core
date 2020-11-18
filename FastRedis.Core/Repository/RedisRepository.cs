@@ -12,9 +12,18 @@ namespace FastRedis.Core.Repository
         private ConnectionMultiplexer Context;
         public RedisRepository(IOptions<ConfigModel> options)
         {
-            var config = options.Value;
-            _db = config.Db;
-            Context = ConnectionMultiplexer.Connect(config.Server);
+            if (options == null)
+            {
+                var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
+                _db = config.Db;
+                Context = ConnectionMultiplexer.Connect(config.Server);
+            }
+            else
+            {
+                var config = options.Value;
+                _db = config.Db;
+                Context = ConnectionMultiplexer.Connect(config.Server);
+            }
         }
 
         #region 是否存在
