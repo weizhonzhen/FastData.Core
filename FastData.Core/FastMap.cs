@@ -31,11 +31,12 @@ namespace FastData.Core
         /// <param name="dll">dll名称</param>
         public static void InstanceProperties(string nameSpace, string projectName)
         {
-            var config = DataConfig.Get();
+            projectName = projectName.Replace(".dll", "");
+            var config = DataConfig.Get("", projectName);
 
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName.Replace(".dll", ""));
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName);
             if (assembly == null)
-                assembly = Assembly.Load(projectName.Replace(".dll", ""));
+                assembly = Assembly.Load(projectName);
 
             if (assembly != null)
             {
@@ -68,15 +69,16 @@ namespace FastData.Core
         /// <param name="dll">dll名称</param>
         public static void InstanceTable(string nameSpace, string projectName, string dbKey = null)
         {
+            projectName = projectName.Replace(".dll", "");
             var query = new DataQuery();
-            query.Config = DataConfig.Get(dbKey);
+            query.Config = DataConfig.Get(dbKey,projectName);
             query.Key = dbKey;
 
             MapXml.CreateLogTable(query);
-            var assembly =  AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName.Replace(".dll", ""));
+            var assembly =  AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName);
 
             if (assembly == null)
-                assembly = Assembly.Load(projectName.Replace(".dll", ""));
+                assembly = Assembly.Load(projectName);
             
             if (assembly != null)
             {
@@ -86,6 +88,66 @@ namespace FastData.Core
                         BaseTable.Check(query, a.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
                 });
             }
+        }
+        #endregion
+
+        #region 初始化map 3  by Resource
+        public static void InstanceMapResource(string projectName, string dbKey = null)
+        {
+            projectName = projectName.Replace(".dll", "");
+            var config = DataConfig.Get(dbKey, projectName);
+            var db = new DataContext(dbKey);
+            var assembly = Assembly.Load(projectName);
+            var map = new MapConfigModel();
+            using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.map.json", projectName)))
+            {
+                if (resource != null)
+                {
+                    using (var reader = new StreamReader(resource))
+                    {
+                        var content = reader.ReadToEnd();
+                        map.Path = BaseJson.JsonToModel<List<string>>(BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue("SqlMap"))).GetValue("Path").ToStr());
+                    }
+                }
+                else
+                    map = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, "map.json");
+            }
+
+            map.Path.ForEach(a =>
+            {
+                using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName, a.Replace("/", "."))))
+                {
+                    if (resource != null)
+                    {
+                        using (var reader = new StreamReader(resource))
+                        {
+                            var xml = reader.ReadToEnd();
+                            var info = new FileInfo(a);
+                            var key = BaseSymmetric.Generate(info.FullName);
+                            if (!DbCache.Exists(config.CacheType, key))
+                            {
+                                var temp = new MapXmlModel();
+                                temp.LastWrite = info.LastWriteTime;
+                                temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
+                                temp.FileName = info.FullName;
+                                if (MapXml.SaveXml(dbKey, key, info, config, db))
+                                    DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
+                            }
+                            else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
+                            {
+                                DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(f => { DbCache.Remove(config.CacheType, f); });
+
+                                var model = new MapXmlModel();
+                                model.LastWrite = info.LastWriteTime;
+                                model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
+                                model.FileName = info.FullName;
+                                if (MapXml.SaveXml(dbKey, key, info, config, db))
+                                    DbCache.Set<MapXmlModel>(config.CacheType, key, model);
+                            }
+                        }
+                    }
+                }
+            });
         }
         #endregion
 
