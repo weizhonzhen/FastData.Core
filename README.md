@@ -45,10 +45,7 @@ in db.json
                 "CacheType":"web",--redis,web
                 "IsUpdateCache": false --is auto update cache
               }
-            ], 
-            "Redis": {
-                "Server": "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000" --no timeouts
-              }
+            ]
       }
 ```
   in map.json
