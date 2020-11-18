@@ -1,10 +1,10 @@
 using FastData.Core.Model;
 using FastData.Core.Type;
 using FastUntility.Core.Base;
-using FastUntility.Core.BuilderMethod;
-using NPOI.SS.Formula.Functions;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace FastData.Core.Base
 {
@@ -15,14 +15,36 @@ namespace FastData.Core.Base
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static ConfigModel Get(string key = null)
+        public static ConfigModel Get(string key = null, string projectName = null)
         {
             var list = new List<ConfigModel>();
             var item = new ConfigModel();
-            var cacheKey = key == null ? "config" : string.Format("config.{0}", key);
+            var cacheKey = "FastData.Core.Config";
 
             if (DbCache.Exists(CacheType.Web, cacheKey))
                 list = DbCache.Get<List<ConfigModel>>(CacheType.Web, cacheKey);
+            else if (projectName != null)
+            {
+                var assembly = Assembly.Load(projectName);
+                using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.db.json", projectName)))
+                {
+                    if (resource != null)
+                    {
+                        using (var reader = new StreamReader(resource))
+                        {
+                            var content = reader.ReadToEnd();
+                            list = BaseJson.JsonToList<ConfigModel>(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue("DataConfig")));
+                            list.ForEach(a => { a.IsUpdateCache = false; });
+                            DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
+                        }
+                    }
+                    else
+                    {
+                        list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, "db.json");
+                        DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
+                    }
+                }
+            }
             else
             {
                 list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, "db.json");
