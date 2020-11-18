@@ -21,7 +21,7 @@ in Startup.cs Startup mothod
             FastData.Core.FastMap.InstanceMapResource("Test1");
             
             //by Repository
-            services.AddFastRedis(a => { a.Db = 0;a.Server = "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000"; });
+            services.AddFastRedis(a => { a.Server = "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000"; });
             services.AddTransient<IFastRepository, FastRepository>(); 
             ServiceContext.Init(new ServiceEngine(services.BuildServiceProvider())); //reader all Repository
        
