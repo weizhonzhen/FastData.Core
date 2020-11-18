@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddFastData(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IFastRepository, FastRepository>();
+            serviceCollection.AddTransient<IFastRepository, FastRepository>();
             ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
             return serviceCollection;
         }
