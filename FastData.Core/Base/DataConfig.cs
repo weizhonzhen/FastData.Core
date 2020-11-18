@@ -68,6 +68,8 @@ namespace FastData.Core.Base
             item.IsPropertyCache = true;
             item.DbType = item.DbType.ToLower();
 
+            if (projectName != null)
+                item.IsUpdateCache = false;
             return item;
         }
 
