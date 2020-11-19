@@ -27,8 +27,7 @@ namespace FastUntility.Core
         private static IServiceEngine engine;
         public static IServiceEngine Init(IServiceEngine _engine)
         {
-            if (engine == null)
-                engine = _engine;
+            engine = _engine;
             return engine;
         }
         
