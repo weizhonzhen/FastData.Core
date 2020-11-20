@@ -14,16 +14,16 @@ in Startup.cs Startup mothod
             FastMap.InstanceTable("DataModel.Base", "Model.dll");
             FastMap.InstanceTable("DataModel.Report", "Model.dll");
 
+            //by Repository
+            services.AddFastRedis(a => { a.Server = "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000"; });
+            services.AddFastData();
+            
             // init map cache
             FastMap.InstanceMap();
             
             //init map cache by Resource （xml file， db.json， map.json）
             FastData.Core.FastMap.InstanceMapResource("Test1");
-            
-            //by Repository
-            services.AddFastRedis(a => { a.Server = "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000"; });
-            services.AddFastData();
-       
+                   
 in db.json         
 ```csharp
  {      
