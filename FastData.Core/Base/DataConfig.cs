@@ -15,7 +15,7 @@ namespace FastData.Core.Base
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static ConfigModel Get(string key = null, string projectName = null)
+        public static ConfigModel Get(string key = null, string projectName = null,string dbFile= "db.json")
         {
             var list = new List<ConfigModel>();
             var item = new ConfigModel();
@@ -26,7 +26,7 @@ namespace FastData.Core.Base
             else if (projectName != null)
             {
                 var assembly = Assembly.Load(projectName);
-                using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.db.json", projectName)))
+                using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName,dbFile)))
                 {
                     if (resource != null)
                     {
@@ -40,14 +40,14 @@ namespace FastData.Core.Base
                     }
                     else
                     {
-                        list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, "db.json");
+                        list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, dbFile);
                         DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
                     }
                 }
             }
             else
             {
-                list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, "db.json");
+                list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, dbFile);
                 DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
             }
 
@@ -73,18 +73,15 @@ namespace FastData.Core.Base
             return item;
         }
 
-        public static bool DataType(string key = null)
+        public static bool DataType(string key = null, string projectName = null, string dbFile = "db.json")
         {
-            var list = new List<ConfigModel>();
-            var cacheKey = key == null ? "config" : string.Format("config.{0}", key);
+            var cacheKey = "FastData.Core.Config";
 
-            if (DbCache.Exists(CacheType.Web, cacheKey))
-                list = DbCache.Get<List<ConfigModel>>(CacheType.Web, cacheKey);
-            else
-            {
-                list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, "db.json");
-                DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
-            }
+            if (!DbCache.Exists(CacheType.Web, cacheKey))
+                DataConfig.Get(key, projectName, dbFile);
+
+            var list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, dbFile);
+            DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
 
             var result = new List<bool>();
             result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.Oracle) > 0);
