@@ -483,10 +483,10 @@ namespace FastData.Core.Repository
         /// 初始化map 3
         /// </summary>
         /// <returns></returns>
-        private void InstanceMap(string dbKey = null)
+        private void InstanceMap(string dbKey = null,string dbFile="db.json",string mapFile= "map.json")
         {
-            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, "map.json");
-            var config = DataConfig.Get(dbKey);
+            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
+            var config = DataConfig.Get(dbKey, null, dbFile);
             var db = new DataContext(dbKey);
             var query = new DataQuery { Config = config, Key = dbKey };
 
@@ -1123,9 +1123,9 @@ namespace FastData.Core.Repository
         /// <param name="field">字段</param>
         /// <param name="Key"></param>
         /// <returns></returns>
-        public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null)
+        public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
-            if (DataConfig.DataType(key)&&key==null)
+            if (DataConfig.DataType(dbFile) && key == null)
                 throw new Exception("数据库查询key不能为空,数据库类型有多个");
 
             if (this.query.Data.Config != null&&this.query.Data.Config.IsChangeDb )
