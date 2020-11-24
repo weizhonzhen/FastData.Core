@@ -19,10 +19,10 @@ in Startup.cs Startup mothod
             services.AddFastData();
             
             // init map cache
-            FastMap.InstanceMap();
+            FastData.Core.FastMap.InstanceMap("dbKey", "db.json", "map.json");
             
             //init map cache by Resource （xml file， db.json， map.json）
-            FastData.Core.FastMap.InstanceMapResource("Test1");
+            FastData.Core.FastMap.InstanceMapResource("Test1", "dbKey", "db.json", "map.json");
                    
 in db.json         
 ```csharp
