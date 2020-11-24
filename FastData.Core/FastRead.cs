@@ -52,10 +52,10 @@ namespace FastData.Core
         /// <param name="field">字段</param>
         /// <param name="Key"></param>
         /// <returns></returns>
-        public static DataQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null)
+        public static DataQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string projectName = null, string dbFile = "db.json")
         {
             var result = new DataQuery();
-            result.Config = DataConfig.Get(key);
+            result.Config = DataConfig.Get(key, projectName, dbFile);
             result.Key = key;
 
             var queryField = BaseField.QueryField<T>(predicate, field, result.Config);
