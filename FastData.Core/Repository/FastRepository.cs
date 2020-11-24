@@ -1123,9 +1123,9 @@ namespace FastData.Core.Repository
         /// <param name="field">字段</param>
         /// <param name="Key"></param>
         /// <returns></returns>
-        public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
+        public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string projectName = null, string dbFile = "db.json")
         {
-            if (DataConfig.DataType(dbFile) && key == null)
+            if (DataConfig.DataType(key, projectName, dbFile) && key == null)
                 throw new Exception("数据库查询key不能为空,数据库类型有多个");
 
             if (this.query.Data.Config != null&&this.query.Data.Config.IsChangeDb )
