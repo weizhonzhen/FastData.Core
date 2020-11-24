@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.IO;
+using FastUntility.Core.Cache;
 
 namespace FastUntility.Core.Base
 {
@@ -18,20 +19,21 @@ namespace FastUntility.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="key">键名</param>
         /// <returns></returns>
-        public static T GetValue<T>(string key,string fileName= "appsettings.json") where T : class, new()
-        {            
+        public static T GetValue<T>(string key,string fileName= "appsettings.json", bool isCache = true) where T : class, new()
+        {
+            var cacheKey = string.Format("json.{0}.{1}", key, fileName);
+            if (isCache && BaseCache.Exists(cacheKey))
+                return BaseCache.Get<T>(cacheKey);
+
             var build = new ConfigurationBuilder();
-
-            //目录
             build.SetBasePath(Directory.GetCurrentDirectory());
-
-            //加载配置文件
             build.AddJsonFile(fileName, optional: true, reloadOnChange: true);
-
-            //编译成对象
             var config = build.Build();
+            var item = new ServiceCollection().AddOptions().Configure<T>(config.GetSection(key)).BuildServiceProvider().GetService<IOptions<T>>().Value;
+            if (isCache)
+                BaseCache.Set<T>(cacheKey, item);
 
-            return new ServiceCollection().AddOptions().Configure<T>(config.GetSection(key)).BuildServiceProvider().GetService<IOptions<T>>().Value;
+            return item;
         }
         #endregion
         
@@ -42,20 +44,22 @@ namespace FastUntility.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="key">键名</param>
         /// <returns></returns>
-        public static List<T> GetListValue<T>(string key, string fileName = "appsettings.json") where T : class, new()
+        public static List<T> GetListValue<T>(string key, string fileName = "appsettings.json",bool isCache=true) where T : class, new()
         {
+            var cacheKey = string.Format("json.{0}.{1}", key, fileName);
+            if (isCache && BaseCache.Exists(cacheKey))
+                return BaseCache.Get<List<T>>(cacheKey);
+
             var build = new ConfigurationBuilder();
-
-            //目录
             build.SetBasePath(Directory.GetCurrentDirectory());
-
-            //加载配置文件
             build.AddJsonFile(fileName, optional: true, reloadOnChange: true);
-
-            //编译成对象
             var config = build.Build();
+            var list = new ServiceCollection().AddOptions().Configure<List<T>>(config.GetSection(key)).BuildServiceProvider().GetService<IOptions<List<T>>>().Value;
 
-            return new ServiceCollection().AddOptions().Configure<List<T>>(config.GetSection(key)).BuildServiceProvider().GetService<IOptions<List<T>>>().Value;
+            if (isCache)
+                BaseCache.Set<List<T>>(cacheKey, list);
+
+            return list;
         }
         #endregion
     }
