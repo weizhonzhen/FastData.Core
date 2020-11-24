@@ -29,7 +29,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceProperties(string nameSpace, string projectName=null,string dbFile="db.json")
+        public static void InstanceProperties(string nameSpace, string projectName,string dbFile="db.json")
         {
             projectName = projectName.Replace(".dll", "");
             var config = DataConfig.Get("", projectName, dbFile);
@@ -67,7 +67,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceTable(string nameSpace, string projectName=null, string dbKey = null, string dbFile = "db.json")
+        public static void InstanceTable(string nameSpace, string projectName, string dbKey = null, string dbFile = "db.json")
         {
             projectName = projectName.Replace(".dll", "");
             var query = new DataQuery();
