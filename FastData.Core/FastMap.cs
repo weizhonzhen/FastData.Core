@@ -92,14 +92,14 @@ namespace FastData.Core
         #endregion
 
         #region 初始化map 3  by Resource
-        public static void InstanceMapResource(string projectName, string dbKey = null)
+        public static void InstanceMapResource(string projectName, string dbKey = null,string dbFile="db.json",string mapFile="map.json")
         {
             projectName = projectName.Replace(".dll", "");
-            var config = DataConfig.Get(dbKey, projectName);
+            var config = DataConfig.Get(dbKey, projectName, dbFile);
             var db = new DataContext(dbKey);
             var assembly = Assembly.Load(projectName);
             var map = new MapConfigModel();
-            using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.map.json", projectName)))
+            using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName,mapFile)))
             {
                 if (resource != null)
                 {
@@ -110,7 +110,7 @@ namespace FastData.Core
                     }
                 }
                 else
-                    map = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, "map.json");
+                    map = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
             }
 
             map.Path.ForEach(a =>
@@ -156,10 +156,10 @@ namespace FastData.Core
         /// 初始化map 3
         /// </summary>
         /// <returns></returns>
-        public static void InstanceMap(string dbKey = null)
+        public static void InstanceMap(string dbKey = null, string dbFile = "db.json", string mapFile= "map.json")
         {
-            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, "map.json");
-            var config = DataConfig.Get(dbKey);
+            var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
+            var config = DataConfig.Get(dbKey, null, dbFile);
             var db = new DataContext(dbKey);
             var query = new DataQuery { Config = config, Key = dbKey };
 
