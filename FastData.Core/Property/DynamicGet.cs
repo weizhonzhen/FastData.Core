@@ -1,4 +1,4 @@
-﻿using FastUntility.Core.Cache;
+﻿using FastData.Core.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -17,13 +17,13 @@ namespace FastData.Core.Property
         public DynamicGet()
         {
             var key = string.Format("DynamicGet<T>.{0}.{1}", typeof(T)?.Namespace, typeof(T).Name);
-            if (!BaseCache.Exists(key))
+            if (!DbCache.Exists(CacheType.Web, key))
             {
                 GetValueDelegate = GenerateGetValue();
-                BaseCache.Set<object>(key, GetValueDelegate);
+                DbCache.Set<object>(CacheType.Web, key, GetValueDelegate);
             }
             else
-                GetValueDelegate = BaseCache.Get<object>(key) as Func<object, string, object>;
+                GetValueDelegate = DbCache.Get<object>(CacheType.Web, key) as Func<object, string, object>;
         }
 
         #region 动态getvalue
@@ -83,13 +83,13 @@ namespace FastData.Core.Property
             Instance = model;
 
             var key = string.Format("DynamicGet.{0}.{1}", model.GetType()?.Namespace, model.GetType().Name);
-            if (!BaseCache.Exists(key))
+            if (!DbCache.Exists(CacheType.Web, key))
             {
                 GetValueDelegate = GenerateGetValue();
-                BaseCache.Set<object>(key, GetValueDelegate);
+                DbCache.Set<object>(CacheType.Web, key, GetValueDelegate);
             }
             else
-                GetValueDelegate = BaseCache.Get<object>(key) as Func<object, string, object>;
+                GetValueDelegate = DbCache.Get<object>(CacheType.Web, key) as Func<object, string, object>;
         }
 
         #region 动态getvalue
