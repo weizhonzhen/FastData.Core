@@ -80,7 +80,7 @@ namespace FastData.Core.Base
             if (!DbCache.Exists(CacheType.Web, cacheKey))
                 DataConfig.Get(key, projectName, dbFile);
 
-            var list = BaseConfig.GetListValue<ConfigModel>(AppSettingKey.Config, dbFile);
+            var list = DbCache.Get<List<ConfigModel>>(CacheType.Web, cacheKey);
 
             var result = new List<bool>();
             result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.Oracle) > 0);
