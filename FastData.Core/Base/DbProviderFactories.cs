@@ -1,9 +1,8 @@
-using System;
+﻿using System;
 using System.Data.Common;
 using System.Reflection;
 using FastData.Core.Model;
 using System.Linq;
-using FastUntility.Core.Cache;
 
 namespace FastData.Core.Base
 {
@@ -19,8 +18,8 @@ namespace FastData.Core.Base
         {
             try
             {
-                if (BaseCache.Exists(config.ProviderName))
-                    return BaseCache.Get<object>(config.ProviderName) as DbProviderFactory;
+                if (DbCache.Exists(CacheType.Web, config.ProviderName))
+                    return DbCache.Get<object>(CacheType.Web, config.ProviderName) as DbProviderFactory;
                 else
                 {
                     var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == config.ProviderName);
@@ -33,7 +32,7 @@ namespace FastData.Core.Base
                     if (type != null)
                         instance = Activator.CreateInstance(type);
 
-                    BaseCache.Set<object>(config.ProviderName, instance);
+                    DbCache.Set<object>(CacheType.Web, config.ProviderName, instance);
                     return instance as DbProviderFactory;
                 }
             }
