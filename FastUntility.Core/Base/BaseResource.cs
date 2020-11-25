@@ -1,5 +1,4 @@
-﻿using FastUntility.Core.Base;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -7,7 +6,27 @@ namespace FastUntility.Core.Base
 {
     public static class BaseResource
     {
-        #region 获取资源文件
+        /// <summary>
+        /// 获取资源文件
+        /// </summary>
+        public static string GetValue(string projectName,string file)
+        {
+            var assembly = Assembly.Load(projectName);
+            using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName, file)))
+            {
+                if (resource != null)
+                {
+                    using (var reader = new StreamReader(resource))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+                else
+                    return "";
+            }
+        }
+
+        #region 获取资源文件 json
         /// <summary>
         /// 获取资源文件
         /// </summary>
@@ -30,9 +49,9 @@ namespace FastUntility.Core.Base
         }
         #endregion
 
-        #region 获取资源文件
+        #region 获取资源文件 json
         /// <summary>
-        /// 获取资源文件
+        /// 获取资源文件 json
         /// </summary>
         public static List<T> GetListValue<T>(string key, string projectName, string jsonFile) where T : class, new()
         {
