@@ -1125,7 +1125,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
-            var projectName = Assembly.GetEntryAssembly().GetName().Name;
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
             if (DataConfig.DataType(key, projectName, dbFile) && key == null)
                 throw new Exception("数据库查询key不能为空,数据库类型有多个");
 
