@@ -14,9 +14,16 @@ namespace FastRedis.Core.Repository
         {
             if (options == null)
             {
-                var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
-                _db = config.Db;
-                Context = ConnectionMultiplexer.Connect(config.Server);
+                try
+                {
+                    var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
+                    _db = config.Db;
+                    Context = ConnectionMultiplexer.Connect(config.Server);
+                }
+                catch
+                {
+                    throw new Exception("services.AddFastRedis(a => { a.Server = 'redis address' });");
+                }
             }
             else
             {
