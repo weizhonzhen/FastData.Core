@@ -29,9 +29,9 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceProperties(string nameSpace, string projectName,string dbFile="db.json")
+        public static void InstanceProperties(string nameSpace, string dbFile="db.json")
         {
-            projectName = projectName.Replace(".dll", "");
+            var projectName = Assembly.GetEntryAssembly().GetName().Name;
             var config = DataConfig.Get("", projectName, dbFile);
 
             var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName);
@@ -67,9 +67,9 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceTable(string nameSpace, string projectName, string dbKey = null, string dbFile = "db.json")
+        public static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json")
         {
-            projectName = projectName.Replace(".dll", "");
+            var projectName = Assembly.GetEntryAssembly().GetName().Name;
             var query = new DataQuery();
             query.Config = DataConfig.Get(dbKey, projectName, dbFile);
             query.Key = dbKey;
@@ -92,9 +92,9 @@ namespace FastData.Core
         #endregion
 
         #region 初始化map 3  by Resource
-        public static void InstanceMapResource(string projectName, string dbKey = null,string dbFile="db.json",string mapFile="map.json")
+        public static void InstanceMapResource(string dbKey = null,string dbFile="db.json",string mapFile="map.json")
         {
-            projectName = projectName.Replace(".dll", "");
+            var projectName = Assembly.GetEntryAssembly().GetName().Name;
             var config = DataConfig.Get(dbKey, projectName, dbFile);
             var db = new DataContext(dbKey);
             var assembly = Assembly.Load(projectName);
@@ -106,7 +106,7 @@ namespace FastData.Core
                     using (var reader = new StreamReader(resource))
                     {
                         var content = reader.ReadToEnd();
-                        map.Path = BaseJson.JsonToModel<List<string>>(BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue("SqlMap"))).GetValue("Path").ToStr());
+                        map.Path = BaseJson.JsonToModel<List<string>>(BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue(AppSettingKey.Map))).GetValue("Path").ToStr());
                     }
                 }
                 else

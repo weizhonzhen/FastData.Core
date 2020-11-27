@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using FastUntility.Core.Page;
 using System.Data;
+using System.Reflection;
 
 namespace FastData.Core
 {
@@ -52,8 +53,9 @@ namespace FastData.Core
         /// <param name="field">字段</param>
         /// <param name="Key"></param>
         /// <returns></returns>
-        public static DataQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string projectName = null, string dbFile = "db.json")
+        public static DataQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
+            var projectName = Assembly.GetEntryAssembly().GetName().Name;
             var result = new DataQuery();
             result.Config = DataConfig.Get(key, projectName, dbFile);
             result.Key = key;
