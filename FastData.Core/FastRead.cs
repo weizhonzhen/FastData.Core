@@ -55,7 +55,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static DataQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
-            var projectName = Assembly.GetEntryAssembly().GetName().Name;
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
             var result = new DataQuery();
             result.Config = DataConfig.Get(key, projectName, dbFile);
             result.Key = key;

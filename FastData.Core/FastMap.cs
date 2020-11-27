@@ -31,7 +31,7 @@ namespace FastData.Core
         /// <param name="dll">dll名称</param>
         public static void InstanceProperties(string nameSpace, string dbFile="db.json")
         {
-            var projectName = Assembly.GetEntryAssembly().GetName().Name;
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
             var config = DataConfig.Get("", projectName, dbFile);
 
             var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName);
@@ -69,7 +69,7 @@ namespace FastData.Core
         /// <param name="dll">dll名称</param>
         public static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json")
         {
-            var projectName = Assembly.GetEntryAssembly().GetName().Name;
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
             var query = new DataQuery();
             query.Config = DataConfig.Get(dbKey, projectName, dbFile);
             query.Key = dbKey;
@@ -94,7 +94,7 @@ namespace FastData.Core
         #region 初始化map 3  by Resource
         public static void InstanceMapResource(string dbKey = null,string dbFile="db.json",string mapFile="map.json")
         {
-            var projectName = Assembly.GetEntryAssembly().GetName().Name;
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
             var config = DataConfig.Get(dbKey, projectName, dbFile);
             var db = new DataContext(dbKey);
             var assembly = Assembly.Load(projectName);
