@@ -8,11 +8,10 @@ in Startup.cs Startup mothod
             Configuration = configuration;
 
             //init model Properties cahce
-            FastMap.InstanceProperties("DataModel", "Model.dll","db.json");
+            FastMap.InstanceProperties("DataModel","db.json");
 
             //init code first
-            FastMap.InstanceTable("DataModel.Base", "Model.dll","db.json");
-            FastMap.InstanceTable("DataModel.Report", "Model.dll","db.json");
+            FastMap.InstanceTable("DataModel.Base", "db.json");
 
             //by Repository
             services.AddFastRedis(a => { a.Server = "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000"; });
@@ -22,7 +21,7 @@ in Startup.cs Startup mothod
             FastData.Core.FastMap.InstanceMap("dbKey", "db.json", "map.json");
             
             //init map cache by Resource （xml file， db.json， map.json）
-            FastData.Core.FastMap.InstanceMapResource("Test1", "dbKey", "db.json", "map.json");
+            FastData.Core.FastMap.InstanceMapResource("dbKey", "db.json", "map.json");
                    
 in db.json         
 ```csharp
