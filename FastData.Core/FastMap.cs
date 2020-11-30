@@ -117,34 +117,35 @@ namespace FastData.Core
             {
                 using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName, a.Replace("/", "."))))
                 {
+                    var xml = "";
                     if (resource != null)
                     {
                         using (var reader = new StreamReader(resource))
                         {
-                            var xml = reader.ReadToEnd();
-                            var info = new FileInfo(a);
-                            var key = BaseSymmetric.Generate(info.FullName);
-                            if (!DbCache.Exists(config.CacheType, key))
-                            {
-                                var temp = new MapXmlModel();
-                                temp.LastWrite = info.LastWriteTime;
-                                temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
-                                temp.FileName = info.FullName;
-                                if (MapXml.SaveXml(dbKey, key, info, config, db))
-                                    DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
-                            }
-                            else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
-                            {
-                                DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(f => { DbCache.Remove(config.CacheType, f); });
-
-                                var model = new MapXmlModel();
-                                model.LastWrite = info.LastWriteTime;
-                                model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
-                                model.FileName = info.FullName;
-                                if (MapXml.SaveXml(dbKey, key, info, config, db))
-                                    DbCache.Set<MapXmlModel>(config.CacheType, key, model);
-                            }
+                            xml = reader.ReadToEnd();                           
                         }
+                    }
+                    var info = new FileInfo(a);
+                    var key = BaseSymmetric.Generate(info.FullName);
+                    if (!DbCache.Exists(config.CacheType, key))
+                    {
+                        var temp = new MapXmlModel();
+                        temp.LastWrite = info.LastWriteTime;
+                        temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
+                        temp.FileName = info.FullName;
+                        if (MapXml.SaveXml(dbKey, key, info, config, db))
+                            DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
+                    }
+                    else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
+                    {
+                        DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(f => { DbCache.Remove(config.CacheType, f); });
+
+                        var model = new MapXmlModel();
+                        model.LastWrite = info.LastWriteTime;
+                        model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
+                        model.FileName = info.FullName;
+                        if (MapXml.SaveXml(dbKey, key, info, config, db))
+                            DbCache.Set<MapXmlModel>(config.CacheType, key, model);
                     }
                 }
             });
