@@ -652,7 +652,7 @@ namespace FastData.Core.Base
                     else
                         xmlDoc.Load(path);
                 }
-                else if (xml != null)
+                else if (!string.IsNullOrEmpty(xml))
                     xmlDoc.LoadXml(xml);
                 else
                     xmlDoc.Load(path);
