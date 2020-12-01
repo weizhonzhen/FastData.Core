@@ -84,9 +84,9 @@ namespace FastData.Core.Base
                             var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             if (DbCache.Exists(cacheType, paramKey))
                             {
-                                var flagParam = string.Format("{0}{1}", flag, temp.ParameterName.ToLower());
-                                var tempKey = string.Format("#{0}#", temp.ParameterName.ToLower());
-                                var paramSql = DbCache.Get(cacheType, paramKey).ToLower();
+                                var flagParam = string.Format("{0}{1}", flag, temp.ParameterName);
+                                var tempKey = string.Format("#{0}#", temp.ParameterName);
+                                var paramSql = DbCache.Get(cacheType, paramKey.ToLower());
                                 var condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
                                 var conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
                                 switch (condition)
@@ -219,7 +219,6 @@ namespace FastData.Core.Base
                                         }
                                     case "if":
                                         {
-                                            //conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
                                             conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
                                             conditionValue = conditionValue.Replace("#", "\"");
                                             if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
@@ -247,11 +246,10 @@ namespace FastData.Core.Base
                                             for (int j = 0; j < DbCache.Get(cacheType, paramKey).ToStr().ToInt(0); j++)
                                             {
                                                 conditionKey = string.Format("{0}.choose.{1}", paramKey, j);
-                                                condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
+                                                condition = DbCache.Get(cacheType, conditionKey).ToStr();
 
                                                 conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
                                                 conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
-                                                //conditionValue = conditionValue.Replace(temp.ParameterName.ToLower(), temp.Value.ToStr());
                                                 conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
                                                 conditionValue = conditionValue.Replace("#", "\"");
                                                 if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
