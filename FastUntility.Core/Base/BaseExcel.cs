@@ -1,5 +1,4 @@
-﻿using FastUntility.Core.Base;
-using NPOI.HPSF;
+﻿using NPOI.HPSF;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
@@ -50,7 +49,6 @@ namespace FastUntility.Core.Base
         }
         #endregion
 
-
         #region 初始化excel
         /// <summary>
         /// 初始化excel
@@ -58,7 +56,7 @@ namespace FastUntility.Core.Base
         /// <param name="headerText">标题</param>
         /// <param name="title">表头</param>
         /// <returns></returns>
-        public static ExcelModel Init(string headerText, Dictionary<string, object> title)
+        public static ExcelModel Init(string headerText, List<Dictionary<string, object>> title1, Dictionary<string, object> title2)
         {
             try
             {
@@ -68,29 +66,110 @@ namespace FastUntility.Core.Base
                 InitializeWorkbook(result.workbook);
                 result.sheet = result.workbook.CreateSheet(headerText);
 
-                //写入总标题，合并居中
                 result.row = result.sheet.CreateRow(0);
                 result.cell = result.row.CreateCell(0);
                 result.cell.SetCellValue(headerText);
-
                 var style = result.workbook.CreateCellStyle();
                 style.Alignment = HorizontalAlignment.Center;
                 var font = result.workbook.CreateFont();
                 font.FontHeight = 20 * 20;
                 style.SetFont(font);
                 result.cell.CellStyle = style;
-                result.sheet.AddMergedRegion(new CellRangeAddress(0, 0, 0, title.Count - 1));
+                result.sheet.AddMergedRegion(new CellRangeAddress(0, 0, 0, title2.Count - 1));
 
-                //插入列标题
-                result.row = result.sheet.CreateRow(1);
-                int i = 0;
+                var i = 0;
+                if (title1 != null)
+                {
+                    var step = 0;
+                    result.row = result.sheet.CreateRow(1);
+                    title1.ToList().ForEach(a =>
+                    {
+                        if (i == 0)
+                            result.cell = result.row.CreateCell(i++);
+                        else
+                            result.cell = result.row.CreateCell(step);
+                        result.cell.Row.Height = 420;
+                        result.cell.SetCellValue(a.GetValue("text").ToStr());
+                        result.sheet.AddMergedRegion(new CellRangeAddress(1, 1, step, step + a.GetValue("step").ToStr().ToInt(0) - 1));
+                        result.cell.CellStyle = GetStyle(result.workbook, true);
+                        step = step + a.GetValue("step").ToStr().ToInt(0);
+                    });
+                }
 
-                title.ToList().ForEach(a => {
+                result.row = result.sheet.CreateRow(2);
+                i = 0;
+                title2.ToList().ForEach(a => {
                     result.cell = result.row.CreateCell(i++);
                     result.cell.Row.Height = 420;
                     result.cell.SetCellValue(a.Value.ToStr());
                     result.cell.CellStyle = GetStyle(result.workbook, true);
                 });
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                BaseLog.SaveLog(ex.ToString(), "ToExcel.Init");
+                return null;
+            }
+        }
+        #endregion
+
+        #region 初始化excel
+        /// <summary>
+        /// 初始化excel
+        /// </summary>
+        /// <param name="headerText">标题</param>
+        /// <param name="title">表头</param>
+        /// <returns></returns>
+        public static ExcelModel Init(string headerText, Dictionary<string, object> title1,List<Dictionary<string,object>> title2=null)
+        {
+            try
+            {
+                var result = new ExcelModel();
+
+                result.workbook = new HSSFWorkbook();
+                InitializeWorkbook(result.workbook);
+                result.sheet = result.workbook.CreateSheet(headerText);
+
+                result.row = result.sheet.CreateRow(0);
+                result.cell = result.row.CreateCell(0);
+                result.cell.SetCellValue(headerText);
+                var style = result.workbook.CreateCellStyle();
+                style.Alignment = HorizontalAlignment.Center;
+                var font = result.workbook.CreateFont();
+                font.FontHeight = 20 * 20;
+                style.SetFont(font);
+                result.cell.CellStyle = style;
+                result.sheet.AddMergedRegion(new CellRangeAddress(0, 0, 0, title1.Count - 1));
+
+                result.row = result.sheet.CreateRow(1);
+                int i = 0;
+                title1.ToList().ForEach(a => {
+                    result.cell = result.row.CreateCell(i++);
+                    result.cell.Row.Height = 420;
+                    result.cell.SetCellValue(a.Value.ToStr());
+                    result.cell.CellStyle = GetStyle(result.workbook, true);
+                });
+
+                if (title2 != null)
+                {
+                    var step = 0;
+                    i = 0;
+                    result.row = result.sheet.CreateRow(2);
+                    title2.ToList().ForEach(a =>
+                    {
+                        if (i == 0)
+                            result.cell = result.row.CreateCell(i++);
+                        else
+                            result.cell = result.row.CreateCell(step);
+                        result.cell.Row.Height = 420;
+                        result.cell.SetCellValue(a.GetValue("text").ToStr());
+                        result.sheet.AddMergedRegion(new CellRangeAddress(2, 2, step, step + a.GetValue("step").ToStr().ToInt(0) - 1));
+                        result.cell.CellStyle = GetStyle(result.workbook, true);
+                        step = step + a.GetValue("step").ToStr().ToInt(0);
+                    });
+                }
 
                 return result;
             }
@@ -108,7 +187,7 @@ namespace FastUntility.Core.Base
         /// </summary>
         /// <param name="listContent">内容列表</param>
         /// <param name="model"></param>
-        public static void FillContent(List<Dictionary<string, object>> listContent, ExcelModel model, string exclude = "")
+        public static void FillContent(List<Dictionary<string, object>> listContent, ExcelModel model, string exclude = "",bool IsSmallTile=false)
         {
             try
             {
@@ -116,11 +195,14 @@ namespace FastUntility.Core.Base
                 var i = 0;
                 if (listContent != null)
                 {
-                    model.style_n = GetStyle(model.workbook, false, true);
+                    model.style_n = GetStyle(model.workbook, true, true);
                     model.style = GetStyle(model.workbook);
                     foreach (var item in listContent)
                     {
-                        model.row = model.sheet.CreateRow(i + 2);
+                        if (IsSmallTile)
+                            model.row = model.sheet.CreateRow(i + 3);
+                        else
+                            model.row = model.sheet.CreateRow(i + 2);
                         int j = 0;
                         foreach (var temp in item)
                         {
@@ -134,7 +216,7 @@ namespace FastUntility.Core.Base
                             if (temp.Value.ToStr().Contains("\n"))
                                 model.cell.CellStyle = model.style_n;
                             else
-                                model.cell.CellStyle = model.style;
+                                model.cell.CellStyle = model.style;                            
                         }
 
                         i++;
@@ -159,11 +241,13 @@ namespace FastUntility.Core.Base
             {
                 //自动列宽
                 var i = 0;
-                title.ToList().ForEach(a => {
+                title.ToList().ForEach(a =>
+                {
                     model.sheet.AutoSizeColumn(i++, true);
                     model.sheet.Autobreaks = true;
                     model.sheet.HorizontallyCenter = true;
                 });
+                
 
                 using (var file = new MemoryStream())
                 {
