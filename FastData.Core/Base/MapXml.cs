@@ -77,7 +77,8 @@ namespace FastData.Core.Base
                             if (!param.ToList().Exists(a => a.ParameterName.ToLower() == item.ToLower()))
                                 continue;
                             var temp = param.ToList().Find(a => a.ParameterName.ToLower() == item.ToLower());
-                            tempParam.Add(temp);
+                            if (!tempParam.ToList().Exists(a => a.ParameterName == temp.ParameterName))
+                                tempParam.Add(temp);
 
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
@@ -252,6 +253,7 @@ namespace FastData.Core.Base
                                                 conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
                                                 conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
                                                 conditionValue = conditionValue.Replace("#", "\"");
+
                                                 if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
                                                 {
                                                     isSuccess = true;
