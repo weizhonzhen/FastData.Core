@@ -310,11 +310,8 @@ namespace FastData.Core.Base
                 #endregion
             }
 
-            param = tempParam.ToArray();
-            param.ToList().ForEach(a => {
-                a.ParameterName = a.ParameterName.ToLower();
-            });
-            return sql.ToString().ToLower();
+            param = tempParam.ToArray();         
+            return sql.ToString();
         }
         #endregion
 
