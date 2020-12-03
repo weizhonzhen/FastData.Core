@@ -85,9 +85,9 @@ namespace FastData.Core.Base
                             var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             if (DbCache.Exists(cacheType, paramKey))
                             {
-                                var flagParam = string.Format("{0}{1}", flag, temp.ParameterName);
-                                var tempKey = string.Format("#{0}#", temp.ParameterName);
-                                var paramSql = DbCache.Get(cacheType, paramKey.ToLower());
+                                var flagParam = string.Format("{0}{1}", flag, temp.ParameterName).ToLower();
+                                var tempKey = string.Format("#{0}#", temp.ParameterName).ToLower();
+                                var paramSql = DbCache.Get(cacheType, paramKey.ToLower()).ToLower();
                                 var condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
                                 var conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
                                 switch (condition)
@@ -247,7 +247,7 @@ namespace FastData.Core.Base
                                             for (int j = 0; j < DbCache.Get(cacheType, paramKey).ToStr().ToInt(0); j++)
                                             {
                                                 conditionKey = string.Format("{0}.choose.{1}", paramKey, j);
-                                                condition = DbCache.Get(cacheType, conditionKey).ToStr();
+                                                condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
 
                                                 conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
                                                 conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
@@ -311,7 +311,10 @@ namespace FastData.Core.Base
             }
 
             param = tempParam.ToArray();
-            return sql.ToString();
+            param.ToList().ForEach(a => {
+                a.ParameterName = a.ParameterName.ToLower();
+            });
+            return sql.ToString().ToLower();
         }
         #endregion
 
