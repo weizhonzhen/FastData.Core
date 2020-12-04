@@ -84,15 +84,18 @@ namespace FastUntility.Core.Base
                     result.row = result.sheet.CreateRow(1);
                     title1.ToList().ForEach(a =>
                     {
-                        if (i == 0)
-                            result.cell = result.row.CreateCell(i++);
-                        else
-                            result.cell = result.row.CreateCell(step);
-                        result.cell.Row.Height = 420;
-                        result.cell.SetCellValue(a.GetValue("text").ToStr());
-                        result.sheet.AddMergedRegion(new CellRangeAddress(1, 1, step, step + a.GetValue("step").ToStr().ToInt(0) - 1));
-                        result.cell.CellStyle = GetStyle(result.workbook, true);
-                        step = step + a.GetValue("step").ToStr().ToInt(0);
+                        if (a.GetValue("text").ToStr() != "" && a.GetValue("step").ToStr() != "")
+                        {
+                            if (i == 0)
+                                result.cell = result.row.CreateCell(i++);
+                            else
+                                result.cell = result.row.CreateCell(step);
+                            result.cell.Row.Height = 420;
+                            result.cell.SetCellValue(a.GetValue("text").ToStr());
+                            result.sheet.AddMergedRegion(new CellRangeAddress(1, 1, step, step + a.GetValue("step").ToStr().ToInt(0) - 1));
+                            result.cell.CellStyle = GetStyle(result.workbook, true);
+                            step = step + a.GetValue("step").ToStr().ToInt(0);
+                        }
                     });
                 }
 
