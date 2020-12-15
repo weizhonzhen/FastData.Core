@@ -113,6 +113,9 @@ namespace FastData.Core
                     map = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
             }
 
+            if (map.Path == null)
+                return;
+
             map.Path.ForEach(a =>
             {
                 using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName, a.Replace("/", "."))))
@@ -163,6 +166,9 @@ namespace FastData.Core
             var config = DataConfig.Get(dbKey, null, dbFile);
             var db = new DataContext(dbKey);
             var query = new DataQuery { Config = config, Key = dbKey };
+
+            if (list.Path == null)
+                return;
 
             list.Path.ForEach(p => {
                 var info = new FileInfo(p);
