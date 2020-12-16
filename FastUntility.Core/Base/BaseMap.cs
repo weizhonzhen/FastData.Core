@@ -15,12 +15,22 @@ namespace FastUntility.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public static T CopyModel<T, T1>(T1 model) where T : class, new()
+        public static T CopyModel<T, T1>(T1 model, Expression<Func<T1, object>> field=null) where T : class, new()
         {
             var result = new T();
             var dynGet = new DynamicGet<T1>();
             var dynSet = new DynamicSet<T>();
             var list = BaseDic.PropertyInfo<T>();
+            var dic = new Dictionary<MemberInfo, Expression>();
+            if (field != null)
+            {
+                var name = (field.Body as NewExpression).Members.ToList();
+                var value = (field.Body as NewExpression).Arguments.ToList();
+                for (var i = 0; i < name.Count; i++)
+                {
+                    dic.Add(name[i], value[i]);
+                }
+            }
 
             BaseDic.PropertyInfo<T1>().ForEach(m => {
                 if (list.Exists(a => a.Name.ToLower() == m.Name.ToLower()))
@@ -42,7 +52,8 @@ namespace FastUntility.Core.Base
                                 var leafModel = Activator.CreateInstance(property.PropertyType.GetGenericArguments()[0]);
                                 var propertyList = leafModel.GetType().GetProperties().ToList();
 
-                                temp.GetType().GetProperties().ToList().ForEach(p => {
+                                temp.GetType().GetProperties().ToList().ForEach(p =>
+                                {
                                     if (propertyList.Exists(a => a.Name == p.Name))
                                     {
                                         var tempProperty = propertyList.Find(a => a.Name.ToLower() == p.Name.ToLower());
@@ -58,7 +69,7 @@ namespace FastUntility.Core.Base
                     }
                     else if (isSystemType)
                     {
-                        if (m.PropertyType.Name == "Nullable`1" && m.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                      if (m.PropertyType.Name == "Nullable`1" && m.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                             dynSet.SetValue(result, property.Name, dynGet.GetValue(model, m.Name, true), true);
                         else
                             dynSet.SetValue(result, property.Name, Convert.ChangeType(dynGet.GetValue(model, m.Name, true), m.PropertyType), true);
@@ -69,7 +80,8 @@ namespace FastUntility.Core.Base
                         var leafModel = Activator.CreateInstance(property.PropertyType);
                         var propertyList = (property.PropertyType as TypeInfo).GetProperties().ToList();
 
-                        (m.PropertyType as TypeInfo).GetProperties().ToList().ForEach(p => {
+                        (m.PropertyType as TypeInfo).GetProperties().ToList().ForEach(p =>
+                        {
                             if (propertyList.Exists(a => a.Name == p.Name))
                             {
                                 var temp = propertyList.Find(a => a.Name.ToLower() == p.Name.ToLower());
@@ -77,6 +89,17 @@ namespace FastUntility.Core.Base
                             }
                         });
                         dynSet.SetValue(result, property.Name, leafModel, true);
+                    }
+                }
+                else
+                {
+                    if (dic.ToList().Exists(n => (n.Value as MemberExpression).Member.Name.ToLower() == m.Name.ToLower()))
+                    {
+                        var temp = dic.ToList().Find(n => (n.Value as MemberExpression).Member.Name.ToLower() == m.Name.ToLower());
+                        if (m.Name == "Nullable`1" && temp.Key.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                            dynSet.SetValue(result, temp.Key.Name, dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name, true), true);
+                        else
+                            dynSet.SetValue(result, temp.Key.Name, Convert.ChangeType(dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name, true), m.PropertyType), true);
                     }
                 }
             });
