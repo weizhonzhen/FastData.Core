@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace FastUntility.Core.Base
@@ -79,6 +80,45 @@ namespace FastUntility.Core.Base
                     }
                 }
             });
+            return result;
+        }
+
+        public static List<Result> Parameters<T,Result>(T item, Expression<Func<T, object>> field) where Result : class, new()
+        {
+            var result = new List<Result>();
+            var dyn = new DynamicGet<T>();
+            var dynResult = new DynamicSet<Result>();
+            var dic = new Dictionary<string, object>();
+
+            var name = (field.Body as NewExpression).Members.ToList();
+            var value = (field.Body as NewExpression).Arguments.ToList();
+
+            for (var i = 0; i < name.Count; i++)
+            {
+                dic.Add(name[i].Name, value[i]);
+            }
+
+            dic.ToList().ForEach(a =>
+            {
+                var param = new Result();
+                dynResult.SetValue(param, "ParameterName", a.Key, true);
+                if (a.Value is ConstantExpression)
+                    dynResult.SetValue(param, "Value", (a.Value as ConstantExpression).Value, true);
+                else if (a.Value is MethodCallExpression)
+                    dynResult.SetValue(param, "Value", Expression.Lambda((a.Value as MethodCallExpression).ReduceExtensions().Reduce()).Compile().DynamicInvoke().ToString(), true);
+                else if (a.Value is MemberExpression)
+                {
+                    if ((a.Value as MemberExpression).Expression is ParameterExpression)
+                        dynResult.SetValue(param, "Value", dyn.GetValue(item, (a.Value as MemberExpression).Member.Name, true), true);
+                    else
+                        dynResult.SetValue(param, "Value", Expression.Lambda(a.Value as MemberExpression).Compile().DynamicInvoke(), true);
+                }
+                else
+                    dynResult.SetValue(param, "Value", dyn.GetValue(item, a.Value.ToStr(), true), true);
+
+                result.Add(param);
+            });
+
             return result;
         }
     }
