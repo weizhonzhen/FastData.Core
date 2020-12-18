@@ -267,9 +267,12 @@ namespace FastUntility.Core.Base
                     for (var col = 0; col < title.Count; col++)
                     {
                         var currentCell = currentRow.GetCell(col);
-                        var length = System.Text.Encoding.UTF8.GetBytes(currentCell.ToString()).Length;
-                        if ((20 * (length / 60 + 1)) > height)
-                            height = 20 * (length / 60 + 1);
+                        if (currentCell != null)
+                        {
+                            var length = System.Text.Encoding.UTF8.GetBytes(currentCell.ToString()).Length;
+                            if ((20 * (length / 60 + 1)) > height)
+                                height = 20 * (length / 60 + 1);
+                        }                            
                     }
 
                     currentRow.HeightInPoints = height;
