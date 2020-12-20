@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -108,6 +109,9 @@ namespace FastUntility.Core.Base
 
         public static List<Result> Parameters<T,Result>(T item, Expression<Func<T, object>> field) where Result : class, new()
         {
+            if (typeof(Result).BaseType != typeof(DbParameter))
+                throw new Exception("Result type error is not DbParameter");
+
             var result = new List<Result>();
             var dyn = new DynamicGet<T>();
             var dynResult = new DynamicSet<Result>();
