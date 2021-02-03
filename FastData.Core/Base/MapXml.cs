@@ -14,6 +14,7 @@ using FastData.Core.Property;
 using System.Threading.Tasks;
 using FastData.Core.Type;
 using FastData.Core.Check;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace FastData.Core.Base
 {
@@ -83,6 +84,7 @@ namespace FastData.Core.Base
                             var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                             var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+
                             if (DbCache.Exists(cacheType, paramKey))
                             {
                                 var flagParam = string.Format("{0}{1}", flag, temp.ParameterName).ToLower();
@@ -220,9 +222,28 @@ namespace FastData.Core.Base
                                         }
                                     case "if":
                                         {
+                                            conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
                                             conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
                                             conditionValue = conditionValue.Replace("#", "\"");
-                                            if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
+                                            
+                                            //references
+                                            var ifSuccess = false;
+                                            var referencesKey = string.Format("{0}.{1}.references.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+                                            if (DbCache.Get(cacheType, referencesKey).ToStr() != "")
+                                            {
+                                                var assembly = Assembly.Load(DbCache.Get(cacheType, referencesKey));
+                                                if (assembly != null)
+                                                {
+                                                    var options = ScriptOptions.Default.AddReferences(assembly);
+                                                    ifSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue, options).Result;
+                                                }
+                                                else
+                                                    ifSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
+                                            }
+                                            else
+                                                ifSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
+
+                                            if (ifSuccess)
                                             {
                                                 if (paramSql.IndexOf(tempKey) >= 0)
                                                 {
@@ -248,15 +269,29 @@ namespace FastData.Core.Base
                                             {
                                                 conditionKey = string.Format("{0}.choose.{1}", paramKey, j);
                                                 condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
-
                                                 conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
                                                 conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
                                                 conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
                                                 conditionValue = conditionValue.Replace("#", "\"");
 
-                                                if (CSharpScript.EvaluateAsync<bool>(conditionValue).Result)
+                                                //references
+                                                var referencesKey = string.Format("{0}.choose.references.{1}", paramKey, j);
+                                                if (DbCache.Get(cacheType, referencesKey).ToStr() != "")
                                                 {
-                                                    isSuccess = true;
+                                                    var assembly = Assembly.Load(DbCache.Get(cacheType, referencesKey));
+                                                    if (assembly == null)
+                                                        isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
+                                                    else
+                                                    {
+                                                        var options = ScriptOptions.Default.AddReferences(assembly);
+                                                        isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue, options).Result;
+                                                    }
+                                                }
+                                                else
+                                                    isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
+
+                                                if (isSuccess)
+                                                {
                                                     if (condition.IndexOf(tempKey) >= 0)
                                                     {
                                                         tempParam.Remove(temp);
@@ -800,6 +835,13 @@ namespace FastData.Core.Base
                                                 key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
                                                 sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
                                             }
+
+                                            //引用dll
+                                            if (dyn.Attributes["references"] != null)
+                                            {
+                                                key.Add(string.Format("{0}.{1}.references.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                sql.Add(dyn.Attributes["references"].Value);
+                                            }
                                         }
                                         else
                                         {
@@ -821,6 +863,13 @@ namespace FastData.Core.Base
                                                     //内容
                                                     key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
                                                     sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
+
+                                                    //引用dll
+                                                    if (child.Attributes["references"] != null)
+                                                    {
+                                                        key.Add(string.Format("{0}.{1}.{2}.choose.references.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                        sql.Add(child.Attributes["references"].Value);
+                                                    }
 
                                                     count++;
                                                 }
