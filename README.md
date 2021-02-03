@@ -66,9 +66,11 @@ in db.json
                   <isLessThan compareValue="5" prepend=" and " property="userNo">a.userNo=?userNo</isLessThan>
                   <isNullOrEmpty prepend=" and " property="roleId">a.roleId=?roleId</isNullOrEmpty>
                   <isNotNullOrEmpty prepend=" and " property="isAdmin">a.isAdmin=?isAdmin</isNotNullOrEmpty>
-                  <if condition="areaId>8" prepend=" and " property="areaId">a.areaId=?areaId</if>
+                  <if condition="areaId>8" prepend=" and " property="areaId">a.areaId=?areaId</if>                  
+                  //<if condition="!FastUntility.Core.Base.BaseRegular.IsZhString(#areaId#, false)" prepend=" and " property="areaId" references="Fast.Untility.Core">a.areaId=?areaId</if>
                   <choose property="userNo">
                      <condition prepend=" and " property="userNo>5">a.userNo=:userNo and a.userNo=5</condition>
+                     //<condition prepend=" and " property="FastUntility.Core.Base.BaseRegular.IsZhString(#userNo#, false)"  references="Fast.Untility.Core">a.userNo=:userNo and a.userNo=5</condition>
                      <condition prepend=" and " property="userNo>6">a.userNo=:userNo and a.userNo=6</condition>
                   </choose>                  
                  <foreach name="data" field="userId">
