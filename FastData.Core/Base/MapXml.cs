@@ -231,7 +231,9 @@ namespace FastData.Core.Base
                                             var referencesKey = string.Format("{0}.{1}.references.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
                                             if (DbCache.Get(cacheType, referencesKey).ToStr() != "")
                                             {
-                                                var assembly = Assembly.Load(DbCache.Get(cacheType, referencesKey));
+                                                var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == DbCache.Get(cacheType, referencesKey));
+                                                if (assembly == null)
+                                                    assembly = Assembly.Load(DbCache.Get(cacheType, referencesKey));
                                                 if (assembly != null)
                                                 {
                                                     var options = ScriptOptions.Default.AddReferences(assembly);
@@ -278,14 +280,16 @@ namespace FastData.Core.Base
                                                 var referencesKey = string.Format("{0}.choose.references.{1}", paramKey, j);
                                                 if (DbCache.Get(cacheType, referencesKey).ToStr() != "")
                                                 {
-                                                    var assembly = Assembly.Load(DbCache.Get(cacheType, referencesKey));
+                                                    var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == DbCache.Get(cacheType, referencesKey));
                                                     if (assembly == null)
-                                                        isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
-                                                    else
+                                                        assembly = Assembly.Load(DbCache.Get(cacheType, referencesKey));
+                                                    if (assembly != null)
                                                     {
                                                         var options = ScriptOptions.Default.AddReferences(assembly);
                                                         isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue, options).Result;
                                                     }
+                                                    else
+                                                        isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
                                                 }
                                                 else
                                                     isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
