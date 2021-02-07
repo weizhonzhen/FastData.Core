@@ -102,62 +102,64 @@ namespace FastData.Core
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
 
             var config = DataConfig.Get(dbKey, projectName, dbFile);
-            var db = new DataContext(dbKey);
-            var assembly = Assembly.Load(projectName);
-            var map = new MapConfigModel();
-            using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName,mapFile)))
+            using (var db = new DataContext(dbKey))
             {
-                if (resource != null)
+                var assembly = Assembly.Load(projectName);
+                var map = new MapConfigModel();
+                using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName, mapFile)))
                 {
-                    using (var reader = new StreamReader(resource))
-                    {
-                        var content = reader.ReadToEnd();
-                        map.Path = BaseJson.JsonToModel<List<string>>(BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue(AppSettingKey.Map))).GetValue("Path").ToStr());
-                    }
-                }
-                else
-                    map = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
-            }
-
-            if (map.Path == null)
-                return;
-
-            map.Path.ForEach(a =>
-            {
-                using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName, a.Replace("/", "."))))
-                {
-                    var xml = "";
                     if (resource != null)
                     {
                         using (var reader = new StreamReader(resource))
                         {
-                            xml = reader.ReadToEnd();                           
+                            var content = reader.ReadToEnd();
+                            map.Path = BaseJson.JsonToModel<List<string>>(BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue(AppSettingKey.Map))).GetValue("Path").ToStr());
                         }
                     }
-                    var info = new FileInfo(a);
-                    var key = BaseSymmetric.Generate(info.FullName);
-                    if (!DbCache.Exists(config.CacheType, key))
-                    {
-                        var temp = new MapXmlModel();
-                        temp.LastWrite = info.LastWriteTime;
-                        temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
-                        temp.FileName = info.FullName;
-                        if (MapXml.SaveXml(dbKey, key, info, config, db))
-                            DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
-                    }
-                    else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
-                    {
-                        DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(f => { DbCache.Remove(config.CacheType, f); });
-
-                        var model = new MapXmlModel();
-                        model.LastWrite = info.LastWriteTime;
-                        model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
-                        model.FileName = info.FullName;
-                        if (MapXml.SaveXml(dbKey, key, info, config, db))
-                            DbCache.Set<MapXmlModel>(config.CacheType, key, model);
-                    }
+                    else
+                        map = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
                 }
-            });
+
+                if (map.Path == null)
+                    return;
+
+                map.Path.ForEach(a =>
+                {
+                    using (var resource = assembly.GetManifestResourceStream(string.Format("{0}.{1}", projectName, a.Replace("/", "."))))
+                    {
+                        var xml = "";
+                        if (resource != null)
+                        {
+                            using (var reader = new StreamReader(resource))
+                            {
+                                xml = reader.ReadToEnd();
+                            }
+                        }
+                        var info = new FileInfo(a);
+                        var key = BaseSymmetric.Generate(info.FullName);
+                        if (!DbCache.Exists(config.CacheType, key))
+                        {
+                            var temp = new MapXmlModel();
+                            temp.LastWrite = info.LastWriteTime;
+                            temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
+                            temp.FileName = info.FullName;
+                            if (MapXml.SaveXml(dbKey, key, info, config, db))
+                                DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
+                        }
+                        else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
+                        {
+                            DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(f => { DbCache.Remove(config.CacheType, f); });
+
+                            var model = new MapXmlModel();
+                            model.LastWrite = info.LastWriteTime;
+                            model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""), xml);
+                            model.FileName = info.FullName;
+                            if (MapXml.SaveXml(dbKey, key, info, config, db))
+                                DbCache.Set<MapXmlModel>(config.CacheType, key, model);
+                        }
+                    }
+                });
+            }
         }
         #endregion
 
@@ -170,63 +172,64 @@ namespace FastData.Core
         {
             var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
             var config = DataConfig.Get(dbKey, null, dbFile);
-            var db = new DataContext(dbKey);
-            var query = new DataQuery { Config = config, Key = dbKey };
-
-            if (list.Path == null)
-                return;
-
-            list.Path.ForEach(p => {
-                var info = new FileInfo(p);
-                var key = BaseSymmetric.Generate(info.FullName);
-                if (!DbCache.Exists(config.CacheType, key))
-                {
-                    var temp = new MapXmlModel();
-                    temp.LastWrite = info.LastWriteTime;
-                    temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
-                    temp.FileName = info.FullName;
-                    if (MapXml.SaveXml(dbKey, key, info, config, db))
-                        DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
-                }
-                else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
-                {
-                    DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(a => { DbCache.Remove(config.CacheType, a); });
-
-                    var model = new MapXmlModel();
-                    model.LastWrite = info.LastWriteTime;
-                    model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
-                    model.FileName = info.FullName;
-                    if (MapXml.SaveXml(dbKey, key, info, config, db))
-                        DbCache.Set<MapXmlModel>(config.CacheType, key, model);
-                }
-            });
-
-            if (config.IsMapSave)
+            using (var db = new DataContext(dbKey))
             {
-                query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
-                if (query.Config.DbType == DataDbType.Oracle)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.Oracle.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.Oracle.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
-                }
+                var query = new DataQuery { Config = config, Key = dbKey };
 
-                if (query.Config.DbType == DataDbType.MySql)
-                {
-                    var listInfo = typeof(FastData.Core.DataModel.MySql.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.MySql.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
-                }
+                if (list.Path == null)
+                    return;
 
-                if (query.Config.DbType == DataDbType.SqlServer)
+                list.Path.ForEach(p =>
                 {
-                    var listInfo = typeof(FastData.Core.DataModel.SqlServer.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
-                    var listAttribute = typeof(FastData.Core.DataModel.SqlServer.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
-                    BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
+                    var info = new FileInfo(p);
+                    var key = BaseSymmetric.Generate(info.FullName);
+                    if (!DbCache.Exists(config.CacheType, key))
+                    {
+                        var temp = new MapXmlModel();
+                        temp.LastWrite = info.LastWriteTime;
+                        temp.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
+                        temp.FileName = info.FullName;
+                        if (MapXml.SaveXml(dbKey, key, info, config, db))
+                            DbCache.Set<MapXmlModel>(config.CacheType, key, temp);
+                    }
+                    else if ((DbCache.Get<MapXmlModel>(config.CacheType, key).LastWrite - info.LastWriteTime).Milliseconds != 0)
+                    {
+                        DbCache.Get<MapXmlModel>(config.CacheType, key).FileKey.ForEach(a => { DbCache.Remove(config.CacheType, a); });
+
+                        var model = new MapXmlModel();
+                        model.LastWrite = info.LastWriteTime;
+                        model.FileKey = MapXml.ReadXml(info.FullName, config, info.Name.ToLower().Replace(".xml", ""));
+                        model.FileName = info.FullName;
+                        if (MapXml.SaveXml(dbKey, key, info, config, db))
+                            DbCache.Set<MapXmlModel>(config.CacheType, key, model);
+                    }
+                });
+
+                if (config.IsMapSave)
+                {
+                    query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
+                    if (query.Config.DbType == DataDbType.Oracle)
+                    {
+                        var listInfo = typeof(FastData.Core.DataModel.Oracle.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                        var listAttribute = typeof(FastData.Core.DataModel.Oracle.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
+                        BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
+                    }
+
+                    if (query.Config.DbType == DataDbType.MySql)
+                    {
+                        var listInfo = typeof(FastData.Core.DataModel.MySql.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                        var listAttribute = typeof(FastData.Core.DataModel.MySql.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
+                        BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
+                    }
+
+                    if (query.Config.DbType == DataDbType.SqlServer)
+                    {
+                        var listInfo = typeof(FastData.Core.DataModel.SqlServer.Data_MapFile).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList();
+                        var listAttribute = typeof(FastData.Core.DataModel.SqlServer.Data_MapFile).GetTypeInfo().GetCustomAttributes().ToList();
+                        BaseTable.Check(query, "Data_MapFile", listInfo, listAttribute);
+                    }
                 }
             }
-
-            db.Dispose();
         }
         #endregion
 
