@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             else
                 FastMap.InstanceMap(config.dbKey, config.dbFile, config.mapFile);
 
-            if (config.IsCodeFirst)
+            if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile);
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties))
