@@ -11,12 +11,15 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddFastData(this IServiceCollection serviceCollection, ConfigData config)
         {
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
             if (config.IsResource)
-                FastMap.InstanceMapResource(config.dbKey, config.dbFile, config.mapFile);
+                FastMap.InstanceMapResource(config.dbKey, config.dbFile, config.mapFile, projectName);
             else
                 FastMap.InstanceMap(config.dbKey, config.dbFile, config.mapFile);
 
-            if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
+            if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst) && config.IsResource)
+                FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
+            else if(config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile);
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties))
@@ -24,7 +27,10 @@ namespace Microsoft.Extensions.DependencyInjection
                 AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName(Assembly.GetCallingAssembly().GetName().Name)).GetTypes()
               .Where(a => a.Namespace != null && a.Namespace.Contains(config.NamespaceProperties)).ToList().ForEach(b =>
               {
-                  FastMap.InstanceProperties(b.Namespace, config.dbFile);
+                  if (config.IsResource)
+                      FastMap.InstanceProperties(b.Namespace, config.dbFile, projectName);
+                  else
+                      FastMap.InstanceProperties(b.Namespace, config.dbFile);
               });
             }
 
@@ -41,7 +47,6 @@ namespace Microsoft.Extensions.DependencyInjection
         public bool IsCodeFirst { get; set; }
 
         public string NamespaceCodeFirst { get; set; }
-
 
         public string NamespaceProperties { get; set; }
 
