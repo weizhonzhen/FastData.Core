@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class FastDataExtension
     {
-        public static IServiceCollection AddFastData(this IServiceCollection serviceCollection, ConfigModel config)
+        public static IServiceCollection AddFastData(this IServiceCollection serviceCollection, ConfigData config)
         {
             if (config.IsResource)
                 FastMap.InstanceMapResource(config.dbKey, config.dbFile, config.mapFile);
@@ -34,7 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
     }
 
-    public class ConfigModel
+    public class ConfigData
     {
         public bool IsResource { get; set; }
 
