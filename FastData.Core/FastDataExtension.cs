@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName(Assembly.GetCallingAssembly().GetName().Name)).GetTypes()
               .Where(a => a.Namespace != null && a.Namespace.Contains(config.NamespaceProperties)).ToList().ForEach(b =>
               {
-                  FastMap.InstanceProperties(b.Namespace, "db.json");
+                  FastMap.InstanceProperties(b.Namespace, config.dbFile);
               });
             }
 
