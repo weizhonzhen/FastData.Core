@@ -7,22 +7,25 @@ in Startup.cs Startup mothod
 
             Configuration = configuration;
 
-            //init model Properties cahce
+            // old pagepackages init model Properties cahce 
             FastMap.InstanceProperties("DataModel","db.json");
 
-            //init code first
+            //old pagepackages init code first
             FastMap.InstanceTable("DataModel.Base", "db.json");
 
-            //by Repository
+            //old pagepackages by Repository
             services.AddFastRedis(a => { a.Server = "127.0.0.1:6379,abortConnect=true,allowAdmin=true,connectTimeout=10000,syncTimeout=10000"; });
             services.AddFastData();
             
-            // init map cache
+            //old pagepackages init map cache
             FastData.Core.FastMap.InstanceMap("dbKey", "db.json", "map.json");
             
-            //init map cache by Resource （xml file， db.json， map.json）
+            //old pagepackages init map cache by Resource （xml file， db.json， map.json）
             FastData.Core.FastMap.InstanceMapResource("dbKey", "db.json", "map.json");
-                   
+            
+            //new pagepackages
+            services.AddFastData(new ConfigData { mapFile = "map.json", dbKey = "dbkey", IsResource = true, dbFile = "db.json",NamespaceProperties = "DataModel." });
+  
 in db.json         
 ```csharp
  {      
