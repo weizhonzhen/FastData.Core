@@ -73,7 +73,7 @@ namespace FastData.Core.Base
                     if (param != null)
                     {
                         var tempSql = new StringBuilder();
-                        foreach (var item in DbCache.Get<List<string>>(DataConfig.Get().CacheType, string.Format("{0}.param", name.ToLower())))
+                        foreach (var item in DbCache.Get<List<string>>(cacheType, string.Format("{0}.param", name.ToLower())))
                         {
                             if (!param.ToList().Exists(a => a.ParameterName.ToLower() == item.ToLower()))
                                 continue;
