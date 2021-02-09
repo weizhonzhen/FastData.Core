@@ -18,7 +18,7 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace FastData.Core.Base
 {
-    internal static class MapXml
+    public static class MapXml
     {
         #region froeach数量
         /// <summary>
