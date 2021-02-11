@@ -266,9 +266,15 @@ namespace FastData.Core.Base
                                         }
                                     case "choose":
                                         {
+                                            var conditionOther = "";
                                             var isSuccess = false;
                                             for (int j = 0; j < DbCache.Get(cacheType, paramKey).ToStr().ToInt(0); j++)
                                             {
+                                                var conditionOtherKey = string.Format("{0}.choose.other.{1}", paramKey, j);
+
+                                                if (DbCache.Get(cacheType, conditionOtherKey).ToStr() != "")
+                                                    conditionOther = DbCache.Get(cacheType, conditionOtherKey).ToLower();
+
                                                 conditionKey = string.Format("{0}.choose.{1}", paramKey, j);
                                                 condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
                                                 conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
@@ -312,9 +318,18 @@ namespace FastData.Core.Base
                                                 }
                                             }
 
-                                            if (!isSuccess)
+                                            if (!isSuccess && conditionOther == "")
                                                 tempParam.Remove(temp);
-
+                                            else
+                                            {
+                                                if (conditionOther.IndexOf(flagParam) < 0 && flag != "")
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(conditionOther.Replace(tempKey, temp.Value.ToStr()));
+                                                }
+                                                else
+                                                    tempSql.Append(conditionOther);
+                                            }
                                             break;
                                         }
                                     default:
@@ -860,21 +875,32 @@ namespace FastData.Core.Base
                                                 sql.Add(dyn.ChildNodes.Count.ToStr());
                                                 foreach (XmlNode child in dyn.ChildNodes)
                                                 {
-                                                    //条件
-                                                    key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                    sql.Add(child.Attributes["property"].Value);
-
-                                                    //内容
-                                                    key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                    sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
-
-                                                    //引用dll
-                                                    if (child.Attributes["references"] != null)
+                                                    //other
+                                                    if (child.Name == "other")
                                                     {
-                                                        key.Add(string.Format("{0}.{1}.{2}.choose.references.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                        sql.Add(child.Attributes["references"].Value);
+                                                        key.Add(string.Format("{0}.{1}.{2}.choose.other.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                        sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
                                                     }
+                                                    else
+                                                    {
+                                                        //条件
+                                                        if (child.Attributes["property"] != null)
+                                                        {
+                                                            key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                            sql.Add(child.Attributes["property"].Value);
+                                                        }
 
+                                                        //内容
+                                                        key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                        sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
+
+                                                        //引用dll
+                                                        if (child.Attributes["references"] != null)
+                                                        {
+                                                            key.Add(string.Format("{0}.{1}.{2}.choose.references.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                            sql.Add(child.Attributes["references"].Value);
+                                                        }
+                                                    }
                                                     count++;
                                                 }
                                             }
