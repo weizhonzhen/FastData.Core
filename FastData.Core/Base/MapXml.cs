@@ -271,7 +271,6 @@ namespace FastData.Core.Base
                                             for (int j = 0; j < DbCache.Get(cacheType, paramKey).ToStr().ToInt(0); j++)
                                             {
                                                 var conditionOtherKey = string.Format("{0}.choose.other.{1}", paramKey, j);
-
                                                 if (DbCache.Get(cacheType, conditionOtherKey).ToStr() != "")
                                                     conditionOther = DbCache.Get(cacheType, conditionOtherKey).ToLower();
 
@@ -318,11 +317,14 @@ namespace FastData.Core.Base
                                                 }
                                             }
 
+                                            if (!isSuccess)
+                                                tempParam.Remove(temp);
+
                                             if (!isSuccess && conditionOther == "")
                                                 tempParam.Remove(temp);
                                             else
                                             {
-                                                if (conditionOther.IndexOf(flagParam) < 0 && flag != "")
+                                                if (conditionOther.IndexOf(flagParam) >= 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(conditionOther.Replace(tempKey, temp.Value.ToStr()));
