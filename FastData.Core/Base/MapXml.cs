@@ -318,13 +318,15 @@ namespace FastData.Core.Base
                                             }
 
                                             if (!isSuccess)
-                                                tempParam.Remove(temp);
-
-                                            if (!isSuccess && conditionOther == "")
-                                                tempParam.Remove(temp);
-                                            else
                                             {
-                                                if (conditionOther.IndexOf(flagParam) >= 0 && flag != "")
+                                                if (conditionOther == "")
+                                                    tempParam.Remove(temp);
+                                                else if (conditionOther.IndexOf(tempKey) >= 0)
+                                                {
+                                                    tempParam.Remove(temp);
+                                                    tempSql.Append(conditionOther.Replace(tempKey, temp.Value.ToStr()));
+                                                }
+                                                else if (conditionOther.IndexOf(flagParam) < 0 && flag != "")
                                                 {
                                                     tempParam.Remove(temp);
                                                     tempSql.Append(conditionOther.Replace(tempKey, temp.Value.ToStr()));
