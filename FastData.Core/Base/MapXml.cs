@@ -368,7 +368,7 @@ namespace FastData.Core.Base
                 #endregion
             }
 
-            if (DbCache.Get(cacheType, name.ToLower()).ToInt(0) > 0)
+            if (DbCache.Get(cacheType, name.ToLower()).ToInt(0) == 1)
                 param = tempParam.ToArray();
 
             return sql.ToString();
