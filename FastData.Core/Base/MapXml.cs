@@ -225,7 +225,7 @@ namespace FastData.Core.Base
                                             conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
                                             conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
                                             conditionValue = conditionValue.Replace("#", "\"");
-                                            
+
                                             //references
                                             var ifSuccess = false;
                                             var referencesKey = string.Format("{0}.{1}.references.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
@@ -368,7 +368,18 @@ namespace FastData.Core.Base
                 #endregion
             }
 
-            param = tempParam.ToArray();
+            if (DbCache.Get<List<string>>(cacheType, string.Format("{0}.param", name.ToLower())).Count > 0)
+                param = tempParam.ToArray();
+            else
+            {
+                foreach (var item in param)
+                {
+                    var temp = string.Format("{0}{1}", flag, item.ParameterName).ToLower();
+                    if (sql.ToString().ToLower().IndexOf(temp) >= 0)
+                        tempParam.Add(item);
+                }
+                param = tempParam.ToArray();
+            }
             return sql.ToString();
         }
         #endregion
