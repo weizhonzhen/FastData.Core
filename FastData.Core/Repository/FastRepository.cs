@@ -624,10 +624,10 @@ namespace FastData.Core.Repository
         }
         #endregion
 
-        #region 获取map备注
+        #region 获取map log
         public bool IsMapLog(string name)
         {
-            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.log", name.ToLower())).ToStr() != "";
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.log", name.ToLower())).ToLower() == "true";
         }
         #endregion
 
