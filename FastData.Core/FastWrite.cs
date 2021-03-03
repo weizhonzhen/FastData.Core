@@ -396,7 +396,7 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static WriteReturn ExecuteSql(string sql, DbParameter[] param, DataContext db = null, string key = null)
+        public static WriteReturn ExecuteSql(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             ConfigModel config = null;
             var result = new DataReturn();
@@ -420,6 +420,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.writeReturn;
