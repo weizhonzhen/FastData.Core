@@ -26,7 +26,7 @@ in Startup.cs Startup mothod
             //new pagepackages
             services.AddFastData(new ConfigData { mapFile = "map.json", dbKey = "dbkey", IsResource = true, dbFile = "db.json",NamespaceProperties = "DataModel." });
                or
-            services.AddFastData(a=> { mapFile = "map.json"; dbKey = "dbkey"; IsResource = true; dbFile = "db.json"; NamespaceProperties = "DataModel."; });
+            services.AddFastData(a=> { a.mapFile = "map.json"; a.dbKey = "dbkey"; a.IsResource = true; a.dbFile = "db.json"; a.NamespaceProperties = "DataModel."; });
   
 in db.json         
 ```csharp
