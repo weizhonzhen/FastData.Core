@@ -61,7 +61,7 @@ in db.json
       ```xml
     <?xml version="1.0" encoding="utf-8" ?>
             <sqlMap>
-              <select id="GetUser">
+              <select id="GetUser" log="true">
                 select a.* from base_user a
                 <dynamic prepend=" where 1=1">
                   <isPropertyAvailable prepend=" and " property="userId">a.userId=?userId</isPropertyAvailable>
