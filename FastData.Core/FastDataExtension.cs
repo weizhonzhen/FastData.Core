@@ -1,6 +1,7 @@
 ﻿using FastData.Core;
 using FastData.Core.Repository;
 using FastUntility.Core;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -9,8 +10,10 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class FastDataExtension
     {
-        public static IServiceCollection AddFastData(this IServiceCollection serviceCollection, ConfigData config)
+        public static IServiceCollection AddFastData(this IServiceCollection serviceCollection, Action<ConfigData> action)
         {
+            var config = new ConfigData();
+            action(config);
             var projectName = Assembly.GetCallingAssembly().GetName().Name;
             if (config.IsResource)
                 FastMap.InstanceMapResource(config.dbKey, config.dbFile, config.mapFile, projectName);
