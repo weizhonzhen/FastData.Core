@@ -174,7 +174,7 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(this DataQuery item, DataContext db = null) where T : class, new()
+        public static List<T> ToList<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             var stopwatch = new Stopwatch();
             var result = new DataReturn<T>();
@@ -195,7 +195,7 @@ namespace FastData.Core
                 result = db.GetList<T>(item);
 
             stopwatch.Stop();
-
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.list;
         }
@@ -208,11 +208,11 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<List<T>> ToListAsy<T>(this DataQuery item, DataContext db = null) where T : class, new()
+        public static async Task<List<T>> ToListAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToList<T>(item, db);
+                return ToList<T>(item, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -224,9 +224,9 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Lazy<List<T>> ToLazyList<T>(this DataQuery item, DataContext db = null) where T : class, new()
+        public static Lazy<List<T>> ToLazyList<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new Lazy<List<T>>(() => ToList<T>(item, db));
+            return new Lazy<List<T>>(() => ToList<T>(item, db,isOutSql));
         }
         #endregion
 
@@ -237,11 +237,11 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<Lazy<List<T>>> ToLazyListAsy<T>(this DataQuery item, DataContext db = null) where T : class, new()
+        public static async Task<Lazy<List<T>>> ToLazyListAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<List<T>>(() => ToList<T>(item, db));
+                return new Lazy<List<T>>(() => ToList<T>(item, db,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -253,7 +253,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static string ToJson(this DataQuery item, DataContext db = null)
+        public static string ToJson(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturn();
             var stopwatch = new Stopwatch();
@@ -274,7 +274,7 @@ namespace FastData.Core
                 result = db.GetJson(item);
 
             stopwatch.Stop();
-
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.Json;
         }
@@ -286,11 +286,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<string> ToJsonAsy(this DataQuery item, DataContext db = null)
+        public static async Task<string> ToJsonAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToJson(item, db);
+                return ToJson(item, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -301,9 +301,9 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Lazy<string> ToLazyJson(this DataQuery item, DataContext db = null)
+        public static Lazy<string> ToLazyJson(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<string>(() => ToJson(item, db));
+            return new Lazy<string>(() => ToJson(item, db,isOutSql));
         }
         #endregion
 
@@ -313,11 +313,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<Lazy<string>> ToLazyJsonAsy(this DataQuery item, DataContext db = null)
+        public static async Task<Lazy<string>> ToLazyJsonAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<string>(() => ToJson(item, db));
+                return new Lazy<string>(() => ToJson(item, db,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -330,7 +330,7 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static T ToItem<T>(this DataQuery item, DataContext db = null) where T : class, new()
+        public static T ToItem<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             var result = new DataReturn<T>();
             var stopwatch = new Stopwatch();
@@ -353,7 +353,7 @@ namespace FastData.Core
                 result = db.GetList<T>(item);
 
             stopwatch.Stop();
-
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.item;
         }
@@ -366,11 +366,11 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<T> ToItemAsy<T>(this DataQuery item, DataContext db = null) where T : class, new()
+        public static async Task<T> ToItemAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToItem<T>(item, db);
+                return ToItem<T>(item, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -382,9 +382,9 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Lazy<T> ToLazyItem<T>(this DataQuery item, DataContext db = null) where T : class, new()
+        public static Lazy<T> ToLazyItem<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new Lazy<T>(() => ToItem<T>(item, db));
+            return new Lazy<T>(() => ToItem<T>(item, db,isOutSql));
         }
         #endregion
 
@@ -395,11 +395,11 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<Lazy<T>> ToLazyItemAsy<T>(this DataQuery item, DataContext db = null) where T : class, new()
+        public static async Task<Lazy<T>> ToLazyItemAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<T>(() => ToItem<T>(item, db));
+                return new Lazy<T>(() => ToItem<T>(item, db,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -411,7 +411,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static int ToCount(this DataQuery item, DataContext db = null)
+        public static int ToCount(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturn();
             var stopwatch = new Stopwatch();
@@ -432,7 +432,7 @@ namespace FastData.Core
                 result = db.GetCount(item);
 
             stopwatch.Stop();
-
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.Count;
@@ -445,11 +445,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<int> ToCountAsy<T, T1>(this DataQuery item, DataContext db = null)
+        public static async Task<int> ToCountAsy<T, T1>(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToCount(item, db);
+                return ToCount(item, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -463,7 +463,7 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static PageResult<T> ToPage<T>(this DataQuery item, PageModel pModel, DataContext db = null) where T : class, new()
+        public static PageResult<T> ToPage<T>(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             var result = new DataReturn<T>();
             var stopwatch = new Stopwatch();
@@ -484,7 +484,7 @@ namespace FastData.Core
                 result = db.GetPage<T>(item, pModel);
 
             stopwatch.Stop();
-
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.pageResult;
         }
@@ -498,11 +498,11 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static async Task<PageResult<T>> ToPageAsy<T>(this DataQuery item, PageModel pModel, DataContext db = null) where T : class, new()
+        public static async Task<PageResult<T>> ToPageAsy<T>(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToPage<T>(item, pModel, db);
+                return ToPage<T>(item, pModel, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -515,9 +515,9 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static Lazy<PageResult<T>> ToLazyPage<T>(this DataQuery item, PageModel pModel, DataContext db = null) where T : class, new()
+        public static Lazy<PageResult<T>> ToLazyPage<T>(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new Lazy<PageResult<T>>(() => ToPage<T>(item, pModel, db));
+            return new Lazy<PageResult<T>>(() => ToPage<T>(item, pModel, db,isOutSql));
         }
         #endregion
 
@@ -529,11 +529,11 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static async Task<Lazy<PageResult<T>>> ToLazyPageAsy<T>(this DataQuery item, PageModel pModel, DataContext db = null) where T : class, new()
+        public static async Task<Lazy<PageResult<T>>> ToLazyPageAsy<T>(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<PageResult<T>>(() => ToPage<T>(item, pModel, db));
+                return new Lazy<PageResult<T>>(() => ToPage<T>(item, pModel, db,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -546,7 +546,7 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static PageResult ToPage(this DataQuery item, PageModel pModel, DataContext db = null)
+        public static PageResult ToPage(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturn();
             var stopwatch = new Stopwatch();
@@ -567,7 +567,7 @@ namespace FastData.Core
                 result = db.GetPage(item, pModel);
 
             stopwatch.Stop();
-
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.PageResult;
         }
@@ -580,11 +580,11 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static async Task<PageResult> ToPageAsy(this DataQuery item, PageModel pModel, DataContext db = null)
+        public static async Task<PageResult> ToPageAsy(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToPage(item, pModel, db);
+                return ToPage(item, pModel, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -597,9 +597,9 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static Lazy<PageResult> ToLazyPage(this DataQuery item, PageModel pModel, DataContext db = null)
+        public static Lazy<PageResult> ToLazyPage(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<PageResult>(() => ToPage(item, pModel, db));
+            return new Lazy<PageResult>(() => ToPage(item, pModel, db,isOutSql));
         }
         #endregion
 
@@ -610,11 +610,11 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static async Task<Lazy<PageResult>> ToLazyPageAsy(this DataQuery item, PageModel pModel, DataContext db = null)
+        public static async Task<Lazy<PageResult>> ToLazyPageAsy(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<PageResult>(() => ToPage(item, pModel, db));
+                return new Lazy<PageResult>(() => ToPage(item, pModel, db,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -626,7 +626,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static DataTable ToDataTable(this DataQuery item, DataContext db = null)
+        public static DataTable ToDataTable(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturn();
             var stopwatch = new Stopwatch();
@@ -649,6 +649,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.Table;
         }
@@ -660,11 +661,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<DataTable> ToDataTableAsy(this DataQuery item, DataContext db = null)
+        public static async Task<DataTable> ToDataTableAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToDataTable(item, db);
+                return ToDataTable(item, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -675,9 +676,9 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Lazy<DataTable> ToLazyDataTable(this DataQuery item, DataContext db = null)
+        public static Lazy<DataTable> ToLazyDataTable(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<DataTable>(() => ToDataTable(item, db));
+            return new Lazy<DataTable>(() => ToDataTable(item, db,isOutSql));
         }
         #endregion
 
@@ -687,11 +688,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<Lazy<DataTable>> ToLazyDataTableAsy(this DataQuery item, DataContext db = null)
+        public static async Task<Lazy<DataTable>> ToLazyDataTableAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<DataTable>(() => ToDataTable(item, db));
+                return new Lazy<DataTable>(() => ToDataTable(item, db,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -743,11 +744,11 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<List<T>> ExecuteSqlAsy<T>(string sql, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
+        public static async Task<List<T>> ExecuteSqlAsy<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ExecuteSql<T>(sql, param, db, key);
+                return ExecuteSql<T>(sql, param, db, key,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -760,9 +761,9 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static Lazy<List<T>> ExecuteLazySql<T>(string sql, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
+        public static Lazy<List<T>> ExecuteLazySql<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return new Lazy<List<T>>(() => ExecuteSql<T>(sql, param, db, key));
+            return new Lazy<List<T>>(() => ExecuteSql<T>(sql, param, db, key,isOutSql));
         }
         #endregion
 
@@ -774,11 +775,11 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<Lazy<List<T>>> ExecuteLazySqlAsy<T>(string sql, DbParameter[] param, DataContext db = null, string key = null) where T : class, new()
+        public static async Task<Lazy<List<T>>> ExecuteLazySqlAsy<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<List<T>>(() => ExecuteSql<T>(sql, param, db, key));
+                return new Lazy<List<T>>(() => ExecuteSql<T>(sql, param, db, key,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -790,7 +791,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static List<Dictionary<string, object>> ToDics(this DataQuery item, DataContext db = null)
+        public static List<Dictionary<string, object>> ToDics(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturn();
             var stopwatch = new Stopwatch();
@@ -811,7 +812,7 @@ namespace FastData.Core
                 result = db.GetDic(item);
 
             stopwatch.Stop();
-
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.DicList;
         }
@@ -823,11 +824,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<List<Dictionary<string, object>>> ToDicsAsy(this DataQuery item, DataContext db = null)
+        public static async Task<List<Dictionary<string, object>>> ToDicsAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToDics(item, db);
+                return ToDics(item, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -838,9 +839,9 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Lazy<List<Dictionary<string, object>>> ToLazyDics(this DataQuery item, DataContext db = null)
+        public static Lazy<List<Dictionary<string, object>>> ToLazyDics(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<List<Dictionary<string, object>>>(() => ToDics(item, db));
+            return new Lazy<List<Dictionary<string, object>>>(() => ToDics(item, db,isOutSql));
         }
         #endregion
 
@@ -850,11 +851,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<Lazy<List<Dictionary<string, object>>>> ToLazyDicsAsy(this DataQuery item, DataContext db = null)
+        public static async Task<Lazy<List<Dictionary<string, object>>>> ToLazyDicsAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<List<Dictionary<string, object>>>(() => ToDics(item, db));
+                return new Lazy<List<Dictionary<string, object>>>(() => ToDics(item, db,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -866,7 +867,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Dictionary<string, object> ToDic(this DataQuery item, DataContext db = null)
+        public static Dictionary<string, object> ToDic(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturn();
             var stopwatch = new Stopwatch();
@@ -889,6 +890,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.Dic;
         }
@@ -900,11 +902,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<Dictionary<string, object>> ToDicAsy(this DataQuery item, DataContext db = null)
+        public static async Task<Dictionary<string, object>> ToDicAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ToDic(item, db);
+                return ToDic(item, db,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -915,9 +917,9 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Lazy<Dictionary<string, object>> ToLazyDic(this DataQuery item, DataContext db = null)
+        public static Lazy<Dictionary<string, object>> ToLazyDic(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<Dictionary<string, object>>(() => ToDic(item, db));
+            return new Lazy<Dictionary<string, object>>(() => ToDic(item, db,isOutSql));
         }
         #endregion
 
@@ -927,11 +929,11 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static async Task<Lazy<Dictionary<string, object>>> ToLazyDicAsy(this DataQuery item, DataContext db = null)
+        public static async Task<Lazy<Dictionary<string, object>>> ToLazyDicAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<Dictionary<string, object>>(() => ToDic(item, db));
+                return new Lazy<Dictionary<string, object>>(() => ToDic(item, db,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion
@@ -983,11 +985,11 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<List<Dictionary<string, object>>> ExecuteSqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null)
+        public static async Task<List<Dictionary<string, object>>> ExecuteSqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return ExecuteSql(sql, param, db, key);
+                return ExecuteSql(sql, param, db, key,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -1000,9 +1002,9 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static Lazy<List<Dictionary<string, object>>> ExecuteLazySql(string sql, DbParameter[] param, DataContext db = null, string key = null)
+        public static Lazy<List<Dictionary<string, object>>> ExecuteLazySql(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return new Lazy<List<Dictionary<string, object>>>(() => ExecuteSql(sql, param, db, key));
+            return new Lazy<List<Dictionary<string, object>>>(() => ExecuteSql(sql, param, db, key,isOutSql));
         }
         #endregion
 
@@ -1014,11 +1016,11 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<Lazy<List<Dictionary<string, object>>>> ExecuteLazySqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null)
+        public static async Task<Lazy<List<Dictionary<string, object>>>> ExecuteLazySqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return await Task.Factory.StartNew(() =>
             {
-                return new Lazy<List<Dictionary<string, object>>>(() => ExecuteSql(sql, param, db, key));
+                return new Lazy<List<Dictionary<string, object>>>(() => ExecuteSql(sql, param, db, key,isOutSql));
             }).ConfigureAwait(false);
         }
         #endregion

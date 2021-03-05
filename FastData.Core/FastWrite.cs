@@ -73,7 +73,7 @@ namespace FastData.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="notAddField">不需要增加的字段</param>
         /// <returns></returns>
-        public static WriteReturn Add<T>(T model, DataContext db = null, string key = null) where T : class, new()
+        public static WriteReturn Add<T>(T model, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -97,6 +97,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.writeReturn;
         }
@@ -111,7 +112,7 @@ namespace FastData.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="notAddField">不需要增加的字段</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> AddAsy<T>(T model, DataContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> AddAsy<T>(T model, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Run(() =>
             {
@@ -129,7 +130,7 @@ namespace FastData.Core
         /// <param name="predicate">表达式</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public static WriteReturn Delete<T>(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null) where T : class, new()
+        public static WriteReturn Delete<T>(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null,bool isOutSql = false) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -153,6 +154,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.writeReturn;
         }
@@ -166,11 +168,11 @@ namespace FastData.Core
         /// <param name="predicate">表达式</param>
         /// <param name="IsTrans">是否事务</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> DeleteAsy<T>(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> DeleteAsy<T>(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Run(() =>
             {
-                return Delete<T>(predicate, db, key);
+                return Delete<T>(predicate, db, key,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -182,7 +184,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public static WriteReturn Delete<T>(T model, DataContext db = null, string key = null, bool isTrans = false) where T : class, new()
+        public static WriteReturn Delete<T>(T model, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -206,6 +208,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.writeReturn;
@@ -217,11 +220,11 @@ namespace FastData.Core
         /// 删除asy
         /// </summary>
         /// <returns></returns>
-        public static async Task<WriteReturn> UpdateAsy<T>(T model, DataContext db = null, string key = null, bool isTrans = false) where T : class, new()
+        public static async Task<WriteReturn> UpdateAsy<T>(T model, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false) where T : class, new()
         {
             return await Task.Run(() =>
             {
-                return Delete<T>(model, db, key);
+                return Delete<T>(model, db, key,isTrans);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -237,7 +240,7 @@ namespace FastData.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="field">需要修改的字段</param>
         /// <returns></returns>
-        public static WriteReturn Update<T>(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        public static WriteReturn Update<T>(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -261,6 +264,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.writeReturn;
@@ -277,11 +281,11 @@ namespace FastData.Core
         /// <param name="IsTrans">是否事务</param>
         /// <param name="field">需要修改的字段</param>
         /// <returns></returns>
-        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Run(() =>
             {
-                return Update<T>(model, predicate, field, db, key);
+                return Update<T>(model, predicate, field, db, key,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -293,7 +297,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public static WriteReturn Update<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false) where T : class, new()
+        public static WriteReturn Update<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -317,6 +321,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.writeReturn;
@@ -328,11 +333,11 @@ namespace FastData.Core
         /// 修改asy
         /// </summary>
         /// <returns></returns>
-        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false) where T : class, new()
+        public static async Task<WriteReturn> UpdateAsy<T>(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false) where T : class, new()
         {
             return await Task.Run(() =>
             {
-                return Update<T>(model, field, db, key, isTrans);
+                return Update<T>(model, field, db, key, isTrans,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -344,7 +349,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public static WriteReturn UpdateList<T>(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        public static WriteReturn UpdateList<T>(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -368,6 +373,7 @@ namespace FastData.Core
 
             stopwatch.Stop();
 
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.writeReturn;
@@ -379,11 +385,11 @@ namespace FastData.Core
         /// 修改list asy
         /// </summary>
         /// <returns></returns>
-        public static async Task<WriteReturn> UpdateListAsy<T>(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null) where T : class, new()
+        public static async Task<WriteReturn> UpdateListAsy<T>(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             return await Task.Run(() =>
             {
-                return UpdateList<T>(list, field, db, key);
+                return UpdateList<T>(list, field, db, key,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
@@ -434,11 +440,11 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<WriteReturn> ExecuteSqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null)
+        public static async Task<WriteReturn> ExecuteSqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return await Task.Run(() =>
             {
-                return ExecuteSql(sql, param, db, key);
+                return ExecuteSql(sql, param, db, key,isOutSql);
             }).ConfigureAwait(false);
         }
         #endregion
