@@ -29,7 +29,7 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Get;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
-                handle.Content.Dispose();
+                handle.Content?.Dispose();
                 handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
@@ -76,7 +76,7 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Post;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
-                handle.Content.Dispose();
+                handle.Content?.Dispose();
                 handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
@@ -107,7 +107,7 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Post;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
-                handle.Content.Dispose();
+                handle.Content?.Dispose();
                 handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
@@ -153,7 +153,7 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Put;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
-                handle.Content.Dispose();
+                handle.Content?.Dispose();
                 handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
@@ -184,7 +184,7 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Put;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
-                handle.Content.Dispose();
+                handle.Content?.Dispose();
                 handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
@@ -216,7 +216,7 @@ namespace FastUntility.Core.Base
                 handle.Method = HttpMethod.Delete;
                 handle.RequestUri = new Uri(url);
                 var response = http.SendAsync(handle).Result;
-                handle.Content.Dispose();
+                handle.Content?.Dispose();
                 handle.Dispose();
                 return response.Content.ReadAsStringAsync().Result;
             }
