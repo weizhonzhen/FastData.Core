@@ -337,7 +337,7 @@ namespace FastUntility.Core.Base
                                     param[0] = id;
                                     var temp = m.Invoke(reader, param);
                                     temp.GetType().GetMethods().ToList().ForEach(v => {
-                                        if (v.Name == "get_Value")
+                                        if (v.Name == "get_Value" && !reader.IsDBNull(id))
                                             dic.Add(a.ToLower(), v.Invoke(temp, null));
                                     }); 
                                     temp.GetType().GetMethods().ToList().ForEach(v =>
@@ -362,7 +362,7 @@ namespace FastUntility.Core.Base
                                     param[0] = id;
                                     var temp = m.Invoke(reader, param);
                                     temp.GetType().GetMethods().ToList().ForEach(v => {
-                                        if (v.Name == "get_Value")
+                                        if (v.Name == "get_Value" && !reader.IsDBNull(id))
                                             dic.Add(a.ToLower(), v.Invoke(temp, null));
                                     });
                                     temp.GetType().GetMethods().ToList().ForEach(v =>
