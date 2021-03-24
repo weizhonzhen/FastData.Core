@@ -94,7 +94,7 @@ namespace FastData.Core.Base
                                 var temp = m.Invoke(dr, param);
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
-                                    if (v.Name == "get_Value")
+                                    if (v.Name == "get_Value" && !dr.IsDBNull(id))
                                         value = v.Invoke(temp, null);
                                 });
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
@@ -121,7 +121,7 @@ namespace FastData.Core.Base
                                 var temp = m.Invoke(dr, param);
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
-                                    if (v.Name == "get_Value")
+                                    if (v.Name == "get_Value" && !dr.IsDBNull(id))
                                         value = v.Invoke(temp, null);
                                 });
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
