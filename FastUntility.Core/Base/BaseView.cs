@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Fast.Untility.Core.Base
+namespace FastUntility.Core.Base
 {
     public static class BaseView
     {
@@ -24,7 +24,7 @@ namespace Fast.Untility.Core.Base
                     return writer.GetStringBuilder().ToString();
                 }
                 else
-                    return "";
+                    return "view " + view + " not exists";
             }
         }
     }
