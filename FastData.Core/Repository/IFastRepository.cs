@@ -61,6 +61,8 @@ namespace FastData.Core.Repository
 
         string MapDb(string name);
 
+        string MapView(string name);
+
         string MapType(string name);
 
         bool IsExists(string name);

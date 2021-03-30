@@ -569,17 +569,7 @@ namespace FastData.Core.Repository
         {
             var config = DataConfig.Get(dbKey);
             var info = new FileInfo(xml);
-
-            var key = new List<string>();
-            var sql = new List<string>();
-            var db = new Dictionary<string, object>();
-            var type = new Dictionary<string, object>();
-            var param = new Dictionary<string, object>();
-            var check = new Dictionary<string, object>();
-            var name = new Dictionary<string, object>();
-            var parameName = new Dictionary<string, object>();
-
-            return MapXml.GetXmlList(info.FullName, "sqlMap", ref key, ref sql, ref db, ref type, ref check, ref param, ref name, ref parameName, config);
+            return MapXml.GetXmlList(info.FullName, "sqlMap", config).isSuccess;
         }
         #endregion
 
@@ -604,6 +594,18 @@ namespace FastData.Core.Repository
         public string MapType(string name)
         {
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.type", name.ToLower())).ToStr();
+        }
+        #endregion
+
+        #region map view
+        /// <summary>
+        /// map view
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string MapView(string name)
+        {
+            return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.view", name.ToLower())).ToStr();
         }
         #endregion
 
