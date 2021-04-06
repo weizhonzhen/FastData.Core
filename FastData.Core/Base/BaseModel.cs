@@ -8,8 +8,6 @@ using FastData.Core.Property;
 using FastData.Core.Model;
 using System.Data.Common;
 using FastData.Core.Type;
-using System.Data;
-using NPOI.SS.Util;
 using System.Linq;
 
 namespace FastData.Core.Base
@@ -29,11 +27,12 @@ namespace FastData.Core.Base
         /// <param name="sql">sql</param>
         /// <param name="oracleParam">参数</param>
         /// <returns></returns>
-        public static OptionModel UpdateToSql<T>(T model, ConfigModel config, Expression<Func<T, object>> field = null)
+        public static OptionModel UpdateToSql<T>(T model, ConfigModel config, Expression<Func<T, object>> field = null, DbCommand cmd=null)
         {
             var result = new OptionModel();
             var dynGet = new DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
+            var where = PrimaryKey(config, cmd, typeof(T).Name);
 
             try
             {
@@ -65,6 +64,20 @@ namespace FastData.Core.Base
                         result.Param.Add(temp);
                     });
                     #endregion
+                }
+
+                foreach(var item in where)
+                {
+                    if (result.Param.Exists(a => a.ParameterName == item))
+                    {
+                        var itemValue = dynGet.GetValue(model, item, config.IsPropertyCache);
+                        if (itemValue == null)
+                        {
+                            result.IsSuccess = false;
+                            result.Message = string.Format("主键{0}值为空", item);
+                            return result;
+                        }
+                    }
                 }
 
                 result.Sql = result.Sql.Substring(0, result.Sql.Length - 1);
@@ -457,6 +470,9 @@ namespace FastData.Core.Base
             var key = string.Format("{0}.Primary.Key", tableName);
             var list = new List<string>();
 
+            if (DbCache.Exists(config.CacheType, key))
+                return DbCache.Get<List<string>>(config.CacheType, key);
+
             if (config.DbType == DataDbType.Oracle)
                 cmd.CommandText = string.Format("select a.COLUMN_NAME from all_cons_columns a,all_constraints b where a.constraint_name = b.constraint_name and b.constraint_type = 'P' and b.table_name = '{0}'", tableName.ToUpper());
 
@@ -481,7 +497,7 @@ namespace FastData.Core.Base
                 }
 
                 dr.Close();
-                DbCache.Set<List<string>>(config.CacheType, key, list);
+                DbCache.Set<List<string>>(config.CacheType, key, list, 8);
                 return list;
             }
         }
