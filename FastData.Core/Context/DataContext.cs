@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using FastData.Core.Property;
 using System.Data;
 using FastUntility.Core.Base;
+using DbProviderFactories = FastData.Core.Base.DbProviderFactories;
 
 namespace FastData.Core.Context
 {
@@ -890,7 +891,10 @@ namespace FastData.Core.Context
                 if (optionModel.IsSuccess)
                     result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, optionModel.Sql);
                 else
+                { 
                     result.writeReturn.IsSuccess = false;
+                    result.writeReturn.Message = optionModel.Message;
+                }
 
                 if (isTrans && result.writeReturn.IsSuccess)
                     SubmitTrans();
@@ -938,7 +942,7 @@ namespace FastData.Core.Context
                 if (isTrans)
                     BeginTrans();
 
-                update = BaseModel.UpdateToSql<T>(model, config, field);
+                update = BaseModel.UpdateToSql<T>(model, config, field,cmd);
 
                 if (update.IsSuccess)
                 {
@@ -962,7 +966,10 @@ namespace FastData.Core.Context
                         result.writeReturn.IsSuccess = false;
                 }
                 else
+                {
                     result.writeReturn.IsSuccess = false;
+                    result.writeReturn.Message = update.Message;
+                }
 
                 if (isTrans && result.writeReturn.IsSuccess)
                     SubmitTrans();
