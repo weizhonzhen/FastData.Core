@@ -103,7 +103,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "QueryField<T>", "");
                     else
                         DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "QueryField<T>", "");
-                });
+                }).ConfigureAwait(false);
 
                 return new FieldModel
                 {
@@ -200,7 +200,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "QueryField<T1,T2,T>", "");
                     else
                         DbLog.LogException(config.IsOutError, config.DbType, ex, "QueryField<T1,T2,T>", "");
-                });
+                }).ConfigureAwait(false);
                 return new FieldModel { Field = "*" };
             }
         }
@@ -234,7 +234,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "GroupBy<T>", "");
                     else
                         DbLog.LogException(config.IsOutError, config.DbType, ex, "GroupBy<T>", "");
-                });
+                }).ConfigureAwait(false);
 
                 return new List<string>();
             }
@@ -271,7 +271,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "OrderBy<T>", "");
                     else
                         DbLog.LogException(config.IsOutError, config.DbType, ex, "OrderBy<T>", "");
-                });
+                }).ConfigureAwait(false);
                 return new List<string>();
             }
         }

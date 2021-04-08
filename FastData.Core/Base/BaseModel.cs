@@ -93,7 +93,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
                     else
                         DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
-                });
+                }).ConfigureAwait(false);
                 result.IsSuccess = false;
                 return result;
             }
@@ -147,7 +147,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "InsertToSql<T>", result.Sql);
                     else
                         DbLog.LogException(config.IsOutError, config.DbType, ex, "InsertToSql<T>", result.Sql);
-                });
+                }).ConfigureAwait(false);
                 result.IsSuccess = false;
                 return result;
             }
@@ -260,7 +260,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
                     else
                         DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
-                });
+                }).ConfigureAwait(false);
                 result.IsSuccess = false;
                 return result;
             }
@@ -378,7 +378,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "UpdateListToSql<T>", result.Sql);
                     else
                         DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateListToSql<T>", result.Sql);
-                });
+                }).ConfigureAwait(false);
                 result.IsSuccess = false;
                 return result;
             }
@@ -450,7 +450,7 @@ namespace FastData.Core.Base
                         DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
                     else
                         DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "DeleteToSql<T>", result.Sql);
-                });
+                }).ConfigureAwait(false);
                 result.IsSuccess = false;
                 return result;
             }
