@@ -54,12 +54,12 @@ namespace FastUntility.Core.Base
         /// <param name="headName">文件头名</param>
         /// <param name="IsWrap">是否换行</param>
         /// <param name="logCount">日志重写数量</param>
-        public static async void SaveLogAsy(string logContent, string fileName)
+        public static Task SaveLogAsy(string logContent, string fileName)
         {
-            await Task.Factory.StartNew(() =>
-            {
-                SaveLog(logContent, fileName);
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+             {
+                 SaveLog(logContent, fileName);
+             });
         }
         #endregion
     }
