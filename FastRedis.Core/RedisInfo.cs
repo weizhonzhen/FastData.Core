@@ -2,10 +2,6 @@
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using FastUntility.Core.Base;
-using System.IO;
-using System.Reflection;
-using FastUntility.Core.Cache;
-using System.Collections.Generic;
 
 namespace FastRedis.Core
 {
@@ -62,20 +58,20 @@ namespace FastRedis.Core
         /// 是否存在 asy
         /// </summary>
         /// <returns></returns>
-        public static async Task<bool> ExistsAsy(string key, int db = 0)
+        public static Task<bool> ExistsAsy(string key, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (string.IsNullOrEmpty(key))
-                    return false;
+                    return Task.FromResult(false);
                 else
-                    return await Context.GetDatabase(db).KeyExistsAsync(key).ConfigureAwait(false);
+                    return Context.GetDatabase(db).KeyExistsAsync(key);
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Exists", key);
-                return false;
+                return Task.FromResult(false);
             }
         }
         #endregion
@@ -116,20 +112,20 @@ namespace FastRedis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static async Task<bool> SetAsy<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
+        public static Task<bool> SetAsy<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return await Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours)).ConfigureAwait(false);
+                    return Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
                 else
-                    return false;
+                    return Task.FromResult(false);
             }
             catch (RedisException ex)
             {
                 SaveLog<T>(ex, "Set<T>");
-                return false;
+                return Task.FromResult(false);
             }
         }
         #endregion
@@ -170,20 +166,20 @@ namespace FastRedis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static async Task<bool> SetAsy(string key, string model, int hours = 24 * 30 * 12, int db = 0)
+        public static Task<bool> SetAsy(string key, string model, int hours = 24 * 30 * 12, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return await Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromHours(hours)).ConfigureAwait(false);
+                    return Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromHours(hours));
                 else
-                    return false;
+                    return Task.FromResult(false);
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Set", key);
-                return false;
+                return Task.FromResult(false);
             }
         }
         #endregion
@@ -224,20 +220,20 @@ namespace FastRedis.Core
         /// <param name="model">值</param>
         /// <param name="Minutes">存期限</param>
         /// <returns></returns>
-        public static async Task<bool> SetAsy(string key, string model, double Minutes, int db = 0)
+        public static Task<bool> SetAsy(string key, string model, double Minutes, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return await Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromMilliseconds(Minutes)).ConfigureAwait(false);
+                    return Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromMilliseconds(Minutes));
                 else
-                    return false;
+                    return Task.FromResult(false);
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Set", key);
-                return false;
+                return Task.FromResult(false);
             }
         }
         #endregion
@@ -332,7 +328,7 @@ namespace FastRedis.Core
                 if (string.IsNullOrEmpty(key))
                     return new T();
                 else
-                    return BaseJson.JsonToModel<T>(await Context.GetDatabase(db).StringGetAsync(key).ConfigureAwait(false)) ?? new T();
+                    return BaseJson.JsonToModel<T>(await Context.GetDatabase(db).StringGetAsync(key)) ?? new T();
             }
             catch (RedisException ex)
             {
@@ -372,20 +368,20 @@ namespace FastRedis.Core
         /// </summary>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static async Task<bool> RemoveAsy(string key, int db = 0)
+        public static Task<bool> RemoveAsy(string key, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return await Context.GetDatabase(db).KeyDeleteAsync(key).ConfigureAwait(false);
+                    return Context.GetDatabase(db).KeyDeleteAsync(key);
                 else
-                    return false;
+                    return Task.FromResult(false);
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Remove", key);
-                return false;
+                return Task.FromResult(false);
             }
         }
         #endregion
