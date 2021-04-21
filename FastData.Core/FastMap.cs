@@ -29,9 +29,9 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceProperties(string nameSpace, string dbFile="db.json",string projectName=null)
+        public static void InstanceProperties(string nameSpace, string dbFile = "db.json", string projectName = null)
         {
-            if(projectName==null)
+            if (projectName == null)
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
 
             var config = DataConfig.Get("", projectName, dbFile);
@@ -42,13 +42,15 @@ namespace FastData.Core
 
             if (assembly != null)
             {
-                assembly.ExportedTypes.ToList().ForEach(p => {
+                assembly.ExportedTypes.ToList().ForEach(p =>
+                {
                     var typeInfo = (p as TypeInfo);
                     if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
                     {
                         var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
                         var cacheList = new List<PropertyModel>();
-                        typeInfo.DeclaredProperties.ToList().ForEach(a => {
+                        typeInfo.DeclaredProperties.ToList().ForEach(a =>
+                        {
                             var model = new PropertyModel();
                             model.Name = a.Name;
                             model.PropertyType = a.PropertyType;
@@ -79,14 +81,15 @@ namespace FastData.Core
             query.Key = dbKey;
 
             MapXml.CreateLogTable(query);
-            var assembly =  AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName);
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName);
 
             if (assembly == null)
                 assembly = Assembly.Load(projectName);
-            
+
             if (assembly != null)
             {
-                assembly.ExportedTypes.ToList().ForEach(a => {
+                assembly.ExportedTypes.ToList().ForEach(a =>
+                {
                     var typeInfo = (a as TypeInfo);
                     if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
                         BaseTable.Check(query, a.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
@@ -96,7 +99,7 @@ namespace FastData.Core
         #endregion
 
         #region 初始化map 3  by Resource
-        public static void InstanceMapResource(string dbKey = null,string dbFile="db.json",string mapFile="map.json", string projectName = null)
+        public static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
         {
             if (projectName == null)
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
@@ -168,7 +171,7 @@ namespace FastData.Core
         /// 初始化map 3
         /// </summary>
         /// <returns></returns>
-        public static void InstanceMap(string dbKey = null, string dbFile = "db.json", string mapFile= "map.json")
+        public static void InstanceMap(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json")
         {
             var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
             var config = DataConfig.Get(dbKey, null, dbFile);
@@ -247,7 +250,7 @@ namespace FastData.Core
             {
                 var sql = MapXml.GetMapSql(name, ref param, db, key);
                 isOutSql = isOutSql ? isOutSql : IsMapLog(name);
-                var result = FastRead.ExecuteSql<T>(sql, param, db, key,isOutSql);
+                var result = FastRead.ExecuteSql<T>(sql, param, db, key, isOutSql);
                 if (MapXml.MapIsForEach(name, config))
                 {
                     if (db == null)
@@ -274,12 +277,12 @@ namespace FastData.Core
         /// <summary>
         /// 执行sql asy
         /// </summary>
-        public static async Task<List<T>> QueryAsy<T>(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
+        public static Task<List<T>> QueryAsy<T>(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return await Task.Run(() =>
+            return Task.Run(() =>
             {
-                return Query<T>(name, param, db, key,isOutSql);
-            }).ConfigureAwait(false);
+                return Query<T>(name, param, db, key, isOutSql);
+            });
         }
         #endregion
 
@@ -289,7 +292,7 @@ namespace FastData.Core
         /// </summary>
         public static Lazy<List<T>> QueryLazy<T>(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return new Lazy<List<T>>(() => Query<T>(name, param, db, key,isOutSql));
+            return new Lazy<List<T>>(() => Query<T>(name, param, db, key, isOutSql));
         }
         #endregion
 
@@ -297,12 +300,12 @@ namespace FastData.Core
         /// <summary>
         /// maq 执行返回结果 lazy asy
         /// </summary>
-        public static async Task<Lazy<List<T>>> QueryLazyAsy<T>(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
+        public static Task<Lazy<List<T>>> QueryLazyAsy<T>(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return await Task.Run(() =>
+            return Task.Run(() =>
             {
-                return new Lazy<List<T>>(() => Query<T>(name, param, db, key,isOutSql));
-            }).ConfigureAwait(false);
+                return new Lazy<List<T>>(() => Query<T>(name, param, db, key, isOutSql));
+            });
         }
         #endregion
 
@@ -350,12 +353,12 @@ namespace FastData.Core
         /// <summary>
         /// 执行sql List<Dictionary<string, object>> asy
         /// </summary>
-        public static async Task<List<Dictionary<string, object>>> QueryAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static Task<List<Dictionary<string, object>>> QueryAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return await Task.Run(() =>
-            {
-                return Query(name, param, db, key,isOutSql);
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+           {
+               return Query(name, param, db, key, isOutSql);
+           });
         }
         #endregion
 
@@ -365,7 +368,7 @@ namespace FastData.Core
         /// </summary>
         public static Lazy<List<Dictionary<string, object>>> QueryLazy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key,isOutSql));
+            return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key, isOutSql));
         }
         #endregion
 
@@ -373,12 +376,12 @@ namespace FastData.Core
         /// <summary>
         /// maq 执行返回 List<Dictionary<string, object>> lazy asy
         /// </summary>
-        public static async Task<Lazy<List<Dictionary<string, object>>>> QueryLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static Task<Lazy<List<Dictionary<string, object>>>> QueryLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return await Task.Run(() =>
-            {
-                return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key,isOutSql));
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+           {
+               return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key, isOutSql));
+           });
         }
         #endregion
 
@@ -410,12 +413,12 @@ namespace FastData.Core
         /// <summary>
         ///  maq 执行写操作 asy
         /// </summary>
-        public static async Task<WriteReturn> WriteAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static Task<WriteReturn> WriteAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return await Task.Run(() =>
-            {
-                return Write(name, param, db, key,isOutSql);
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+           {
+               return Write(name, param, db, key, isOutSql);
+           });
         }
         #endregion
 
@@ -425,7 +428,7 @@ namespace FastData.Core
         /// </summary>
         public static Lazy<WriteReturn> WriteLazy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return new Lazy<WriteReturn>(() => Write(name, param, db, key,isOutSql));
+            return new Lazy<WriteReturn>(() => Write(name, param, db, key, isOutSql));
         }
         #endregion
 
@@ -433,12 +436,12 @@ namespace FastData.Core
         /// <summary>
         /// maq 执行写操作 asy lazy asy
         /// </summary>
-        public static async Task<Lazy<WriteReturn>> WriteLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static Task<Lazy<WriteReturn>> WriteLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return await Task.Run(() =>
-            {
-                return new Lazy<WriteReturn>(() => Write(name, param, db, key,isOutSql));
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+           {
+               return new Lazy<WriteReturn>(() => Write(name, param, db, key, isOutSql));
+           });
         }
         #endregion
 
@@ -450,7 +453,7 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        private static PageResult ExecuteSqlPage(PageModel pModel, string sql, DbParameter[] param, DataContext db = null, string key = null,bool isOutSql=false)
+        private static PageResult ExecuteSqlPage(PageModel pModel, string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             var result = new DataReturn();
             var config = DataConfig.Get(key);
@@ -523,12 +526,12 @@ namespace FastData.Core
         /// <summary>
         /// 执行分页 asy
         /// </summary>
-        public static async Task<PageResult> QueryPageAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static Task<PageResult> QueryPageAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return await Task.Run(() =>
-            {
-                return QueryPage(pModel, name, param, db, key,isOutSql);
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+           {
+               return QueryPage(pModel, name, param, db, key, isOutSql);
+           });
         }
         #endregion
 
@@ -538,7 +541,7 @@ namespace FastData.Core
         /// </summary>
         public static Lazy<PageResult> QueryPageLazy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key,isOutSql));
+            return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key, isOutSql));
         }
         #endregion
 
@@ -546,12 +549,12 @@ namespace FastData.Core
         /// <summary>
         /// maq 执行分页lazy asy
         /// </summary>
-        public static async Task<Lazy<PageResult>> QueryPageLazyAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static Task<Lazy<PageResult>> QueryPageLazyAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return await Task.Run(() =>
-            {
-                return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key,isOutSql));
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+           {
+               return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key, isOutSql));
+           });
         }
         #endregion
 
@@ -606,7 +609,7 @@ namespace FastData.Core
                 var sql = MapXml.GetMapSql(name, ref param, db, key);
 
                 isOutSql = isOutSql ? isOutSql : IsMapLog(name);
-                var result = ExecuteSqlPage<T>(pModel, sql, param, db, key,isOutSql);
+                var result = ExecuteSqlPage<T>(pModel, sql, param, db, key, isOutSql);
 
                 if (MapXml.MapIsForEach(name, config))
                 {
@@ -635,12 +638,12 @@ namespace FastData.Core
         /// <summary>
         /// 执行分页 asy
         /// </summary>
-        public static async Task<PageResult<T>> QueryPageAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
+        public static Task<PageResult<T>> QueryPageAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return await Task.Run(() =>
-            {
-                return QueryPage<T>(pModel, name, param, db, key,isOutSql);
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+           {
+               return QueryPage<T>(pModel, name, param, db, key, isOutSql);
+           });
         }
         #endregion
 
@@ -650,7 +653,7 @@ namespace FastData.Core
         /// </summary>
         public static Lazy<PageResult<T>> QueryPageLazy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key,isOutSql));
+            return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key, isOutSql));
         }
         #endregion
 
@@ -658,12 +661,12 @@ namespace FastData.Core
         /// <summary>
         /// maq 执行分页lazy asy
         /// </summary>
-        public static async Task<Lazy<PageResult<T>>> QueryPageLazyAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
+        public static Task<Lazy<PageResult<T>>> QueryPageLazyAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return await Task.Run(() =>
-            {
-                return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key,isOutSql));
-            }).ConfigureAwait(false);
+            return Task.Run(() =>
+           {
+               return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key, isOutSql));
+           });
         }
         #endregion
 
