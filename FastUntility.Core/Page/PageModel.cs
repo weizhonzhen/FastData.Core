@@ -5,16 +5,6 @@
     /// </summary>
     public class PageModel
     {
-        public PageModel()
-        {
-            StarId = 0;
-            EndId = 0;
-            TotalRecord = 0;
-            TotalPage = 0;
-            PageId = 1;
-            PageSize = 10;
-        }
-
         /// <summary>
         /// 起始Id
         /// </summary>
@@ -38,11 +28,11 @@
         /// <summary>
         /// 第几页
         /// </summary>
-        public int PageId { get; set; }
+        public int PageId { get; set; } = 1;
 
         /// <summary>
         /// 每页数量
         /// </summary>
-        public int PageSize { get; set; }
+        public int PageSize { get; set; } = 10;
     }
 }

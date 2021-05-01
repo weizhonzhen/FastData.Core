@@ -7,26 +7,15 @@ namespace FastUntility.Core.Page
     /// </summary>
     public sealed class PageResult<T> where T : class, new()
     {
-        private PageModel _pModel = new PageModel();
-        private List<T> _list = new List<T>();
-
         /// <summary>
         /// 分页model
         /// </summary>
-        public PageModel pModel
-        {
-            set { _pModel = value; }
-            get { return _pModel; }
-        }
+        public PageModel pModel = new PageModel();
 
         /// <summary>
         /// 分页列表
         /// </summary>
-        public List<T> list
-        {
-            set { _list = value; }
-            get { return _list; }
-        }
+        public List<T> list = new List<T>();
     }
 
 
@@ -35,16 +24,10 @@ namespace FastUntility.Core.Page
     /// </summary>
     public class PageResult
     {
-        private PageModel _pModel = new PageModel();
-
         /// <summary>
         /// 分页model
         /// </summary>
-        public PageModel pModel
-        {
-            set { _pModel = value; }
-            get { return _pModel; }
-        }
+        public PageModel pModel = new PageModel();
 
         /// <summary>
         /// 分页列表
