@@ -5,16 +5,10 @@ namespace FastData.Core.CacheModel
 {
     internal class MapConfigModel
     {
-        private List<string> _path = new List<string>();
-
         /// <summary>
         /// 文件名带绝对路径
         /// </summary>
-        public List<string> Path
-        {
-            set { _path = value; }
-            get { return _path; }
-        }
+        public List<string> Path { get; set; } = new List<string>();
 
         /// <summary>
         /// 上次修改时间
