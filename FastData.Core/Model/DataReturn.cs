@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using FastUntility.Core.Page;
 
@@ -45,9 +45,6 @@ namespace FastData.Core.Model
     /// </summary>
     public class DataReturn
     {
-        private PageResult _pageResult = new PageResult();
-        private WriteReturn _writeReturn = new WriteReturn();
-
         /// <summary>
         /// 条数
         /// </summary>
@@ -81,20 +78,12 @@ namespace FastData.Core.Model
         /// <summary>
         /// 分页
         /// </summary>
-        public PageResult PageResult
-        {
-            set { _pageResult = value; }
-            get { return _pageResult; }
-        }
+        public PageResult PageResult = new PageResult();
 
         /// <summary>
         /// 写返回结果
         /// </summary>
-        public WriteReturn writeReturn
-        {
-            set { _writeReturn = value; }
-            get { return _writeReturn; }
-        }
+        public WriteReturn writeReturn = new WriteReturn();
     }
 
     /// <summary>
