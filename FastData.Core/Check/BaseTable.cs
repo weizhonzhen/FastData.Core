@@ -43,18 +43,17 @@ namespace FastData.Core.Check
                             model.ForEach(p =>
                             {
                                 var info = table.Column.Find(a => a.Name.ToLower() == p.Name.ToLower()) ?? new ColumnModel();
-                                var result = CheckModel.CompareTo<ColumnModel>(info, p);
+                                var result = CheckModel.CompareTo(info, p);
                                 if (result.IsUpdate)
                                     UpdateTable(item, result, tableName);
                             });
                         }
                         else
                         {
-                            var tempColumn = new List<ColumnModel>();
-                            tempColumn = table.Column;
-                            tempColumn.ForEach(p => {
-                                var info = table.Column.Find(a => a.Name.ToLower() == p.Name.ToLower()) ?? new ColumnModel();
-                                var result = CheckModel.CompareTo<ColumnModel>(p, info);
+                            table.Column.ForEach(p =>
+                            {
+                                var info = model.Find(a => a.Name.ToLower() == p.Name.ToLower()) ?? new ColumnModel();
+                                var result = CheckModel.CompareTo(p, info);
                                 if (result.IsUpdate)
                                     UpdateTable(item, result, tableName);
 

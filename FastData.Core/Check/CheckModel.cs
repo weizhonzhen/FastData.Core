@@ -1,6 +1,6 @@
-using FastData.Core.Property;
-using FastData.Core.Model;
+﻿using FastData.Core.Model;
 using FastUntility.Core.Base;
+using FastData.Core.CacheModel;
 
 namespace FastData.Core.Check
 {
@@ -10,103 +10,70 @@ namespace FastData.Core.Check
         /// <summary>
         /// 比对model
         /// </summary>
-        /// <typeparam name="T">泛型</typeparam>
         /// <param name="CacheItem">缓存实体</param>
         /// <param name="modelItem">实体</param>
         /// <returns></returns>
-        public static CompareModel<T> CompareTo<T>(T CacheItem, T modelItem) where T : class, new()
+        public static CompareModel<ColumnModel> CompareTo(ColumnModel CacheItem, ColumnModel modelItem)
         {
-            var dynGet = new Property.DynamicGet<T>();
-            var dynSet = new Property.DynamicSet<T>();
-            var result = new CompareModel<T>();
-
+            var result = new CompareModel<ColumnModel>();
             result.Item = modelItem;
 
-            if (modelItem == null)
+            if (modelItem.Name.ToStr() == "")
             {
-                result.RemoveName.Add(dynGet.GetValue(CacheItem, "Name", true).ToStr());
+                result.RemoveName.Add(CacheItem.Name);
                 result.IsDelete = true;
                 return result;
             }
 
-            var type = dynGet.GetValue(modelItem, "DataType", true).ToStr();
-
+            var type = modelItem.DataType.ToStr();
             if (type == "")
-                type = dynGet.GetValue(CacheItem, "DataType", true).ToStr();
+                type = CacheItem.DataType.ToStr();
 
-            var name = dynGet.GetValue(modelItem, "Name", true).ToStr();
-
+            var name = modelItem.Name.ToStr();
             if (name == "")
             {
-                name = dynGet.GetValue(CacheItem, "Name", true).ToStr();
+                name = CacheItem.Name.ToStr();
                 result.Item = CacheItem;
             }
 
-            foreach (var info in PropertyCache.GetPropertyInfo<T>())
+            if (modelItem.IsKey != CacheItem.IsKey)
             {
-                var modelValue = dynGet.GetValue(modelItem, info.Name, true);
-                var cacheValue = dynGet.GetValue(CacheItem, info.Name, true);
-
-                dynSet.SetValue(result.Item, info.Name, modelValue, true);
-
-
-                if ((modelValue != null && cacheValue != null && modelValue.ToStr().ToLower() != cacheValue.ToStr().ToLower())
-                    || (modelValue == null && cacheValue != null) || (modelValue != null && cacheValue == null))
-                {
-                    result.IsUpdate = true;
-
-                    switch (info.Name)
-                    {
-                        case "IsKey":
-                            {
-                                if (!(bool)modelValue)
-                                    result.RemoveKey.Add(name);
-
-                                if ((bool)modelValue)
-                                    result.AddKey.Add(GetColumnType<T>(modelItem, type, name));
-                                break;
-                            }
-                        case "IsNull":
-                            {
-                                if (!(bool)modelValue)
-                                    result.RemoveNull.Add(GetColumnType<T>(modelItem, type, name));
-
-                                if ((bool)modelValue)
-                                    result.AddNull.Add(GetColumnType<T>(modelItem, type, name));
-                                break;
-                            }
-                        case "Name":
-                            {
-                                if (modelValue == null)
-                                    result.RemoveName.Add(name);
-
-                                if (modelValue != null)
-                                    result.AddName.Add(GetColumnType<T>(modelItem, type, name));
-                                break;
-                            }
-                        case "Length":
-                        case "Precision":
-                        case "Scale":
-                            {
-                                result.Type.Add(GetColumnType<T>(modelItem, type, name));
-                                break;
-                            }
-                        case "DataType":
-                            {
-                                result.Type.Add(GetColumnType<T>(modelItem, modelValue, name));
-                                break;
-                            }
-                        case "Comments":
-                            {
-                                result.Comments.Add(new ColumnComments { Comments = modelValue.ToStr(), Name = name, Type = GetColumnType<T>(modelItem, type, name) });
-                                break;
-                            }
-                        default:
-                            break;
-                    }
-                }
+                result.IsUpdate = true;
+                if (modelItem.IsKey)
+                    result.AddKey.Add(GetColumnType(modelItem, type, name));
+                else
+                    result.RemoveKey.Add(name);
             }
 
+            if (modelItem.IsNull != CacheItem.IsNull)
+            {
+                result.IsUpdate = true;
+                if (modelItem.IsNull)
+                    result.AddNull.Add(GetColumnType(modelItem, type, name));
+                else
+                    result.RemoveNull.Add(GetColumnType(modelItem, type, name));
+            }
+
+            if (modelItem.Name.ToStr().ToLower() != CacheItem.Name.ToStr().ToLower())
+            {
+                result.IsUpdate = true;
+                if (modelItem.Name.ToStr()=="")
+                    result.RemoveName.Add(name);
+                else
+                    result.AddName.Add(GetColumnType(modelItem, type, name));
+            }
+
+            if (modelItem.DataType.ToStr().ToLower() != CacheItem.DataType.ToStr().ToLower() || modelItem.Length != CacheItem.Length || modelItem.Precision != CacheItem.Precision || modelItem.Scale != CacheItem.Scale)
+            {
+                result.IsUpdate = true;
+                result.Type.Add(GetColumnType(modelItem, type, name));
+            }
+
+            if (modelItem.Comments.ToStr() != CacheItem.Comments.ToStr())
+            {
+                result.IsUpdate = true;
+                result.Comments.Add(new ColumnComments { Comments = modelItem.Comments, Name = name, Type = GetColumnType(modelItem, type, name) });
+            }
             return result;
         }
         #endregion
@@ -116,14 +83,12 @@ namespace FastData.Core.Check
         /// 获取列类型
         /// </summary>
         /// <returns></returns>
-        private static ColumnType GetColumnType<T>(T ModelItem, object ModelVaue, string name)
+        private static ColumnType GetColumnType(ColumnModel model, string type, string name)
         {
-            var dynGet = new Property.DynamicGet<T>();
             var item = new ColumnType();
             item.Name = name;
-            var type = ModelVaue.ToStr().ToLower();
 
-            switch (type)
+            switch (type.ToLower())
             {
                 case "char":
                 case "nchar":
@@ -131,14 +96,14 @@ namespace FastData.Core.Check
                 case "nvarchar":
                 case "varchar2":
                 case "nvarchar2":
-                    item.Length = dynGet.GetValue(ModelItem, "Length", true).ToStr().ToInt(0);
+                    item.Length = model.Length;
                     item.Type = type;
                     break;
                 case "decimal":
                 case "numeric":
                 case "number":
-                    item.Precision = dynGet.GetValue(ModelItem, "Precision", true).ToStr().ToInt(0);
-                    item.Scale = dynGet.GetValue(ModelItem, "Scale", true).ToStr().ToInt(0);
+                    item.Precision = model.Precision;
+                    item.Scale = model.Scale;
                     item.Type = type;
                     break;
                 default:
