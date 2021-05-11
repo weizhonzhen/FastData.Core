@@ -11,6 +11,7 @@ using FastData.Core.Type;
 using FastUntility.Core.Base;
 using System.Reflection;
 using FastData.Core.Context;
+using DbProviderFactories = FastData.Core.Base.DbProviderFactories;
 
 namespace FastData.Core.Check
 {
@@ -166,10 +167,10 @@ namespace FastData.Core.Check
                     var tempSql = "";
 
                     //删除主键
-                    var isKey = CheckKey(item, a.Name, tableName);
-                    if (isKey)
+                    var key = CheckKey(item, a.Name, tableName);
+                    if (key.Count>0)
                     {
-                        tempSql = string.Format("alter table {0} drop constraint pk_{0}_{1}", tableName, a.Name);
+                        tempSql = string.Format("alter table {0} drop constraint {1}", tableName, key.GetValue("pk"));
                         db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
                     }
 
@@ -186,7 +187,7 @@ namespace FastData.Core.Check
                     }
 
                     //增加主键
-                    if (isKey)
+                    if (key.Count > 0)
                     {
                         tempSql = string.Format("alter table {0} add constraint pk_{0}_{1} primary key ({1})", tableName, a.Name);
                         db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
@@ -198,10 +199,10 @@ namespace FastData.Core.Check
                     var tempSql = "";
 
                     //删除主键
-                    var isKey = CheckKey(item, a.Name, tableName);
-                    if (isKey)
+                    var key = CheckKey(item, a.Name, tableName);
+                    if (key.Count > 0)
                     {
-                        tempSql = string.Format("alter table {0} drop constraint pk_{0}_{1}", tableName, a.Name);
+                        tempSql = string.Format("alter table {0} drop constraint {1}", tableName, key.GetValue("pk"));
                         db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
                     }
 
@@ -218,7 +219,7 @@ namespace FastData.Core.Check
                     }
 
                     //增加主键
-                    if (isKey)
+                    if (key.Count > 0)
                     {
                         tempSql = string.Format("alter table {0} add constraint pk_{0}_{1} primary key ({1})", tableName, a.Name);
                         db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
@@ -227,7 +228,8 @@ namespace FastData.Core.Check
 
                 //删除主键
                 info.RemoveKey.ForEach(a => {
-                    var tempSql = string.Format("alter table {0} drop constraint pk_{0}_{1}", tableName, a);
+                    var key = CheckKey(item, a, tableName);
+                    var tempSql = string.Format("alter table {0} drop constraint {1}", tableName, key.GetValue("pk"));
                     db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
                 });
 
@@ -256,10 +258,10 @@ namespace FastData.Core.Check
                     if (!info.AddName.Exists(a => a.Name == p.Name))
                     {
                         //删除主键
-                        var isKey = CheckKey(item, p.Name, tableName);
-                        if (isKey)
+                        var key = CheckKey(item, p.Name, tableName);
+                        if (key.Count > 0)
                         {
-                            tempSql = string.Format("alter table {0} drop constraint pk_{0}_{1}", tableName, p.Name);
+                            tempSql = string.Format("alter table {0} drop constraint {1}", tableName, key.GetValue("pk"));
                             db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
                         }
 
@@ -276,7 +278,7 @@ namespace FastData.Core.Check
                         }
 
                         //增加主键
-                        if (isKey)
+                        if (key.Count > 0)
                         {
                             tempSql = string.Format("alter table {0} add constraint pk_{0}_{1} primary key ({1})", tableName, p.Name);
                             db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
@@ -390,7 +392,10 @@ namespace FastData.Core.Check
                 case "decimal":
                 case "numeric":
                 case "number":
-                    return string.Format("{0}({1},{2})", item.DataType, item.Precision, item.Scale);
+                    if (item.Precision == 0 && item.Scale == 0)
+                        return item.DataType;
+                    else
+                        return string.Format("{0}({1},{2})", item.DataType, item.Precision, item.Scale);
                 default:
                     return item.DataType;
             }
@@ -435,16 +440,9 @@ namespace FastData.Core.Check
         /// <returns></returns>
         private static string GetFieldKey(ColumnModel item)
         {
-            if (item.IsKey != null)
-            {
-                if ((bool)item.IsKey)
-                    return "not null";
-                else if (item.IsNull != null && !(bool)item.IsNull)
-                    return "not null";
-                else
-                    return "";
-            }
-            else if (item.IsNull != null && !(bool)item.IsNull)
+            if (item.IsKey)
+                return "not null";
+            else if (!item.IsNull)
                 return "not null";
             else
                 return "";
@@ -458,7 +456,7 @@ namespace FastData.Core.Check
         /// <param name="item"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        private static bool CheckKey(DataQuery item, string name, string tableName)
+        private static Dictionary<string,object> CheckKey(DataQuery item, string name, string tableName)
         {
             using (var db = new DataContext(item.Key))
             {
@@ -468,48 +466,51 @@ namespace FastData.Core.Check
                 if (item.Config.DbType == DataDbType.SqlServer)
                 {
                     var tempParam = DbProviderFactories.GetFactory(item.Config).CreateParameter();
-                    tempParam.ParameterName = "type";
-                    tempParam.Value = "pk";
+                    tempParam.ParameterName = "tableName";
+                    tempParam.Value = tableName.ToUpper();
                     param.Add(tempParam);
 
                     tempParam = DbProviderFactories.GetFactory(item.Config).CreateParameter();
-                    tempParam.ParameterName = "name";
-                    tempParam.Value = string.Format("pk_{0}_{1}", tableName, name);
+                    tempParam.ParameterName = "colName";
+                    tempParam.Value = name.ToUpper();
                     param.Add(tempParam);
 
-                    sql = "select count(0) count from sysobjects where xtype=@type and name=@name";
+                    sql = "select CONSTRAINT_NAME PK from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where upper(TABLE_NAME)=@tableName and upper(COLUMN_NAME)=@colName";
                 }
 
                 if (item.Config.DbType == DataDbType.Oracle)
                 {
                     var tempParam = DbProviderFactories.GetFactory(item.Config).CreateParameter();
-                    tempParam.ParameterName = "name";
-                    tempParam.Value = string.Format("PK_{0}_{1}", tableName.ToUpper(), name.ToUpper());
+                    tempParam.ParameterName = "tableName";
+                    tempParam.Value = tableName.ToUpper();
                     param.Add(tempParam);
 
                     tempParam = DbProviderFactories.GetFactory(item.Config).CreateParameter();
-                    tempParam.ParameterName = "type";
-                    tempParam.Value = "P";
+                    tempParam.ParameterName = "colName";
+                    tempParam.Value = name.ToUpper();
                     param.Add(tempParam);
 
-                    sql = "select count(0) count from user_constraints where constraint_name = :name and constraint_type=:type";
+                    sql = @"select a.CONSTRAINT_NAME PK from all_constraints a 
+                            inner join all_cons_columns b on a.TABLE_NAME=b.TABLE_NAME and a.CONSTRAINT_NAME=b.CONSTRAINT_NAME
+                            where a.table_name=:tableName and a.constraint_type = 'P' and b.COLUMN_NAME=:colName";
                 }
 
                 if (item.Config.DbType == DataDbType.MySql)
                 {
                     var tempParam = DbProviderFactories.GetFactory(item.Config).CreateParameter();
-                    tempParam.ParameterName = "name";
-                    tempParam.Value = string.Format("PK_{0}_{1}", tableName.ToUpper(), name.ToUpper());
+                    tempParam.ParameterName = "tableName";
+                    tempParam.Value = tableName.ToUpper();
                     param.Add(tempParam);
 
-                    sql = "select count(0) count from information_schema.columns where column_key=?name";
+                    tempParam = DbProviderFactories.GetFactory(item.Config).CreateParameter();
+                    tempParam.ParameterName = "colName";
+                    tempParam.Value = name.ToUpper();
+                    param.Add(tempParam);
+
+                    sql = "select constraint_name PK from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where upper(TABLE_NAME)=?tableName and constraint_name='PRIMARY' and upper(column_name)=?colName";
                 }
 
-                var count = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList[0]["count"].ToStr().ToInt(0);
-                if (count >= 1)
-                    return true;
-                else
-                    return false;
+               return db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList.First() ?? new Dictionary<string, object>();
             }
         }
         #endregion
