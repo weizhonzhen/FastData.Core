@@ -40,16 +40,12 @@ namespace FastData.Core.Check
 
                         if (model.Count >= table.Column.Count)
                         {
-                            model.ForEach(p => {
-                                var tempSql = new List<string>();
+                            model.ForEach(p =>
+                            {
                                 var info = table.Column.Find(a => a.Name.ToLower() == p.Name.ToLower()) ?? new ColumnModel();
                                 var result = CheckModel.CompareTo<ColumnModel>(info, p);
                                 if (result.IsUpdate)
-                                {
-                                    table.Column.Remove(p);
-                                    table.Column.Add(result.Item);
                                     UpdateTable(item, result, tableName);
-                                }
                             });
                         }
                         else
@@ -57,24 +53,14 @@ namespace FastData.Core.Check
                             var tempColumn = new List<ColumnModel>();
                             tempColumn = table.Column;
                             tempColumn.ForEach(p => {
-                                var tempSql = new List<string>();
                                 var info = table.Column.Find(a => a.Name.ToLower() == p.Name.ToLower()) ?? new ColumnModel();
                                 var result = CheckModel.CompareTo<ColumnModel>(p, info);
                                 if (result.IsUpdate)
-                                {
-                                    table.Column.Remove(p);
-                                    table.Column.Add(result.Item);
                                     UpdateTable(item, result, tableName);
-                                }
 
                                 if (result.IsDelete)
-                                {
-                                    model.Remove(p);
                                     UpdateTable(item, result, tableName);
-                                }
                             });
-
-                            table.Column = model;
                         }
 
                         var comments = PropertyCache.GetAttributesTableInfo(listAttribute);
