@@ -580,7 +580,8 @@ namespace FastData.Core.Check
 
                     var dicList = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList;
 
-                    dicList.ForEach(a => {
+                    dicList.ForEach(a =>
+                    {
                         var model = new ColumnModel();
                         model.Comments = a.GetValue("comments").ToStr();
                         model.DataType = a.GetValue("data_type").ToStr();
@@ -617,8 +618,9 @@ namespace FastData.Core.Check
                                       is_nullable,numeric_precision,numeric_scale from information_schema.columns c where upper(table_name)=?name order by ordinal_position asc");
 
                     var dicList = FastRead.ExecuteSql(sql, param.ToArray()) ?? new List<Dictionary<string, object>>();
-                    
-                    dicList.ForEach(a => {
+
+                    dicList.ForEach(a =>
+                    {
                         var model = new ColumnModel();
                         model.Comments = a.GetValue("column_comment").ToStr();
                         model.DataType = a.GetValue("data_type").ToStr();
@@ -659,7 +661,8 @@ namespace FastData.Core.Check
 
                     var dicList = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList;
 
-                    dicList.ForEach(a => {
+                    dicList.ForEach(a =>
+                    {
                         var model = new ColumnModel();
                         model.Comments = a.GetValue("value").ToStr();
                         model.DataType = a.GetValue("type").ToStr();
@@ -673,6 +676,13 @@ namespace FastData.Core.Check
                     });
                     #endregion
                 }
+
+                result.Column.ForEach(a =>
+                {
+                    if (a.DataType.ToLower() == "nchar" || a.DataType.ToLower() == "nvarchar" 
+                    || a.DataType.ToLower() == "nvarchar2" || a.DataType.ToLower() == "ntext" || a.DataType.ToLower() == "nclob")
+                        a.Length = a.Length / 2;
+                });
 
                 return result;
             }

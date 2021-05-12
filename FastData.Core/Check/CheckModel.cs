@@ -10,33 +10,33 @@ namespace FastData.Core.Check
         /// <summary>
         /// 比对model
         /// </summary>
-        /// <param name="CacheItem">缓存实体</param>
+        /// <param name="cacheItem">缓存实体</param>
         /// <param name="modelItem">实体</param>
         /// <returns></returns>
-        public static CompareModel<ColumnModel> CompareTo(ColumnModel CacheItem, ColumnModel modelItem)
+        public static CompareModel<ColumnModel> CompareTo(ColumnModel cacheItem, ColumnModel modelItem)
         {
             var result = new CompareModel<ColumnModel>();
             result.Item = modelItem;
 
             if (modelItem.Name.ToStr() == "")
             {
-                result.RemoveName.Add(CacheItem.Name);
+                result.RemoveName.Add(cacheItem.Name);
                 result.IsDelete = true;
                 return result;
             }
 
             var type = modelItem.DataType.ToStr();
             if (type == "")
-                type = CacheItem.DataType.ToStr();
+                type = cacheItem.DataType.ToStr();
 
             var name = modelItem.Name.ToStr();
             if (name == "")
             {
-                name = CacheItem.Name.ToStr();
-                result.Item = CacheItem;
+                name = cacheItem.Name.ToStr();
+                result.Item = cacheItem;
             }
 
-            if (modelItem.IsKey != CacheItem.IsKey)
+            if (modelItem.IsKey != cacheItem.IsKey)
             {
                 result.IsUpdate = true;
                 if (modelItem.IsKey)
@@ -45,7 +45,7 @@ namespace FastData.Core.Check
                     result.RemoveKey.Add(name);
             }
 
-            if (modelItem.IsNull != CacheItem.IsNull)
+            if (modelItem.IsNull != cacheItem.IsNull)
             {
                 result.IsUpdate = true;
                 if (modelItem.IsNull)
@@ -54,22 +54,48 @@ namespace FastData.Core.Check
                     result.RemoveNull.Add(GetColumnType(modelItem, type, name));
             }
 
-            if (modelItem.Name.ToStr().ToLower() != CacheItem.Name.ToStr().ToLower())
+            if (modelItem.Name.ToStr().ToLower() != cacheItem.Name.ToStr().ToLower())
             {
                 result.IsUpdate = true;
-                if (modelItem.Name.ToStr()=="")
+                if (modelItem.Name.ToStr() == "")
                     result.RemoveName.Add(name);
                 else
                     result.AddName.Add(GetColumnType(modelItem, type, name));
             }
 
-            if (modelItem.DataType.ToStr().ToLower() != CacheItem.DataType.ToStr().ToLower() || modelItem.Length != CacheItem.Length || modelItem.Precision != CacheItem.Precision || modelItem.Scale != CacheItem.Scale)
+            if (modelItem.DataType.ToLower() != cacheItem.DataType.ToLower())
             {
                 result.IsUpdate = true;
                 result.Type.Add(GetColumnType(modelItem, type, name));
             }
+            else
+                switch (modelItem.DataType.ToLower())
+                {
+                    case "char":
+                    case "nchar":
+                    case "varchar":
+                    case "nvarchar":
+                    case "varchar2":
+                    case "nvarchar2":
+                        if (modelItem.Length != cacheItem.Length)
+                        {
+                            result.IsUpdate = true;
+                            result.Type.Add(GetColumnType(modelItem, type, name));
+                        }
+                        break;
+                    case "decimal":
+                    case "numeric":
+                    case "number":
+                        if (modelItem.Precision != cacheItem.Precision || modelItem.Scale != cacheItem.Scale)
+                        {
+                            result.IsUpdate = true;
+                            result.Type.Add(GetColumnType(modelItem, type, name));
+                        }
+                        break;
+                }
 
-            if (modelItem.Comments.ToStr() != CacheItem.Comments.ToStr())
+
+            if (modelItem.Comments.ToStr() != cacheItem.Comments.ToStr())
             {
                 result.IsUpdate = true;
                 result.Comments.Add(new ColumnComments { Comments = modelItem.Comments, Name = name, Type = GetColumnType(modelItem, type, name) });
