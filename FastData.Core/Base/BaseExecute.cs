@@ -90,7 +90,7 @@ namespace FastData.Core.Base
                 var table = new StringBuilder();
                 var sb = new StringBuilder();
                 var param = new List<DbParameter>();
-                
+
                 table.Append(item.Table[0]);
                 for (var i = 1; i < item.Predicate.Count; i++)
                 {
@@ -99,7 +99,7 @@ namespace FastData.Core.Base
                     if (item.Predicate[i].Param.Count != 0)
                         param.AddRange(item.Predicate[i].Param);
                 }
-                                
+
                 if (item.Predicate[0].Param.Count != 0)
                     param.AddRange(item.Predicate[0].Param);
 
@@ -131,7 +131,7 @@ namespace FastData.Core.Base
                                         , pModel.StarId);
                     }
                     else
-                    { 
+                    {
                         sb.AppendFormat(@"select * from {3} 
                                     where rowid in(select rid from 
                                     (select rownum rn,rid from 
@@ -198,15 +198,13 @@ namespace FastData.Core.Base
                 sql = string.Format("count:{0},page:{1}", sql, ParameterToSql.ObjectParamToSql(param, sb.ToString(), item.Config));
                 return cmd.ExecuteReader();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (item.Config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException(item.Config, ex, "ToPageDataReader", "");
-                    else
-                        DbLog.LogException(true, item.Config.DbType, ex, "ToPageDataReader", "");
-                }).ConfigureAwait(false);
+                if (item.Config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(item.Config, ex, "ToPageDataReader", "");
+                else
+                    DbLog.LogException(true, item.Config.DbType, ex, "ToPageDataReader", "");
+
                 return null;
             }
         }
@@ -238,7 +236,7 @@ namespace FastData.Core.Base
                 if (item.Predicate[0].Param.Count != 0)
                     param.AddRange(item.Predicate[0].Param);
 
-                if(param.Count!=0)
+                if (param.Count != 0)
                     cmd.Parameters.AddRange(param.ToArray());
 
                 var dt = BaseExecute.ToDataTable(cmd, sql.ToString());
@@ -247,13 +245,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (item.Config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException(item.Config, ex, "ToPageCount", "");
-                    else
-                        DbLog.LogException(true, item.Config.DbType, ex, "ToPageCount", "");
-                }).ConfigureAwait(false);
+                if (item.Config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(item.Config, ex, "ToPageCount", "");
+                else
+                    DbLog.LogException(true, item.Config.DbType, ex, "ToPageCount", "");
 
                 return 0;
             }
@@ -274,20 +269,18 @@ namespace FastData.Core.Base
 
                 if (param != null)
                     cmd.Parameters.AddRange(param.ToArray());
-                
+
                 var dt = BaseExecute.ToDataTable(cmd, sql.ToString());
 
                 return int.Parse(dt.Rows[0][0].ToString());
             }
             catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException(config, ex, "ToPageCountSql", sql);
-                    else
-                        DbLog.LogException(config.IsOutError,config.DbType, ex, "ToPageCountSql", sql);
-                }).ConfigureAwait(false);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "ToPageCountSql", sql);
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "ToPageCountSql", sql);
+
                 return 0;
             }
         }
@@ -324,11 +317,11 @@ namespace FastData.Core.Base
                                     , sql, pModel.EndId, pModel.StarId);
 
                 if (config.DbType == DataDbType.PostgreSql)
-                    sql = string.Format("{0} limit {1} offset {2}"  , sql, pModel.PageSize, pModel.StarId);
+                    sql = string.Format("{0} limit {1} offset {2}", sql, pModel.PageSize, pModel.StarId);
 
                 if (config.DbType == DataDbType.SQLite)
                     sql = string.Format("{0} limit {1} offset {2}", sql, pModel.PageSize, pModel.StarId);
-                
+
                 tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
 
                 if (param != null)
@@ -340,13 +333,11 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException(config, ex, "ToPageDataReaderSql", "");
-                    else
-                        DbLog.LogException(config.IsOutError, config.DbType, ex, "ToPageDataReaderSql", "");
-                }).ConfigureAwait(false);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "ToPageDataReaderSql", "");
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "ToPageDataReaderSql", "");
+
                 return null;
             }
         }

@@ -931,7 +931,7 @@ namespace FastData.Core.Base
 
                                 i++;
                             }
-                            
+
                             //db
                             if (temp.Attributes["db"] != null)
                                 result.db.Add(tempKey, temp.Attributes["db"].Value.ToStr());
@@ -967,13 +967,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException(config, ex, "InstanceMap", "GetXmlList");
-                    else
-                        DbLog.LogException(true, "InstanceMap", ex, "GetXmlList", "");
-                }).ConfigureAwait(false);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "InstanceMap", "GetXmlList");
+                else
+                    DbLog.LogException(true, "InstanceMap", ex, "GetXmlList", "");
 
                 result.isSuccess = false;
                 return result;

@@ -27,7 +27,7 @@ namespace FastData.Core.Base
         /// <param name="sql">sql</param>
         /// <param name="oracleParam">参数</param>
         /// <returns></returns>
-        public static OptionModel UpdateToSql<T>(T model, ConfigModel config, Expression<Func<T, object>> field = null, DbCommand cmd=null)
+        public static OptionModel UpdateToSql<T>(T model, ConfigModel config, Expression<Func<T, object>> field = null, DbCommand cmd = null)
         {
             var result = new OptionModel();
             var dynGet = new DynamicGet<T>();
@@ -42,7 +42,8 @@ namespace FastData.Core.Base
                 if (field == null)
                 {
                     #region 属性
-                    pInfo.ForEach(a => {
+                    pInfo.ForEach(a =>
+                    {
                         result.Sql = string.Format("{2} {0}={1}{0},", a.Name, config.Flag, result.Sql);
                         var itemValue = dynGet.GetValue(model, a.Name, config.IsPropertyCache);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
@@ -55,7 +56,8 @@ namespace FastData.Core.Base
                 else
                 {
                     #region lambda
-                    (field.Body as NewExpression).Members.ToList().ForEach(a => {
+                    (field.Body as NewExpression).Members.ToList().ForEach(a =>
+                    {
                         result.Sql = string.Format("{2} {0}={1}{0},", a.Name, config.Flag, result.Sql);
                         var itemValue = dynGet.GetValue(model, a.Name, config.IsPropertyCache);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
@@ -66,7 +68,7 @@ namespace FastData.Core.Base
                     #endregion
                 }
 
-                foreach(var item in where)
+                foreach (var item in where)
                 {
                     if (result.Param.Exists(a => a.ParameterName == item))
                     {
@@ -85,15 +87,13 @@ namespace FastData.Core.Base
 
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
-                    else
-                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
-                }).ConfigureAwait(false);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
+                else
+                    DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
+
                 result.IsSuccess = false;
                 return result;
             }
@@ -121,7 +121,8 @@ namespace FastData.Core.Base
             {
                 sbName.AppendFormat("insert into {0} (", typeof(T).Name);
                 sbValue.Append(" values (");
-                PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache).ForEach(p => {
+                PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache).ForEach(p =>
+                {
                     if (!list.Exists(a => a.Name == p.Name))
                     {
                         sbName.AppendFormat("{0},", p.Name);
@@ -139,15 +140,13 @@ namespace FastData.Core.Base
                 result.IsSuccess = true;
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException<T>(config, ex, "InsertToSql<T>", result.Sql);
-                    else
-                        DbLog.LogException(config.IsOutError, config.DbType, ex, "InsertToSql<T>", result.Sql);
-                }).ConfigureAwait(false);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "InsertToSql<T>", result.Sql);
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "InsertToSql<T>", result.Sql);
+
                 result.IsSuccess = false;
                 return result;
             }
@@ -163,7 +162,7 @@ namespace FastData.Core.Base
         /// <param name="sql">sql</param>
         /// <param name="oracleParam">参数</param>
         /// <returns></returns>
-        public static OptionModel UpdateToSql<T>(DbCommand cmd,T model, ConfigModel config, Expression<Func<T, object>> field = null)
+        public static OptionModel UpdateToSql<T>(DbCommand cmd, T model, ConfigModel config, Expression<Func<T, object>> field = null)
         {
             var result = new OptionModel();
             var dynGet = new DynamicGet<T>();
@@ -223,7 +222,7 @@ namespace FastData.Core.Base
                 result.Sql = result.Sql.Substring(0, result.Sql.Length - 1);
 
                 var count = 1;
-                foreach(var  item in where)
+                foreach (var item in where)
                 {
                     var itemValue = dynGet.GetValue(model, item, config.IsPropertyCache);
 
@@ -245,7 +244,7 @@ namespace FastData.Core.Base
 
                     result.Param.Add(temp);
 
-                    count ++;
+                    count++;
                 }
 
                 result.IsSuccess = true;
@@ -254,13 +253,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
-                    else
-                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
-                }).ConfigureAwait(false);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
+                else
+                    DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateToSql<T>", result.Sql);
                 result.IsSuccess = false;
                 return result;
             }
@@ -276,7 +272,7 @@ namespace FastData.Core.Base
         /// <param name="sql">sql</param>
         /// <param name="oracleParam">参数</param>
         /// <returns></returns>
-        public static OptionModel UpdateListToSql<T>(DbCommand cmd,List<T> list, ConfigModel config, Expression<Func<T, object>> field = null)
+        public static OptionModel UpdateListToSql<T>(DbCommand cmd, List<T> list, ConfigModel config, Expression<Func<T, object>> field = null)
         {
             var dynGet = new DynamicGet<T>();
             var result = new OptionModel();
@@ -292,7 +288,7 @@ namespace FastData.Core.Base
 
             try
             {
-                result.table = BaseExecute.ToDataTable<T>(cmd,config, where, field);
+                result.table = BaseExecute.ToDataTable<T>(cmd, config, where, field);
 
                 result.Sql = string.Format("update {0} set", typeof(T).Name);
                 var pInfo = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
@@ -307,7 +303,7 @@ namespace FastData.Core.Base
                         result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = item.Name;
-                        temp.SourceColumn = item.Name;                           
+                        temp.SourceColumn = item.Name;
                         result.Param.Add(temp);
                     }
                     #endregion
@@ -331,7 +327,8 @@ namespace FastData.Core.Base
                 result.Sql = result.Sql.Substring(0, result.Sql.Length - 1);
 
                 var count = 1;
-                where.ForEach(a => {
+                where.ForEach(a =>
+                {
                     if (count == 1)
                         result.Sql = string.Format("{2} where {0}={1}{0} ", a, config.Flag, result.Sql);
                     else
@@ -346,21 +343,25 @@ namespace FastData.Core.Base
 
                 result.IsSuccess = true;
 
-                list.ForEach(p => {
+                list.ForEach(p =>
+                {
                     var row = result.table.NewRow();
-                    where.ForEach(a => {
+                    where.ForEach(a =>
+                    {
                         row[a] = dynGet.GetValue(p, a, true);
                     });
 
                     if (field == null)
                     {
-                        PropertyCache.GetPropertyInfo<T>().ForEach(a => {
+                        PropertyCache.GetPropertyInfo<T>().ForEach(a =>
+                        {
                             row[a.Name] = dynGet.GetValue(p, a.Name, true);
                         });
                     }
                     else
                     {
-                        (field.Body as NewExpression).Members.ToList().ForEach(a => {
+                        (field.Body as NewExpression).Members.ToList().ForEach(a =>
+                        {
                             row[a.Name] = dynGet.GetValue(p, a.Name, true);
                         });
                     }
@@ -372,13 +373,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException<T>(config, ex, "UpdateListToSql<T>", result.Sql);
-                    else
-                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateListToSql<T>", result.Sql);
-                }).ConfigureAwait(false);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "UpdateListToSql<T>", result.Sql);
+                else
+                    DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateListToSql<T>", result.Sql);
                 result.IsSuccess = false;
                 return result;
             }
@@ -430,7 +428,7 @@ namespace FastData.Core.Base
                         result.Sql = string.Format("{2} and {0}={1}{0} ", item, config.Flag, result.Sql);
 
                     var temp = DbProviderFactories.GetFactory(config).CreateParameter();
-                    temp.ParameterName =  item;
+                    temp.ParameterName = item;
                     temp.Value = itemValue == null ? DBNull.Value : itemValue;
 
                     result.Param.Add(temp);
@@ -444,13 +442,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Run(() =>
-                {
-                    if (config.SqlErrorType == SqlErrorType.Db)
-                        DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
-                    else
-                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "DeleteToSql<T>", result.Sql);
-                }).ConfigureAwait(false);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "UpdateToSql<T>", result.Sql);
+                else
+                    DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "DeleteToSql<T>", result.Sql);
                 result.IsSuccess = false;
                 return result;
             }

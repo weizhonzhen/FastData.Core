@@ -69,13 +69,11 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() =>
-                {
-                    if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
-                        DbLogTable.LogException<T>(config, ex, "LambdaWhere<T>", "");
-                    else
-                        DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "LambdaWhere<T>", "");
-                });
+                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "LambdaWhere<T>", "");
+                else
+                    DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "LambdaWhere<T>", "");
+
                 result.IsSuccess = false;
                 return result;
             }
