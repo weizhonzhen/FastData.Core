@@ -45,7 +45,7 @@ namespace FastData.Core.Check
                     result.RemoveKey.Add(name);
             }
 
-            if (modelItem.IsNull != cacheItem.IsNull)
+            if (modelItem.IsNull != cacheItem.IsNull && !modelItem.IsKey)
             {
                 result.IsUpdate = true;
                 if (modelItem.IsNull)
