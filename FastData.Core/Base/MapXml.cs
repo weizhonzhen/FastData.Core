@@ -388,6 +388,13 @@ namespace FastData.Core.Base
                 }
                 param = tempParam.ToArray();
             }
+
+            if (!sql.ToString().Contains(flag))
+            {
+                tempParam.Clear();
+                param = tempParam.ToArray();
+            }
+
             return sql.ToString();
         }
         #endregion
