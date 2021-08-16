@@ -30,8 +30,7 @@ in Startup.cs Startup mothod
             a.aop = new TestAop();
             });
   
-  //aop
-  public class TestAop : FastData.Core.Aop.IFastAop
+   public class TestAop : FastData.Core.Aop.IFastAop
     {
         public void After(AfterContext context)
         {
