@@ -23,6 +23,25 @@ in Startup.cs Startup mothod
             //old pagepackages init map cache by Resource （xml file， db.json， map.json）
             FastData.Core.FastMap.InstanceMapResource("dbKey", "db.json", "map.json");
             
+               public class TestAop : FastData.Core.Aop.IFastAop
+                {
+                    public void After(AfterContext context)
+                    {
+                        throw new NotImplementedException();
+                    }
+
+                    public void Before(BeforeContext context)
+                    {
+                        throw new NotImplementedException();
+                    }
+
+                    public void Map(MapContext context)
+                    {
+                        return;
+                        throw new NotImplementedException();
+                    }
+                }
+            
             //new pagepackages
             services.AddFastData(new ConfigData { mapFile = "map.json", dbKey = "dbkey", IsResource = true, dbFile = "db.json",NamespaceProperties = "DataModel." });
                or
