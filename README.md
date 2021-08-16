@@ -26,7 +26,29 @@ in Startup.cs Startup mothod
             //new pagepackages
             services.AddFastData(new ConfigData { mapFile = "map.json", dbKey = "dbkey", IsResource = true, dbFile = "db.json",NamespaceProperties = "DataModel." });
                or
-            services.AddFastData(a=> { a.mapFile = "map.json"; a.dbKey = "dbkey"; a.IsResource = true; a.dbFile = "db.json"; a.NamespaceProperties = "DataModel."; });
+            services.AddFastData(a=> { a.mapFile = "map.json"; a.dbKey = "dbkey"; a.IsResource = true; a.dbFile = "db.json"; a.NamespaceProperties = "DataModel."; 
+            a.aop = new TestAop();
+            });
+  
+  //aop
+  public class TestAop : FastData.Core.Aop.IFastAop
+    {
+        public void After(AfterContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Before(BeforeContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Map(MapContext context)
+        {
+            return;
+            throw new NotImplementedException();
+        }
+    }
   
 in db.json         
 ```csharp
