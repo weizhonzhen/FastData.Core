@@ -1,4 +1,5 @@
 ﻿using FastData.Core;
+using FastData.Core.Aop;
 using FastData.Core.Repository;
 using FastUntility.Core;
 using System;
@@ -22,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst) && config.IsResource)
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
-            else if(config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
+            else if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile);
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties))
@@ -38,7 +39,12 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             serviceCollection.AddTransient<IFastRepository, FastRepository>();
+
+            if (config.aop != null)
+                serviceCollection.AddSingleton<IFastAop>(config.aop);
+
             ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
+           
             return serviceCollection;
         }
     }
@@ -58,5 +64,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public string dbFile { get; set; } = "db.json";
 
         public string mapFile { get; set; } = "map.json";
+
+        public IFastAop aop { get; set; }
     }
 }
