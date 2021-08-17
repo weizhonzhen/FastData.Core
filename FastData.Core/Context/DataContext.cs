@@ -85,6 +85,18 @@ namespace FastData.Core.Context
             }
         }
 
+        /// <summary>
+        /// aop Exception
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="name"></param>
+        private void AopException(Exception ex, string name)
+        {
+            var aop = FastUntility.Core.ServiceContext.Engine.Resolve<IFastAop>();
+            if (aop != null)
+                aop.Exception(ex, name);
+        }
+
 
         /// <summary>
         /// dispose parameter
@@ -137,6 +149,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "DataContext :"+ key);
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "DataContext", "");
                 else
@@ -221,6 +234,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to List tableName:" + typeof(T).Name);
                 if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
                     DbLogTable.LogException<T>(config, ex, "GetList<T>", "");
                 else
@@ -279,6 +293,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to Page tableName:" + typeof(T).Name);
                 if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
                     DbLogTable.LogException<T>(config, ex, "GetPage<T>", "");
                 else
@@ -338,6 +353,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to Page ");
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "GetPage", result.Sql);
                 else
@@ -397,6 +413,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to Page sql");
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "GetPageSql", result.Sql);
                 else
@@ -456,6 +473,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to Page tableName:"+ typeof(T).Name);
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException<T>(config, ex, "GetPageSql", result.sql);
                 else
@@ -539,6 +557,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to Json");
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "GetJson", result.Sql);
                 else
@@ -607,6 +626,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to Count");
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "GetCount", result.Sql);
                 else
@@ -650,6 +670,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "ExecuteSql tableName:" +typeof(T).Name);
                 if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
                     DbLogTable.LogException<T>(config, ex, "ExecuteSql<T>", "");
                 else
@@ -697,6 +718,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Excute Sql");
                 result.writeReturn.IsSuccess = false;
                 result.writeReturn.Message = ex.Message;
 
@@ -793,6 +815,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to Dic");
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "GetDic", result.Sql);
                 else
@@ -875,6 +898,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "to DataTable");
                 if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "GetDataTable", result.Sql);
                 else
@@ -932,6 +956,8 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Delete by Lambda tableName" + typeof(T).Name);
+
                 if (isTrans)
                     RollbackTrans();
 
@@ -994,6 +1020,8 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Delete by Primary Key tableName" + typeof(T).Name);
+
                 if (isTrans)
                     RollbackTrans();
 
@@ -1072,6 +1100,8 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Update by Lambda tableName:"+ typeof(T).Name);
+
                 if (isTrans)
                     RollbackTrans();
 
@@ -1136,6 +1166,8 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Update by Primary Key tableName:"+typeof(T).Name);
+
                 if (isTrans)
                     RollbackTrans();
 
@@ -1213,6 +1245,8 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Update List tableName:"+typeof(T).Name);
+
                 if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
                     DbLogTable.LogException<T>(config, ex, "UpdateList<T>", "");
                 else
@@ -1274,6 +1308,8 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Add tableName: "+ typeof(T).Name);
+
                 if (isTrans)
                     RollbackTrans();
 
@@ -1453,6 +1489,8 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Add List tableName:"+typeof(T).Name);
+
                 if (IsTrans)
                     RollbackTrans();
 
@@ -1507,6 +1545,8 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
+                AopException(ex, "Excute Sql");
+
                 if (isTrans)
                     RollbackTrans();
 
