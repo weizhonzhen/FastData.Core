@@ -12,6 +12,7 @@ using FastUntility.Core.Base;
 using System.Reflection;
 using FastData.Core.Context;
 using DbProviderFactories = FastData.Core.Base.DbProviderFactories;
+using FastData.Core.Aop;
 
 namespace FastData.Core.Check
 {
@@ -81,6 +82,10 @@ namespace FastData.Core.Check
             }
             catch (Exception ex)
             {
+                var aop = FastUntility.Core.ServiceContext.Engine.Resolve<IFastAop>();
+                if (aop != null)
+                    aop.Exception(ex, "Code First table ： " + tableName);
+
                 DbLog.LogException(item.Config.IsOutError, item.Config.DbType, ex, string.Format("Check_{0}", tableName), "");
             }
         }
