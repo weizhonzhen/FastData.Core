@@ -37,7 +37,11 @@ in Startup.cs Startup mothod
 
                     public void Map(MapContext context)
                     {
-                        return;
+                        throw new NotImplementedException();
+                    }
+                    
+                     public void Exception(Exception ex, string name)
+                    {
                         throw new NotImplementedException();
                     }
                 }
