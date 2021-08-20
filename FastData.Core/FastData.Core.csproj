@@ -1,31 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>orm(db first,code frist) for sqlserver mysql etl.
-https://github.com/weizhonzhen/FastData.Core</Description>
-    <Version>1.0.1</Version>
+    <Description>orm(db first,code frist) for sqlserver mysql etl.
+https://github.com/weizhonzhen/FastData.Core
+</Description>
+    <Version>2.5.4.2</Version>
+    <PackageId>Fast.Data.Core</PackageId>
+    <Authors>Fast.Data.Core</Authors>
+    <Company>Fast.Data.Core</Company>
+    <PackageIconUrl>https://en.gravatar.com/userimage/151376774/1cba1ca23219db268cc5ed8abde11775.png</PackageIconUrl>
+    <PackageReleaseNotes>add by log</PackageReleaseNotes>
+    <RepositoryUrl>https://en.gravatar.com/userimage/151376774/1cba1ca23219db268cc5ed8abde11775.png</RepositoryUrl>
   </PropertyGroup>
-
   <ItemGroup>
-    <Compile Remove="Context\WriteContext.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Model\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.8.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.2.1" />
     <PackageReference Include="System.CodeDom" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\FastRedis.Core\FastRedis.Core.csproj" />
     <ProjectReference Include="..\FastUntility.Core\FastUntility.Core.csproj" />
   </ItemGroup>
-
 </Project>

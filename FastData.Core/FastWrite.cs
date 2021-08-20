@@ -402,7 +402,7 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static WriteReturn ExecuteSql(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static WriteReturn ExecuteSql(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false,bool isAop=true)
         {
             ConfigModel config = null;
             var result = new DataReturn();
@@ -414,13 +414,13 @@ namespace FastData.Core
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.ExecuteSql(sql, param, false);
+                    result = tempDb.ExecuteSql(sql, param, false, false, false,false);
                     config = tempDb.config;
                 }
             }
             else
             {
-                result = db.ExecuteSql(sql, param, false);
+                result = db.ExecuteSql(sql, param, false, false, false,false);
                 config = db.config;
             }
 

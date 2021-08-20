@@ -706,7 +706,7 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static List<T> ExecuteSql<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
+        public static List<T> ExecuteSql<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false,bool isAop=true) where T : class, new()
         {
             ConfigModel config = null;
             var result = new DataReturn<T>();
@@ -946,7 +946,7 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static List<Dictionary<string, object>> ExecuteSql(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static List<Dictionary<string, object>> ExecuteSql(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false,bool isAop=true)
         {
             ConfigModel config = null;
             var result = new DataReturn();
@@ -958,13 +958,13 @@ namespace FastData.Core
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.ExecuteSql(sql, param, false);
+                    result = tempDb.ExecuteSql(sql, param, false,isAop);
                     config = tempDb.config;
                 }
             }
             else
             {
-                result = db.ExecuteSql(sql, param, false);
+                result = db.ExecuteSql(sql, param, false,isAop);
                 config = db.config;
             }
 
