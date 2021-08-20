@@ -84,7 +84,13 @@ namespace FastData.Core.Check
             {
                 var aop = FastUntility.Core.ServiceContext.Engine.Resolve<IFastAop>();
                 if (aop != null)
-                    aop.Exception(ex, "Code First table ： " + tableName);
+                {
+                    var context = new ExceptionContext();
+                    context.ex = ex;
+                    context.name = "Code First table ： " + tableName;
+                    context.type = AopType.CodeFirst;
+                    aop.Exception(context);
+                }
 
                 DbLog.LogException(item.Config.IsOutError, item.Config.DbType, ex, string.Format("Check_{0}", tableName), "");
             }
@@ -119,13 +125,13 @@ namespace FastData.Core.Check
                 });
 
                 sql.Append(")");
-                db.ExecuteSql(sql.ToString(), null, false, item.Config.IsOutSql);
+                db.ExecuteSql(sql.ToString(), null, false, item.Config.IsOutSql,false,false);
 
                 //主键
                 key.ForEach(a => {
                     sql = new StringBuilder();
                     sql.AppendFormat("alter table {0} add constraint pk_{0}_{1} primary key ({1})", tableName, a);
-                    db.ExecuteSql(sql.ToString(), null, false, item.Config.IsOutSql);
+                    db.ExecuteSql(sql.ToString(), null, false, item.Config.IsOutSql,false,false);
                 });
 
                 info.ForEach(a => {
@@ -149,7 +155,7 @@ namespace FastData.Core.Check
                 //add colunm
                 info.AddName.ForEach(a => {
                     var tempSql = string.Format("alter table {0} add {1} {2}", tableName, a.Name, GetFieldType(a));
-                    db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                    db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false,false);
                 });
 
                 //修改列不为空
@@ -161,26 +167,26 @@ namespace FastData.Core.Check
                     if (key.Count>0)
                     {
                         tempSql = string.Format("alter table {0} drop constraint {1}", tableName, key.GetValue("pk"));
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
 
                     if (item.Config.DbType == DataDbType.SqlServer)
                     {
                         tempSql = string.Format("alter table {0} alter column {1} {2} not null", tableName, a.Name, GetFieldType(a));
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
 
                     if (item.Config.DbType == DataDbType.MySql || item.Config.DbType == DataDbType.Oracle)
                     {
                         tempSql = string.Format("alter table {0} modify {1} {2} not null", tableName, a.Name, GetFieldType(a));
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
 
                     //增加主键
                     if (key.Count > 0)
                     {
                         tempSql = string.Format("alter table {0} add constraint pk_{0}_{1} primary key ({1})", tableName, a.Name);
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
                 });
 
@@ -193,26 +199,26 @@ namespace FastData.Core.Check
                     if (key.Count > 0)
                     {
                         tempSql = string.Format("alter table {0} drop constraint {1}", tableName, key.GetValue("pk"));
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
 
                     if (item.Config.DbType == DataDbType.SqlServer)
                     {
                         tempSql = string.Format("alter table {0} alter column {1} {2} null", tableName, a.Name, GetFieldType(a));
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
 
                     if (item.Config.DbType == DataDbType.MySql || item.Config.DbType == DataDbType.Oracle)
                     {
                         tempSql = string.Format("alter table {0} modify {1} {2} null", tableName, a.Name, GetFieldType(a));
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
 
                     //增加主键
                     if (key.Count > 0)
                     {
                         tempSql = string.Format("alter table {0} add constraint pk_{0}_{1} primary key ({1})", tableName, a.Name);
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
                 });
 
@@ -220,7 +226,7 @@ namespace FastData.Core.Check
                 info.RemoveKey.ForEach(a => {
                     var key = CheckKey(item, a, tableName);
                     var tempSql = string.Format("alter table {0} drop constraint {1}", tableName, key.GetValue("pk"));
-                    db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                    db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                 });
 
                 //增加主键
@@ -229,17 +235,17 @@ namespace FastData.Core.Check
                     if (item.Config.DbType == DataDbType.SqlServer)
                     {
                         tempSql = string.Format("alter table {0} alter column {1} {2} not null", tableName, a.Name, GetFieldType(a));
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
 
                     if (item.Config.DbType == DataDbType.MySql || item.Config.DbType == DataDbType.Oracle)
                     {
                         tempSql = string.Format("alter table {0} modify {1} {2} not null", tableName, a.Name, GetFieldType(a));
-                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                        db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                     }
 
                     tempSql = string.Format("alter table {0} add constraint pk_{0}_{1} primary key ({1})", tableName, a.Name);
-                    db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                    db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                 });
 
                 //修改列
@@ -252,26 +258,26 @@ namespace FastData.Core.Check
                         if (key.Count > 0)
                         {
                             tempSql = string.Format("alter table {0} drop constraint {1}", tableName, key.GetValue("pk"));
-                            db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                            db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                         }
 
                         if (item.Config.DbType == DataDbType.SqlServer)
                         {
                             tempSql = string.Format("alter table {0} alter column {1} {2}", tableName, p.Name, GetFieldType(p));
-                            db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                            db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                         }
 
                         if (item.Config.DbType == DataDbType.MySql || item.Config.DbType == DataDbType.Oracle)
                         {
                             tempSql = string.Format("alter table {0} modify {1} {2}", tableName, p.Name, GetFieldType(p));
-                            db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                            db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                         }
 
                         //增加主键
                         if (key.Count > 0)
                         {
                             tempSql = string.Format("alter table {0} add constraint pk_{0}_{1} primary key ({1})", tableName, p.Name);
-                            db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                            db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql,false, false);
                         }
                     }
                 });
@@ -279,7 +285,7 @@ namespace FastData.Core.Check
                 //删除列
                 info.RemoveName.ForEach(a => {
                     var tempSql = string.Format("alter table {0} drop column {1}", tableName, a);
-                    db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql);
+                    db.ExecuteSql(tempSql, null, false, item.Config.IsOutSql, false, false);
                 });
 
                 //修改列备注
@@ -311,14 +317,14 @@ namespace FastData.Core.Check
                 if (item.Config.DbType == DataDbType.SqlServer)
                 {
                     sql = string.Format("select count(0) count from sys.extended_properties where object_id('{0}')=major_id and minor_id=0", tableName);
-                    var count = db.ExecuteSql(sql).DicList[0]["count"].ToStr().ToInt(0);
+                    var count = db.ExecuteSqlList(sql,null,item.Config.IsOutSql,false).DicList[0]["count"].ToStr().ToInt(0);
                     if (count >= 1)
                         sql = string.Format("execute sp_updateextendedproperty N'MS_Description', '{0}', N'user', N'dbo', N'table', N'{1}', NULL, NULL", value, tableName);
                     else
                         sql = string.Format("execute sp_addextendedproperty N'MS_Description', '{0}', N'user', N'dbo', N'table', N'{1}', NULL, NULL", value, tableName);
                 }
 
-                db.ExecuteSql(sql, null, false, item.Config.IsOutSql);
+                db.ExecuteSql(sql, null, false, item.Config.IsOutSql,false,false);
             }
         }
         #endregion
@@ -349,7 +355,7 @@ namespace FastData.Core.Check
                                     and exists(select 1 from sys.extended_properties where object_id('{0}')=major_id and colid=minor_id)"
                                           , tableName, name);
 
-                    var count = db.ExecuteSql(sql).DicList[0]["count"].ToStr().ToInt(0);
+                    var count = db.ExecuteSqlList(sql,null,item.Config.IsOutSql,false).DicList[0]["count"].ToStr().ToInt(0);
 
                     if (count >= 1)
                         sql = string.Format("execute sp_updateextendedproperty N'MS_Description', '{0}', N'user', N'dbo', N'table', N'{1}', N'column', {2}", value, tableName, name);
@@ -357,7 +363,7 @@ namespace FastData.Core.Check
                         sql = string.Format("execute sp_addextendedproperty N'MS_Description', '{0}', N'user', N'dbo', N'table', N'{1}', N'column', {2}", value, tableName, name);
                 }
 
-                db.ExecuteSql(sql, null, false, item.Config.IsOutSql);
+                db.ExecuteSql(sql, null, false, item.Config.IsOutSql,false,false);
             }
         }
         #endregion
@@ -500,7 +506,7 @@ namespace FastData.Core.Check
                     sql = "select constraint_name PK from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where upper(TABLE_NAME)=?tableName and constraint_name='PRIMARY' and upper(column_name)=?colName";
                 }
 
-               return db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList.First() ?? new Dictionary<string, object>();
+               return db.ExecuteSqlList(sql, param.ToArray(), item.Config.IsOutSql,false).DicList.First() ?? new Dictionary<string, object>();
             }
         }
         #endregion
@@ -527,19 +533,19 @@ namespace FastData.Core.Check
                 if (query.Config.DbType == DataDbType.Oracle)
                 {
                     var sql = "select count(0) count from user_tables where table_name=:name";
-                    result = db.ExecuteSql(sql, param.ToArray(), query.Config.IsOutSql).DicList[0].GetValue("count").ToStr().ToInt(0) == 1;
+                    result = db.ExecuteSqlList(sql, param.ToArray(), query.Config.IsOutSql, false).DicList[0].GetValue("count").ToStr().ToInt(0) == 1;
                 }
 
                 if (query.Config.DbType == DataDbType.SqlServer)
                 {
                     var sql = "select count(0) count from dbo.sysobjects where upper(name)=@name";
-                    result = db.ExecuteSql(sql, param.ToArray(), query.Config.IsOutSql).DicList[0].GetValue("count").ToStr().ToInt(0) == 1;
+                    result = db.ExecuteSqlList(sql, param.ToArray(), query.Config.IsOutSql, false).DicList[0].GetValue("count").ToStr().ToInt(0) == 1;
                 }
 
                 if (query.Config.DbType == DataDbType.MySql)
                 {
                     var sql = "select count(0) count from information_schema.tables where upper(table_name)=?name";
-                    result = db.ExecuteSql(sql, param.ToArray(), query.Config.IsOutSql).DicList[0].GetValue("count").ToStr().ToInt(0) == 1;
+                    result = db.ExecuteSqlList(sql, param.ToArray(), query.Config.IsOutSql, false).DicList[0].GetValue("count").ToStr().ToInt(0) == 1;
                 }
 
                 return result;
@@ -571,7 +577,7 @@ namespace FastData.Core.Check
 
                     //表
                     var sql = "select a.table_name,comments from user_tables a inner join user_tab_comments b on a.TABLE_NAME = b.TABLE_NAME  and a.table_name = :name";
-                    var dic = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList[0];
+                    var dic = db.ExecuteSqlList(sql, param.ToArray(), item.Config.IsOutSql, false).DicList[0];
 
                     result.Name = dic.GetValue("table_name").ToStr();
                     result.Comments = dic.GetValue("comments").ToStr();
@@ -583,7 +589,7 @@ namespace FastData.Core.Check
                                      from user_tab_columns a inner join user_col_comments b
                                      on a.table_name =:name and a.table_name = b.table_name and a.column_name = b.column_name order by a.column_id asc");
 
-                    var dicList = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList;
+                    var dicList = db.ExecuteSqlList(sql, param.ToArray(), item.Config.IsOutSql, false).DicList;
 
                     dicList.ForEach(a =>
                     {
@@ -612,7 +618,7 @@ namespace FastData.Core.Check
 
                     //表
                     var sql = "select table_name,table_comment count from information_schema.tables where upper(table_name)=?name";
-                    var dic = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList[0];
+                    var dic = db.ExecuteSqlList(sql, param.ToArray(), item.Config.IsOutSql, false).DicList[0];
 
                     result.Name = dic.GetValue("table_name").ToStr();
                     result.Comments = dic.GetValue("table_comment").ToStr();
@@ -622,7 +628,7 @@ namespace FastData.Core.Check
                                      (select count(0) from INFORMATION_SCHEMA.KEY_COLUMN_USAGE a where upper(TABLE_NAME)=?name and constraint_name='PRIMARY' and c.column_name=a.column_name) iskey,
                                       is_nullable,numeric_precision,numeric_scale from information_schema.columns c where upper(table_name)=?name order by ordinal_position asc");
 
-                    var dicList = FastRead.ExecuteSql(sql, param.ToArray()) ?? new List<Dictionary<string, object>>();
+                    var dicList = db.ExecuteSqlList(sql, param.ToArray(),item.Config.IsOutSql,false).DicList ?? new List<Dictionary<string, object>>();
 
                     dicList.ForEach(a =>
                     {
@@ -651,7 +657,7 @@ namespace FastData.Core.Check
 
                     //表
                     var sql = "select name,(select top 1 value from sys.extended_properties where major_id=object_id(a.name) and minor_id=0) as value from sys.objects a where type = 'U'and upper(name) = @name";
-                    var dic = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList[0];
+                    var dic = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql, false,false).DicList[0];
 
                     result.Name = dic.GetValue("name").ToStr();
                     result.Comments = dic.GetValue("value").ToStr();
@@ -664,7 +670,7 @@ namespace FastData.Core.Check
                                     on major_id = id and minor_id = colid and b.name ='MS_Description' 
                                     where a.id=object_id('@name') order by a.colid asc");
 
-                    var dicList = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql).DicList;
+                    var dicList = db.ExecuteSqlList(sql, param.ToArray(), item.Config.IsOutSql, false).DicList;
 
                     dicList.ForEach(a =>
                     {
