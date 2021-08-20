@@ -25,24 +25,29 @@ in Startup.cs Startup mothod
             
                public class TestAop : FastData.Core.Aop.IFastAop
                 {
-                    public void After(AfterContext context)
+                   public void After(AfterContext context)
                     {
-                        throw new NotImplementedException();
+                        //throw new NotImplementedException();
                     }
 
                     public void Before(BeforeContext context)
                     {
-                        throw new NotImplementedException();
+                        //throw new NotImplementedException();
                     }
 
-                    public void Map(MapContext context)
+                    public void Exception(ExceptionContext context)
                     {
-                        throw new NotImplementedException();
+                       // throw new NotImplementedException();
                     }
-                    
-                     public void Exception(Exception ex, string name)
+
+                    public void MapAfter(MapAfterContext context)
                     {
-                        throw new NotImplementedException();
+                        //throw new NotImplementedException();
+                    }
+
+                    public void MapBefore(MapBeforeContext context)
+                    {
+                      //  throw new NotImplementedException();
                     }
                 }
             
