@@ -4,12 +4,14 @@ namespace FastData.Core.Aop
 {
     public interface IFastAop
     {
-        void Map(MapContext context);
+        void MapBefore(MapBeforeContext context);
+
+        void MapAfter(MapAfterContext context);
 
         void Before(BeforeContext context);
 
         void After(AfterContext context);
 
-        void Exception(Exception ex,string name);
+        void Exception(ExceptionContext context);
     }
 }

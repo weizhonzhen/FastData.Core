@@ -16,5 +16,7 @@ namespace FastData.Core.Aop
         public bool isRead { get; set; } = false;
 
         public bool isWrite { get; set; } = false;
+
+        public AopType type { get; set; }
     }
 }
