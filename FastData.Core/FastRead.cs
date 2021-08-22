@@ -958,13 +958,13 @@ namespace FastData.Core
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.ExecuteSql(sql, param, false,isAop);
+                    result = tempDb.ExecuteSqlList(sql, param, false,isAop);
                     config = tempDb.config;
                 }
             }
             else
             {
-                result = db.ExecuteSql(sql, param, false,isAop);
+                result = db.ExecuteSqlList(sql, param, false,isAop);
                 config = db.config;
             }
 
