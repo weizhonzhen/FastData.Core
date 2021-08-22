@@ -528,7 +528,7 @@ namespace FastData.Core.Base
                             param.Add(tempParam);
                         }
 
-                        var tempData = db.ExecuteSql(sql, param.ToArray(), false);
+                        var tempData = db.ExecuteSqlList(sql, param.ToArray(), false,false);
 
                         foreach (var temp in tempData.DicList)
                         {
@@ -983,7 +983,13 @@ namespace FastData.Core.Base
                     DbLog.LogException(true, "InstanceMap", ex, "GetXmlList", "");
 
                 if (aop != null)
-                    aop.Exception(ex, path + "Parsing xml");
+                {
+                    var context = new ExceptionContext();
+                    context.ex = ex;
+                    context.name = "Parsing xml";
+                    context.type = AopType.ParsingXml;
+                    aop.Exception(context);
+                }
 
                 result.isSuccess = false;
                 return result;
