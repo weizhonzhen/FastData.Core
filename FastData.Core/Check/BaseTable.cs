@@ -657,7 +657,7 @@ namespace FastData.Core.Check
 
                     //表
                     var sql = "select name,(select top 1 value from sys.extended_properties where major_id=object_id(a.name) and minor_id=0) as value from sys.objects a where type = 'U'and upper(name) = @name";
-                    var dic = db.ExecuteSql(sql, param.ToArray(), item.Config.IsOutSql, false,false).DicList[0];
+                    var dic = db.ExecuteSqlList(sql, param.ToArray(), item.Config.IsOutSql, false).DicList[0];
 
                     result.Name = dic.GetValue("name").ToStr();
                     result.Comments = dic.GetValue("value").ToStr();
