@@ -401,11 +401,11 @@ namespace FastData.Core.Repository
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.GetPageSql<T>(pModel, sql, param,false);
+                    result = tempDb.GetPageSql<T>(pModel, sql, param);
                 }
             }
             else
-                result = db.GetPageSql<T>(pModel, sql, param,false);
+                result = db.GetPageSql<T>(pModel, sql, param);
 
             stopwatch.Stop();
 
