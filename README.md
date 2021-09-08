@@ -146,6 +146,9 @@ in db.json
         param.Add(new OracleParameter { ParameterName = "userid", Value = "dd5c99f2-0892-4179-83db-c2ccf243104c" });
         var tt = FastMap.Query<TestResult>("Patient.Test", param.ToArray(), null, "test");
         
+        //Navigate
+        var data = FastRead.Query<TestResult>(a => a.USERID != "" , null , "test").toList<TestResult>();
+        
         namespace Test1.Model
         {
             public class TestResult
