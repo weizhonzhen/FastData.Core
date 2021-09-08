@@ -13,6 +13,8 @@ using System.Data;
 using FastUntility.Core.Base;
 using DbProviderFactories = FastData.Core.Base.DbProviderFactories;
 using FastData.Core.Aop;
+using FastData.Core.CacheModel;
+using System.Collections;
 
 namespace FastData.Core.Context
 {
@@ -24,6 +26,7 @@ namespace FastData.Core.Context
         private DbCommand cmd;
         private DbTransaction trans;
 
+        #region Aop Before
         /// <summary>
         /// Aop Before
         /// </summary>
@@ -54,7 +57,9 @@ namespace FastData.Core.Context
                 aop.Before(context);
             }
         }
+        #endregion
 
+        #region Aop After
         /// <summary>
         /// Aop After
         /// </summary>
@@ -86,9 +91,11 @@ namespace FastData.Core.Context
                 aop.After(context);
             }
         }
+        #endregion
 
+        #region Aop Exception
         /// <summary>
-        /// aop Exception
+        /// Aop Exception
         /// </summary>
         /// <param name="ex"></param>
         /// <param name="name"></param>
@@ -106,8 +113,103 @@ namespace FastData.Core.Context
                 aop.Exception(context);
             }
         }
+        #endregion
 
+        #region Navigate
+        /// <summary>
+        /// Navigate
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="model"></param>
+        private void Navigate<T>(DataReturn<T> model, ConfigModel config, bool isPage) where T : class, new()
+        {
+            try
+            {
+                var key = string.Format("{0}.{1}.navigate", typeof(T).Namespace, typeof(T).Name);
+                if (DbCache.Exists(config.CacheType, key))
+                {
+                    var dynGet = new Property.DynamicGet<T>();
+                    var list = DbCache.Get<List<NavigateModel>>(config.CacheType, key);
+                    list.ForEach(a =>
+                    {
+                        var instance = Activator.CreateInstance(a.PropertyType);
+                        List<T> data;
+                        if (isPage)
+                            data = model.pageResult.list;
+                        else
+                            data = model.list;
 
+                        data.ForEach(d =>
+                        {
+                            var table = new List<string>();
+                            var paramList = new List<DbParameter>();
+                            var sql = new StringBuilder();
+
+                            table.Add(a.PropertyType.Name);
+                            sql.AppendFormat("select * from {0} where {1}={2}{1}", a.PropertyType.Name, a.Name, config.Flag);
+
+                            if (!string.IsNullOrEmpty(a.Appand) && a.Appand.ToLower().TrimStart().StartsWith("and"))
+                                sql.Append(a.Appand);
+
+                            if (!string.IsNullOrEmpty(a.Appand) && !a.Appand.ToLower().TrimStart().StartsWith("and"))
+                                sql.AppendFormat(" and {0}", a.Appand);
+
+                            if (config.DbType == DataDbType.Oracle && !a.IsList)
+                                sql.Append(" and rownum <=1");
+                            else if (config.DbType == DataDbType.DB2 && !a.IsList)
+                                sql.Append(" and fetch first 1 rows only");
+                            else if (config.DbType == DataDbType.MySql && !a.IsList)
+                                sql.Append(" and limit 1");
+                            else if (config.DbType == DataDbType.PostgreSql && !a.IsList)
+                                sql.Append(" and limit 1");
+                            else if (config.DbType == DataDbType.SQLite && !a.IsList)
+                                sql.Append(" and limit 0 offset 1");
+
+                            cmd.Parameters.Clear();
+                            cmd.CommandText = sql.ToString();
+                            var param = DbProviderFactories.GetFactory(config).CreateParameter();
+                            param.ParameterName = a.Name;
+                            param.Value = dynGet.GetValue(d, a.Key, true);
+                            cmd.Parameters.Add(param);
+                            paramList.Add(param);
+
+                            AopBefore(table, cmd.CommandText, paramList, config, true, AopType.Navigate);
+                            var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
+                            object result;
+
+                            if (a.MemberType == typeof(List<Dictionary<string, object>>))
+                                result = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle);
+                            else if (a.MemberType == typeof(Dictionary<string, object>))
+                                result = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle)?.First();
+                            else if (a.IsList)
+                                result = BaseDataReader.ToList(a.MemberType, instance, dr, config);
+                            else
+                                result = BaseDataReader.ToModel(instance, dr, config);
+
+                            dr.Close();
+                            AopAfter(table, cmd.CommandText, paramList, config, true, AopType.Navigate, result);
+                            if (result != null)
+                                d.GetType().GetProperties().ToList().ForEach(p =>
+                                {
+                                    if (p.Name == a.MemberName)
+                                        p.SetValue(d, Convert.ChangeType(result, a.MemberType));
+                                });
+                        });
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                AopException(ex, "to List tableName:" + typeof(T).Name, AopType.Navigate, config);
+                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "Navigate<T>", "");
+                else
+                    DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Navigate", "");
+            }
+        }
+        #endregion
+
+        #region dispose parameter
         /// <summary>
         /// dispose parameter
         /// </summary>
@@ -128,6 +230,7 @@ namespace FastData.Core.Context
             }
             cmd.Parameters.Clear();
         }
+        #endregion
 
         #region 回收资源
         /// <summary>
@@ -240,6 +343,8 @@ namespace FastData.Core.Context
 
                 AopAfter(item.Table, sql.ToString(), param, config, true, AopType.Query_List_Lambda, result.list);
 
+                Navigate<T>(result, item.Config, false);
+
                 return result;
             }
             catch (Exception ex)
@@ -295,6 +400,8 @@ namespace FastData.Core.Context
                     dr = null;
 
                     AopAfter(item.Table, sql.ToString(), param, config, true, AopType.Query_Page_Lambda_Model, result.pageResult.list);
+
+                    Navigate<T>(result, item.Config, true);
                 }
                 else
                     result.pageResult.list = new List<T>();
