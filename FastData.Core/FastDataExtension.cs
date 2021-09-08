@@ -22,9 +22,15 @@ namespace Microsoft.Extensions.DependencyInjection
                 FastMap.InstanceMap(config.dbKey, config.dbFile, config.mapFile);
 
             if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst) && config.IsResource)
+            {
+                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile, projectName);
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
+            }
             else if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
+            {
+                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile);
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile);
+            }
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties))
             {
