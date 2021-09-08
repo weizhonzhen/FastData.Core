@@ -37,7 +37,9 @@ namespace FastData.Core.Aop
 
         DataContext = 25,
         ParsingXml = 26,
-        CodeFirst = 27
+        CodeFirst = 27,
+
+        Navigate = 28
 
     }
 }
