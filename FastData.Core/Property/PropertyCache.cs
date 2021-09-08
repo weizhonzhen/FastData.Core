@@ -32,10 +32,13 @@ namespace FastData.Core.Property
                 {
                     typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                       {
-                          var temp = new PropertyModel();
-                          temp.Name = a.Name;
-                          temp.PropertyType = a.PropertyType;
-                          list.Add(temp);
+                          if (!a.GetMethod.IsVirtual)
+                          {
+                              var temp = new PropertyModel();
+                              temp.Name = a.Name;
+                              temp.PropertyType = a.PropertyType;
+                              list.Add(temp);
+                          }
                       });
 
                     DbCache.Set<List<PropertyModel>>(config.CacheType, key, list);
@@ -45,10 +48,13 @@ namespace FastData.Core.Property
             {
                 typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                 {
-                    var temp = new PropertyModel();
-                    temp.Name = a.Name;
-                    temp.PropertyType = a.PropertyType;
-                    list.Add(temp);
+                    if (!a.GetMethod.IsVirtual)
+                    {
+                        var temp = new PropertyModel();
+                        temp.Name = a.Name;
+                        temp.PropertyType = a.PropertyType;
+                        list.Add(temp);
+                    }
                 });
             }
 
@@ -71,10 +77,13 @@ namespace FastData.Core.Property
                 {
                     model.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                     {
-                        var temp = new PropertyModel();
-                        temp.Name = a.Name;
-                        temp.PropertyType = a.PropertyType;
-                        list.Add(temp);
+                        if (!a.GetMethod.IsVirtual)
+                        {
+                            var temp = new PropertyModel();
+                            temp.Name = a.Name;
+                            temp.PropertyType = a.PropertyType;
+                            list.Add(temp);
+                        }
                     });
 
                     DbCache.Set<List<PropertyModel>>(config.CacheType, key, list);
@@ -84,10 +93,13 @@ namespace FastData.Core.Property
             {
                 model.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToList().ForEach(a =>
                 {
-                    var temp = new PropertyModel();
-                    temp.Name = a.Name;
-                    temp.PropertyType = a.PropertyType;
-                    list.Add(temp);
+                    if (!a.GetMethod.IsVirtual)
+                    {
+                        var temp = new PropertyModel();
+                        temp.Name = a.Name;
+                        temp.PropertyType = a.PropertyType;
+                        list.Add(temp);
+                    }
                 });
             }
 
