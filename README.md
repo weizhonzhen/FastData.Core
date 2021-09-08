@@ -170,12 +170,22 @@ in db.json
                 public DateTime? DELTIME { get; set; }
                 public string DELUSERID { get; set; }
                 public string DELUSERNAME { get; set; }
-                public List<BASE_AREA> area { get; set; }
-                public List<BASE_ROLE> role { get; set; }
+                
+                 //Navigate
+                public virtual List<BASE_AREA> area { get; set; }
+                public virtual List<BASE_ROLE> role { get; set; }    
+                
+                [NavigateType(Type = typeof(BASE_ROLE))]
+                public virtual List<Dictionary<string, object>> roleList { get; set; }
+                                
+                [NavigateType(Type = typeof(BASE_ROLE))]
+                public virtual Dictionary<string, object> roleDic { get; set; }
             }
             
             public class BASE_ROLE
             {
+                //Navigate
+                [Navigate(Name = nameof(TestResult.ROLEID))]
                 public string ROLEID{ get; set; }
                 public string ROLENAME{ get; set; }
                 public string ROLEREMARK{ get; set; }
@@ -187,6 +197,8 @@ in db.json
             
             public class BASE_AREA
             {
+                //Navigate
+                [Navigate(Name = nameof(TestResult.AREAID))]
                 public string AREAID{ get; set; }
                 public string HOSPITALID{ get; set; }
                 public string AREANAME{ get; set; }
