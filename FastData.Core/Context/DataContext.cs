@@ -151,13 +151,13 @@ namespace FastData.Core.Context
                             cmd.Parameters.Clear();
                             for (var i = 0; i < a.Name.Count; i++)
                             {
-                                sql.AppendFormat("and {0}={1}{0} ", a.Name[i], config.Flag);
+                                sql.AppendFormat(" and {0}={1}{0} ", a.Name[i], config.Flag);
 
                                 if (!string.IsNullOrEmpty(a.Appand[i]) && a.Appand[i].ToLower().TrimStart().StartsWith("and"))
-                                    sql.Append(a.Appand);
+                                    sql.Append(a.Appand[i]);
 
                                 if (!string.IsNullOrEmpty(a.Appand[i]) && !a.Appand[i].ToLower().TrimStart().StartsWith("and"))
-                                    sql.AppendFormat(" and {0}", a.Appand);
+                                    sql.AppendFormat(" and {0} ", a.Appand[i]);
 
                                 var param = DbProviderFactories.GetFactory(config).CreateParameter();
                                 param.ParameterName = a.Name[i];
