@@ -38,9 +38,9 @@ namespace FastData.Core
                 var attribute = a.GetCustomAttribute<NavigateAttribute>();
                 if (attribute != null)
                 {
-                    navigate.Appand = attribute.Appand;
-                    navigate.Name = a.Name;
-                    navigate.Key = attribute.Name;
+                    navigate.Appand.Add(attribute.Appand);
+                    navigate.Name.Add(a.Name);
+                    navigate.Key.Add(attribute.Name);
                 }
             });
             return navigate;
@@ -88,7 +88,7 @@ namespace FastData.Core
                                 navigate.PropertyType = navigateType.Type;
                                 navigate.MemberName = a.Name;
                                 navigate.MemberType = a.PropertyType;
-                                if (!string.IsNullOrEmpty(navigate.Name))
+                                if (navigate.Name.Count != 0)
                                     cacheNavigate.Add(navigate);
                             }
                             else if (navigateType != null && a.PropertyType == typeof(List<Dictionary<string, object>>) && a.GetMethod.IsVirtual)
@@ -98,7 +98,7 @@ namespace FastData.Core
                                 navigate.PropertyType = navigateType.Type;
                                 navigate.MemberName = a.Name;
                                 navigate.MemberType = a.PropertyType;
-                                if (!string.IsNullOrEmpty(navigate.Name))
+                                if (navigate.Name.Count != 0)
                                     cacheNavigate.Add(navigate);
                             }
                             else if (a.PropertyType.GetGenericArguments().Length > 0 && a.GetMethod.IsVirtual)
@@ -108,7 +108,7 @@ namespace FastData.Core
                                 navigate.PropertyType = a.PropertyType.GenericTypeArguments[0];
                                 navigate.MemberName = a.Name;
                                 navigate.MemberType = a.PropertyType;
-                                if (!string.IsNullOrEmpty(navigate.Name))
+                                if (navigate.Name.Count != 0)
                                     cacheNavigate.Add(navigate);
                             }
                             else if (a.GetMethod.IsVirtual)
@@ -118,7 +118,7 @@ namespace FastData.Core
                                 navigate.PropertyType = a.PropertyType;
                                 navigate.MemberName = a.Name;
                                 navigate.MemberType = a.PropertyType;
-                                if (!string.IsNullOrEmpty(navigate.Name))
+                                if (navigate.Name.Count != 0)
                                     cacheNavigate.Add(navigate);
                             }
                             else
