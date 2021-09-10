@@ -1,16 +1,18 @@
-﻿namespace FastData.Core.CacheModel
+﻿using System.Collections.Generic;
+
+namespace FastData.Core.CacheModel
 {
     internal class NavigateModel
     {
         public System.Type PropertyType { get; set; }
 
-        public string Name { get; set; }
+        public List<string> Name { get; set; } = new List<string>();
 
-        public string Key { get; set; }
+        public List<string> Key { get; set; } = new List<string>();
+
+        public List<string> Appand { get; set; } = new List<string>();
 
         public bool IsList { get; set; }
-
-        public string Appand { get; set; }
 
         public string MemberName { get; set; }
 
