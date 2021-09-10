@@ -146,13 +146,25 @@ namespace FastData.Core.Context
                             var sql = new StringBuilder();
 
                             table.Add(a.PropertyType.Name);
-                            sql.AppendFormat("select * from {0} where {1}={2}{1} ", a.PropertyType.Name, a.Name, config.Flag);
+                            sql.AppendFormat("select * from {0} where 1=1 ", a.PropertyType.Name);
 
-                            if (!string.IsNullOrEmpty(a.Appand) && a.Appand.ToLower().TrimStart().StartsWith("and"))
-                                sql.Append(a.Appand);
+                            cmd.Parameters.Clear();
+                            for (var i = 0; i < a.Name.Count; i++)
+                            {
+                                sql.AppendFormat("and {0}={1}{0} ", a.Name[i], config.Flag);
 
-                            if (!string.IsNullOrEmpty(a.Appand) && !a.Appand.ToLower().TrimStart().StartsWith("and"))
-                                sql.AppendFormat(" and {0}", a.Appand);
+                                if (!string.IsNullOrEmpty(a.Appand[i]) && a.Appand[i].ToLower().TrimStart().StartsWith("and"))
+                                    sql.Append(a.Appand);
+
+                                if (!string.IsNullOrEmpty(a.Appand[i]) && !a.Appand[i].ToLower().TrimStart().StartsWith("and"))
+                                    sql.AppendFormat(" and {0}", a.Appand);
+
+                                var param = DbProviderFactories.GetFactory(config).CreateParameter();
+                                param.ParameterName = a.Name[i];
+                                param.Value = dynGet.GetValue(d, a.Key[i], true);
+                                cmd.Parameters.Add(param);
+                                paramList.Add(param);
+                            }
 
                             if (config.DbType == DataDbType.Oracle && !a.IsList)
                                 sql.Append(" and rownum <=1");
@@ -165,13 +177,7 @@ namespace FastData.Core.Context
                             else if (config.DbType == DataDbType.SQLite && !a.IsList)
                                 sql.Append(" and limit 0 offset 1");
 
-                            cmd.Parameters.Clear();
                             cmd.CommandText = sql.ToString();
-                            var param = DbProviderFactories.GetFactory(config).CreateParameter();
-                            param.ParameterName = a.Name;
-                            param.Value = dynGet.GetValue(d, a.Key, true);
-                            cmd.Parameters.Add(param);
-                            paramList.Add(param);
 
                             AopBefore(table, cmd.CommandText, paramList, config, true, AopType.Navigate);
                             var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
