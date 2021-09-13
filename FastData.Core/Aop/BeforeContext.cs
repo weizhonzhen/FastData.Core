@@ -5,18 +5,18 @@ namespace FastData.Core.Aop
 {
     public class BeforeContext
     {
-        public string dbType { get; set; }
+        public string dbType { get; internal set; }
 
-        public List<string> tableName { get; set; } = new List<string>();
+        public List<string> tableName { get; internal set; } = new List<string>();
 
-        public string sql { get; set; }
+        public string sql { get; internal set; }
 
-        public List<DbParameter> param { get; set; } = new List<DbParameter>();
+        public List<DbParameter> param { get; internal set; } = new List<DbParameter>();
 
-        public bool isRead { get; set; } = false;
+        public bool isRead { get; internal set; } = false;
 
-        public bool isWrite { get; set; } = false;
+        public bool isWrite { get; internal set; } = false;
 
-        public AopType type { get; set; }
+        public AopType type { get; internal set; }
     }
 }

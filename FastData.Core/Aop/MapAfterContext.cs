@@ -5,16 +5,16 @@ namespace FastData.Core.Aop
 {
     public class MapAfterContext
     {
-        public string dbType { get; set; }
+        public string dbType { get; internal set; }
 
-        public string sql { get; set; }
+        public string sql { get; internal set; }
 
-        public string mapName { get; set; }
+        public string mapName { get; internal set; }
 
-        public List<DbParameter> param { get; set; } = new List<DbParameter>();
+        public List<DbParameter> param { get; internal set; } = new List<DbParameter>();
 
-        public AopType type { get; set; }
+        public AopType type { get; internal set; }
 
-        public object result { get; set; }
+        public object result { get; internal set; }
     }
 }
