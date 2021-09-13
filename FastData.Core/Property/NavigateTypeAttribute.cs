@@ -5,6 +5,7 @@ namespace FastData.Core.Property
     /// <summary>
     /// 字典导航属性
     /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
     public class NavigateTypeAttribute : Attribute
     {
         /// <summary>
