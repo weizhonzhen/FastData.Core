@@ -186,7 +186,7 @@ namespace FastData.Core.Context
                             if (a.MemberType == typeof(List<Dictionary<string, object>>))
                                 result = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle);
                             else if (a.MemberType == typeof(Dictionary<string, object>))
-                                result = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle)?.First();
+                                result = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle)?.FirstOrDefault() ?? new Dictionary<string, object>();
                             else if (a.IsList)
                                 result = BaseDataReader.ToList(a.MemberType, instance, dr, config);
                             else
