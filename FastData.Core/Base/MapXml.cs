@@ -16,6 +16,7 @@ using FastData.Core.Type;
 using FastData.Core.Check;
 using Microsoft.CodeAnalysis.Scripting;
 using FastData.Core.Aop;
+using FastUntility.Core;
 
 namespace FastData.Core.Base
 {
@@ -975,22 +976,13 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                var aop = FastUntility.Core.ServiceContext.Engine.Resolve<IFastAop>();
+                var aop = ServiceContext.Engine.Resolve<IFastAop>();
 
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "InstanceMap", "GetXmlList");
                 else
                     DbLog.LogException(true, "InstanceMap", ex, "GetXmlList", "");
-
-                if (aop != null)
-                {
-                    var context = new ExceptionContext();
-                    context.ex = ex;
-                    context.name = "Parsing xml";
-                    context.type = AopType.ParsingXml;
-                    aop.Exception(context);
-                }
-
+                BaseAop.AopException(ex, "Parsing xml", AopType.ParsingXml, config);
                 result.isSuccess = false;
                 return result;
             }
