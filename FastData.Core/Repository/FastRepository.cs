@@ -16,6 +16,8 @@ using System.Reflection;
 using System.IO;
 using System.Linq.Expressions;
 using FastData.Core.Aop;
+using FastData.Core.Filter;
+using FastUntility.Core;
 
 namespace FastData.Core.Repository
 {
@@ -1251,7 +1253,7 @@ namespace FastData.Core.Repository
         /// <param name="config"></param>
         private void AopMapBefore(string mapName, string sql, DbParameter[] param, ConfigModel config, AopType type)
         {
-            var aop = FastUntility.Core.ServiceContext.Engine.Resolve<IFastAop>();
+            var aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
             {
                 var context = new MapBeforeContext();
@@ -1279,7 +1281,7 @@ namespace FastData.Core.Repository
         /// <param name="config"></param>
         private void AopMapAfter(string mapName, string sql, DbParameter[] param, ConfigModel config, AopType type, object data)
         {
-            var aop = FastUntility.Core.ServiceContext.Engine.Resolve<IFastAop>();
+            var aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
             {
                 var context = new MapAfterContext();
