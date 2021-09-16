@@ -22,6 +22,8 @@ namespace FastData.Core.Repository
 
         public abstract IQuery Take(int i);
 
+        public abstract IQuery Filter(bool isFilter = true);
+
         public abstract string ToJson(DataContext db = null, bool isOutSql = false);
 
         public abstract Task<string> ToJsonAsy(DataContext db = null, bool isOutSql = false);
@@ -89,5 +91,7 @@ namespace FastData.Core.Repository
         public abstract Lazy<List<T>> ToLazyList<T>(DataContext db = null, bool isOutSql = false) where T : class, new();
 
         public abstract Task<Lazy<List<T>>> ToLazyListAsy<T>(DataContext db = null, bool isOutSql = false) where T : class, new();
+
+
     }
 }

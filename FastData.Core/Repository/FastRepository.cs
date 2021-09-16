@@ -1223,7 +1223,7 @@ namespace FastData.Core.Repository
             var condtion = VisitExpression.LambdaWhere<T>(predicate, this.query.Data.Config);
             this.query.Data.Predicate.Add(condtion);
             this.query.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
-
+            this.query.Data.TableName.Add(typeof(T).Name);
             return this.query;
         }
         #endregion
