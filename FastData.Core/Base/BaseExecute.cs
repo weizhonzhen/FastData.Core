@@ -10,6 +10,7 @@ using FastData.Core.Type;
 using FastData.Core.Model;
 using System.Linq.Expressions;
 using FastData.Core.Property;
+using FastData.Core.Filter;
 
 namespace FastData.Core.Base
 {
@@ -83,7 +84,7 @@ namespace FastData.Core.Base
         /// <param name="pModel"></param>
         /// <param name="where"></param>
         /// <returns></returns>
-        public static DbDataReader ToPageDataReader(DataQuery item, DbCommand cmd, PageModel pModel, ref string sql)
+        public static DbDataReader ToPageDataReader(DataQuery item, DbCommand cmd, PageModel pModel, ref string sql, FilterType type)
         {
             try
             {
@@ -192,6 +193,9 @@ namespace FastData.Core.Base
                     #endregion
                 }
 
+                if (item.IsFilter)
+                    BaseFilter.Filter(param, type, item.TableName, item.Config, sb);
+
                 if (param.Count != 0)
                     cmd.Parameters.AddRange(param.ToArray());
                 cmd.CommandText = sb.ToString();
@@ -215,7 +219,7 @@ namespace FastData.Core.Base
         /// 返回分页条数
         /// </summary>
         /// <returns></returns>
-        public static int ToPageCount(DataQuery item, DbCommand cmd,  ref string sql)
+        public static int ToPageCount(DataQuery item, DbCommand cmd,  ref string sql, FilterType type)
         {
             try
             {
@@ -232,6 +236,9 @@ namespace FastData.Core.Base
 
                 if (!string.IsNullOrEmpty(item.Predicate[0].Where))
                     sql = string.Format("{1} where {0}", item.Predicate[0].Where, sql);
+
+                if (item.IsFilter)
+                    BaseFilter.Filter(param.ToArray(), type, item.TableName, item.Config, ref sql);
 
                 if (item.Predicate[0].Param.Count != 0)
                     param.AddRange(item.Predicate[0].Param);
@@ -260,15 +267,23 @@ namespace FastData.Core.Base
         /// 返回分页条数sql
         /// </summary>
         /// <returns></returns>
-        public static int ToPageCountSql(DbParameter[] param, DbCommand cmd, string sql, ConfigModel config, ref string tempSql)
+        public static int ToPageCountSql(DbParameter[] param, DbCommand cmd, string sql, ConfigModel config, ref string tempSql, FilterType type,string tableName)
         {
-            sql = string.Format("select count(0) from ({0})t", sql);
             try
             {
-                tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
+                var table = new List<string>();
+                if (tableName != null)
+                    table.Add(tableName);
+
+                sql = string.Format("select count(0) from ({0})t", sql);
 
                 if (param != null)
                     cmd.Parameters.AddRange(param.ToArray());
+
+                if (tableName != null)
+                    BaseFilter.Filter(param, type, table, config, ref sql);
+
+                tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
 
                 var dt = BaseExecute.ToDataTable(cmd, sql.ToString());
 
@@ -296,10 +311,14 @@ namespace FastData.Core.Base
         /// <param name="pModel"></param>
         /// <param name="where"></param>
         /// <returns></returns>
-        public static DbDataReader ToPageDataReaderSql(DbParameter[] param, DbCommand cmd, PageModel pModel, string sql, ConfigModel config, ref string tempSql)
+        public static DbDataReader ToPageDataReaderSql(DbParameter[] param, DbCommand cmd, PageModel pModel, string sql, ConfigModel config, ref string tempSql, FilterType type, string tableName)
         {
             try
             {
+                var table = new List<string>();
+                if(tableName!=null)
+                    table.Add(tableName);
+
                 if (config.DbType == DataDbType.Oracle)
                     sql = string.Format("select * from(select field.*,ROWNUM RN from({0}) field where rownum<={1}) where rn>={2}"
                                     , sql, pModel.EndId, pModel.StarId);
@@ -322,10 +341,13 @@ namespace FastData.Core.Base
                 if (config.DbType == DataDbType.SQLite)
                     sql = string.Format("{0} limit {1} offset {2}", sql, pModel.PageSize, pModel.StarId);
 
-                tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
-
                 if (param != null)
                     cmd.Parameters.AddRange(param.ToArray());
+
+                if (tableName != null)
+                    BaseFilter.Filter(param, type, table, config, ref sql);
+
+                tempSql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
 
                 cmd.CommandText = sql;
 
