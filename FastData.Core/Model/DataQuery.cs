@@ -52,6 +52,16 @@ namespace FastData.Core.Model
         /// 连接配置
         /// </summary>
         internal ConfigModel Config { get; set; }
+
+        /// <summary>
+        /// 表名
+        /// </summary>
+        internal List<string> TableName { set; get; } = new List<string>();
+
+        /// <summary>
+        /// 过滤
+        /// </summary>
+        internal bool IsFilter { get; set; } = true;
     }
     #endregion
 }
