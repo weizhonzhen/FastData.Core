@@ -1,9 +1,13 @@
 ﻿using FastData.Core;
 using FastData.Core.Aop;
+using FastData.Core.Base;
+using FastData.Core.Filter;
+using FastData.Core.Model;
 using FastData.Core.Repository;
 using FastUntility.Core;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -11,9 +15,11 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class FastDataExtension
     {
+        private static ConfigData config;
+
         public static IServiceCollection AddFastData(this IServiceCollection serviceCollection, Action<ConfigData> action)
         {
-            var config = new ConfigData();
+            config = new ConfigData();
             action(config);
             var projectName = Assembly.GetCallingAssembly().GetName().Name;
             if (config.IsResource)
@@ -50,7 +56,32 @@ namespace Microsoft.Extensions.DependencyInjection
                 serviceCollection.AddSingleton<IFastAop>(config.aop);
 
             ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
-           
+
+            return serviceCollection;
+        }
+
+        public static IServiceCollection AddFastFilter<T>(this IServiceCollection serviceCollection, Expression<Func<T, bool>> predicate, FilterType type)
+        {
+            if (config != null)
+            {
+                ConfigModel item;
+                string projectName = null;
+                if (config.IsResource)
+                    projectName = Assembly.GetCallingAssembly().GetName().Name;
+
+                item = DataConfig.Get(config.dbKey, projectName, config.dbFile);
+                var model = VisitExpression.LambdaWhere<T>(predicate, item);
+
+                if (predicate.Parameters.Count > 0)
+                {
+                    var flag = string.Format("{0}.", (predicate.Parameters[0] as ParameterExpression).Name);
+                    model.Where = model.Where.Replace(flag, "");
+                }
+
+                var key = $"Filter.{typeof(T).Name}.{type.ToString()}";
+                DbCache.Set<VisitModel>(CacheType.Web, key, model);
+            }
+
             return serviceCollection;
         }
     }
