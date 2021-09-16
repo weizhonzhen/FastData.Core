@@ -42,8 +42,8 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
             {
-                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile);
-                FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile);
+                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile ,projectName);
+                FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
             }
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties))
