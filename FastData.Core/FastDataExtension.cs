@@ -21,6 +21,14 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             config = new ConfigData();
             action(config);
+
+            serviceCollection.AddTransient<IFastRepository, FastRepository>();
+
+            if (config.aop != null)
+                serviceCollection.AddSingleton<IFastAop>(config.aop);
+
+            ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
+
             var projectName = Assembly.GetCallingAssembly().GetName().Name;
             if (config.IsResource)
                 FastMap.InstanceMapResource(config.dbKey, config.dbFile, config.mapFile, projectName);
@@ -49,13 +57,6 @@ namespace Microsoft.Extensions.DependencyInjection
                       FastMap.InstanceProperties(b.Namespace, config.dbFile);
               });
             }
-
-            serviceCollection.AddTransient<IFastRepository, FastRepository>();
-
-            if (config.aop != null)
-                serviceCollection.AddSingleton<IFastAop>(config.aop);
-
-            ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
 
             return serviceCollection;
         }
