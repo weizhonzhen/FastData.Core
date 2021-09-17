@@ -11,6 +11,7 @@ in Startup.cs Startup mothod
             FastMap.InstanceProperties("DataModel","db.json");
 
             //old pagepackages init code first
+            //db.json DesignModel
             FastMap.InstanceTable("DataModel.Base", "db.json");
 
             //old pagepackages by Repository
