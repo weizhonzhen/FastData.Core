@@ -127,6 +127,42 @@ namespace FastData.Core.Context
         }
         #endregion
 
+        #region fastread
+        /// <summary>
+        /// fastread
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        internal object FastReadAttribute(ServiceModel model, List<DbParameter> param)
+        {            
+            object result;
+            cmd.Parameters.Clear();
+            var instance = Activator.CreateInstance(model.type);
+
+            BaseAop.AopBefore(null, model.sql, param, config, true, AopType.FastRead);
+            cmd.Parameters.AddRange(param.ToArray());
+            var dr = BaseExecute.ToDataReader(cmd, model.sql);
+
+            if (model.type == typeof(List<Dictionary<string, object>>) && model.isList)
+                result = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle);
+            else if (model.type == typeof(Dictionary<string, object>))
+                result = BaseJson.DataReaderToDic(dr, config.DbType == DataDbType.Oracle)?.FirstOrDefault() ?? new Dictionary<string, object>();
+            else if (model.isList)
+            {
+                instance = Activator.CreateInstance(model.type.GetGenericArguments()[0]);
+                result = BaseDataReader.ToList(model.type, instance, dr, config); 
+            }
+            else
+                result = BaseDataReader.ToModel(instance, dr, config);
+
+            dr.Close();
+            BaseAop.AopAfter(null, cmd.CommandText, param, config, true, AopType.FastRead, result);
+
+            return result;
+        }
+        #endregion
+
         #region dispose parameter
         /// <summary>
         /// dispose parameter
@@ -1574,8 +1610,15 @@ namespace FastData.Core.Context
         /// <summary>
         /// 执行sql
         /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="param"></param>
+        /// <param name="type"></param>
+        /// <param name="isTrans"></param>
+        /// <param name="isLog"></param>
+        /// <param name="IsProcedure"></param>
+        /// <param name="isAop"></param>
         /// <returns></returns>
-        public DataReturn ExecuteSql(string sql, DbParameter[] param, bool isTrans = false, bool isLog = false, bool IsProcedure = false, bool isAop = true)
+        internal DataReturn ExecuteSql(string sql, DbParameter[] param,AopType type, bool isTrans = false, bool isLog = false, bool IsProcedure = false, bool isAop = true)
         {
             var result = new DataReturn();
             try
@@ -1596,7 +1639,7 @@ namespace FastData.Core.Context
                     cmd.Parameters.AddRange(param.ToArray());
 
                 if (isAop)
-                    BaseAop.AopBefore(null, sql, param?.ToList(), config, false, AopType.Execute_Sql_Bool);
+                    BaseAop.AopBefore(null, sql, param?.ToList(), config, false, type);
 
                 result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, sql, IsProcedure);
 
@@ -1606,11 +1649,11 @@ namespace FastData.Core.Context
                     RollbackTrans();
 
                 if (isAop)
-                    BaseAop.AopAfter(null, sql, param?.ToList(), config, false, AopType.Execute_Sql_Bool, result.writeReturn.IsSuccess);
+                    BaseAop.AopAfter(null, sql, param?.ToList(), config, false, type, result.writeReturn.IsSuccess);
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, "Excute Sql", AopType.Execute_Sql_Bool, config);
+                BaseAop.AopException(ex, "Excute Sql", type, config);
 
                 if (isTrans)
                     RollbackTrans();
@@ -1624,6 +1667,18 @@ namespace FastData.Core.Context
             }
 
             return result;
+        }
+
+        #endregion
+
+        #region 执行sql
+        /// <summary>
+        /// 执行sql
+        /// </summary>
+        /// <returns></returns>
+        public DataReturn ExecuteSql(string sql, DbParameter[] param, bool isTrans = false, bool isLog = false, bool IsProcedure = false, bool isAop = true)
+        {
+            return ExecuteSql(sql, param, AopType.Execute_Sql_Bool, isTrans, isLog, IsProcedure, isAop);
         }
         #endregion
 
