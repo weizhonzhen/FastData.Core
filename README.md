@@ -68,7 +68,7 @@ in Startup.cs Startup mothod
             var data1 = IFast.Query<TestResult>(a => a.ORGID == "1",null,"test").ToPage<TestResult>(page);
             var data2 = IFast.Query<TestResult>(a => a.ORGID == "1",null,"test").Filter(false).ToPage<TestResult>(page);
             
-            
+          
 interface  Service            
 ```csharp
     public interface TestService
@@ -90,7 +90,8 @@ interface  Service
     }
 
 
-  
+            
+ ```   
 in db.json         
 ```csharp
  {      
