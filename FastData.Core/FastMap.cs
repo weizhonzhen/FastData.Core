@@ -17,6 +17,8 @@ using FastUntility.Core.Page;
 using FastData.Core.Aop;
 using FastData.Core.Property;
 using FastUntility.Core;
+using Microsoft.Extensions.DependencyInjection;
+using FastData.Core.Proxy;
 
 namespace FastData.Core
 {
@@ -55,7 +57,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceProperties(string nameSpace, string dbFile = "db.json", string projectName = null)
+        internal static void InstanceProperties(string nameSpace, string dbFile = "db.json", string projectName = null)
         {
             if (projectName == null)
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
@@ -148,7 +150,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json", string projectName = null)
+        internal static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json", string projectName = null)
         {
             if (projectName == null)
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
@@ -176,7 +178,7 @@ namespace FastData.Core
         #endregion
 
         #region 初始化map 3  by Resource
-        public static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
+        internal static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
         {
             if (projectName == null)
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
@@ -248,7 +250,7 @@ namespace FastData.Core
         /// 初始化map 3
         /// </summary>
         /// <returns></returns>
-        public static void InstanceMap(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json")
+        internal static void InstanceMap(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json")
         {
             var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
             var config = DataConfig.Get(dbKey, null, dbFile);
@@ -312,6 +314,95 @@ namespace FastData.Core
             }
         }
         #endregion
+
+        #region 初始化 interface service
+        internal static void InstanceService(IServiceCollection serviceCollection, string nameSpace)
+        {
+            var config = DataConfig.Get();
+            var handler = new ProxyHandler();
+            Assembly.GetEntryAssembly().ExportedTypes.ToList().ForEach(a =>
+            {
+                if (a.Namespace == nameSpace)
+                {
+                    var isRegister = false;
+                    a.GetMethods().ToList().ForEach(m =>
+                    {
+                        var model = new ServiceModel();
+                        var read = m.GetCustomAttribute<FastReadAttribute>();
+                        var write = m.GetCustomAttribute<FastWriteAttribute>();
+
+                        if (read != null)
+                        {
+                            isRegister = true;
+                            model.isWrite = false;
+                            model.sql = read.sql.ToLower();
+                            model.dbKey = read.dbKey;
+
+                            if (m.ReturnType == typeof(Dictionary<string, object>))
+                                model.isList = false;
+                            else if (m.ReturnType == typeof(List<Dictionary<string, object>>))
+                                model.isList = true;
+                            else
+                            {
+                                model.isList = m.ReturnType.GetGenericArguments().Length > 0;
+                                System.Type argType;
+
+                                if (model.isList)
+                                    argType = m.ReturnType.GetGenericArguments()[0];
+                                else
+                                    argType = m.ReturnType;
+
+                                if ((argType.IsPrimitive || argType.Equals(typeof(string)) || argType.Equals(typeof(decimal)) || argType.Equals(typeof(DateTime))))                                
+                                    throw new Exception($"FastReadAttribute[service:{a.Name}, method:{m.Name}, return type:{m.ReturnType} is not support]");                                
+                            }
+                            
+                            model.type = m.ReturnType;
+
+                            for (int i = 0; i < m.GetParameters().Length; i++)
+                            {
+                                model.param.Add(i.ToString(), m.GetParameters()[i].Name.ToLower());
+                            }
+
+                            if (m.ReturnType.IsPrimitive || m.ReturnType.Equals(typeof(string)) || m.ReturnType.Equals(typeof(decimal)) || m.ReturnType.Equals(typeof(DateTime)))
+                                throw new Exception($"FastReadAttribute[service:{a.Name}, method:{m.Name}, return type:{m.ReturnType} is not support]");
+                        }
+
+                        if (write != null)
+                        {
+                            isRegister = true;
+
+                            if (m.ReturnType != typeof(WriteReturn))
+                                throw new Exception($"FastWriteAttribute[return type only WriteReturn, service:{a.Name}, method:{m.Name}, return type:{m.ReturnType} is not support]");
+
+                            model.isWrite = true;
+                            model.sql = write.sql.ToLower();
+                            model.dbKey = write.dbKey;
+                            model.type = m.ReturnType;
+                            model.isList = false;
+
+                            for (int i = 0; i < m.GetParameters().Length; i++)
+                            {
+                                model.param.Add(i.ToString(), m.GetParameters()[i].Name.ToLower());
+                            }
+                        }
+
+                        if (isRegister)
+                        {
+                            var key = string.Format("{0}.{1}", a.Name, m.Name);
+                            DbCache.Set<ServiceModel>(config.CacheType, key, model);
+                        }
+                    });
+
+                    if (isRegister)
+                    {
+                        var service = FastProxy.Invoke(a, handler);
+                        serviceCollection.AddSingleton(a, service);
+                    }
+                }
+            });
+        }
+        #endregion
+
 
         #region maq 执行返回结果
         /// <summary>

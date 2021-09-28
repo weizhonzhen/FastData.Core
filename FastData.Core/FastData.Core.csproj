@@ -7,12 +7,12 @@
     <Description>orm(db first,code frist) for sqlserver mysql etl.
 https://github.com/weizhonzhen/FastData.Core
 </Description>
-    <Version>2.5.7</Version>
+    <Version>2.6</Version>
     <PackageId>Fast.Data.Core</PackageId>
     <Authors>Fast.Data.Core</Authors>
     <Company>Fast.Data.Core</Company>
     <PackageIconUrl>https://en.gravatar.com/userimage/151376774/1cba1ca23219db268cc5ed8abde11775.png</PackageIconUrl>
-    <PackageReleaseNotes>add by Filter</PackageReleaseNotes>
+    <PackageReleaseNotes>add by FastProxy and interface Service</PackageReleaseNotes>
     <RepositoryUrl>https://en.gravatar.com/userimage/151376774/1cba1ca23219db268cc5ed8abde11775.png</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
