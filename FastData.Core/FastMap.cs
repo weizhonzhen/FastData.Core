@@ -57,7 +57,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        internal static void InstanceProperties(string nameSpace, string dbFile = "db.json", string projectName = null)
+        public static void InstanceProperties(string nameSpace, string dbFile = "db.json", string projectName = null)
         {
             if (projectName == null)
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
@@ -150,7 +150,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        internal static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json", string projectName = null)
+        public static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json", string projectName = null)
         {
             if (projectName == null)
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
@@ -178,7 +178,7 @@ namespace FastData.Core
         #endregion
 
         #region 初始化map 3  by Resource
-        internal static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
+        public static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
         {
             if (projectName == null)
                 projectName = Assembly.GetCallingAssembly().GetName().Name;
@@ -250,7 +250,7 @@ namespace FastData.Core
         /// 初始化map 3
         /// </summary>
         /// <returns></returns>
-        internal static void InstanceMap(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json")
+        public static void InstanceMap(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json")
         {
             var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
             var config = DataConfig.Get(dbKey, null, dbFile);
@@ -316,7 +316,7 @@ namespace FastData.Core
         #endregion
 
         #region 初始化 interface service
-        internal static void InstanceService(IServiceCollection serviceCollection, string nameSpace)
+        public static void InstanceService(IServiceCollection serviceCollection, string nameSpace)
         {
             var config = DataConfig.Get();
             var handler = new ProxyHandler();
