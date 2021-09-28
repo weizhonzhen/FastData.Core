@@ -58,6 +58,7 @@ in Startup.cs Startup mothod
             services.AddFastData(a=> { a.mapFile = "map.json"; a.dbKey = "dbkey"; a.IsResource = true; a.dbFile = "db.json";
                 a.NamespaceProperties = "DataModel."; 
                 a.aop = new TestAop();
+                a.NamespaceService = "Test1.Service";
             });
             
             //Filter
@@ -68,6 +69,27 @@ in Startup.cs Startup mothod
             var data2 = IFast.Query<TestResult>(a => a.ORGID == "1",null,"test").Filter(false).ToPage<TestResult>(page);
             
             
+interface  Service            
+```csharp
+    public interface TestService
+    {
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
+        List<Dictionary<string, object>> readListDic(string userId, string kid);
+
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
+        Dictionary<string, object> readDic(string userId, string kid);
+
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=:kid")]
+        List<TestResult> readModel(string userId, string kid);
+
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
+        TestResult readListModel(string userId, string kid);
+
+        [FastWriteAttribute(dbKey = "Write", sql = "update TestResult set userName=?userName where userId=?userId")]
+        WriteReturn update(string userName, string userId);
+    }
+
+
   
 in db.json         
 ```csharp
