@@ -127,7 +127,7 @@ in db.json
  
 ```
        map xml
-      ```xml
+```csharp
     <?xml version="1.0" encoding="utf-8" ?>
             <sqlMap>
               <select id="GetUser" log="true">
