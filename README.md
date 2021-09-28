@@ -73,23 +73,28 @@ interface  Service
 ```csharp
     public interface TestService
     {
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
         List<Dictionary<string, object>> readListDic(string userId, string kid);
 
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
         Dictionary<string, object> readDic(string userId, string kid);
 
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=:kid")]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=:userId")]
         List<TestResult> readModel(string userId, string kid);
 
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
         TestResult readListModel(string userId, string kid);
 
         [FastWriteAttribute(dbKey = "Write", sql = "update TestResult set userName=?userName where userId=?userId")]
         WriteReturn update(string userName, string userId);
     }
 
-
+//ioc  
+ var write = testService.update("管理员", "admin");
+ var readDic = testService.readDic("admin", "101");
+ var readListDic = testService.readListDic("admin", "101");
+ var readModel = testService.readModel("admin", "101");
+ var readListModel = testService.readListModel("admin", "101");
             
  ```   
 in db.json         
