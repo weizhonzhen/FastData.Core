@@ -125,9 +125,9 @@ in db.json
 "SqlMap" :{"Path": [ "map/admin/Api.xml", "map/admin/Area.xml"]}
 ```
  
-```
-       map xml
-```csharp
+
+map xml
+```xml
     <?xml version="1.0" encoding="utf-8" ?>
             <sqlMap>
               <select id="GetUser" log="true">
