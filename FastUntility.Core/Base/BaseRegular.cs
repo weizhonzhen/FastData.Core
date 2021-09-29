@@ -491,18 +491,13 @@ namespace FastUntility.Core.Base
         }
         #endregion
 
-        #region arrary to list
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public static List<T> ToList<T>(T[] list)
+        #region 是不是基本类型
+        public static bool isSysType(this System.Type type)
         {
-            var result = new List<T>();
-            list.ToList().ForEach(a => { result.Add(a); });
-            return result;
+            if (type.IsPrimitive || type.Equals(typeof(string)) || type.Equals(typeof(decimal)) || type.Equals(typeof(DateTime)))
+                return true;
+            else
+                return false;
         }
         #endregion
     }
