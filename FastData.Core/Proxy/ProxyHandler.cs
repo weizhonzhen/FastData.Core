@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Reflection;
 using System.Linq;
+using FastData.Core.Property;
+using FastData.Core.Model;
 
 namespace FastData.Core.Proxy
 {
@@ -23,12 +25,27 @@ namespace FastData.Core.Proxy
                 var model = DbCache.Get<ServiceModel>(config.CacheType, key);
                 config = DataConfig.Get(model.dbKey);
 
-                for (int i = 0; i < args.Length; i++)
+                if (model.isSysType)
                 {
-                    var temp = DbProviderFactories.GetFactory(config).CreateParameter();
-                    temp.ParameterName = model.param.GetValue(i.ToString()).ToStr();
-                    temp.Value = args[i];
-                    param.Add(temp);
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                        temp.ParameterName = model.param.GetValue(i.ToString()).ToStr();
+                        temp.Value = args[i];
+                        param.Add(temp);
+                    }
+                }
+                else
+                {
+                    var dyn = new DynamicGet(Activator.CreateInstance(method.GetParameters()[0].ParameterType));
+                    for (int i = 0; i < model.param.Count; i++)
+                    {
+                        var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                        temp.ParameterName = model.param.GetValue(i.ToString()).ToStr();
+                        temp.Value = dyn.GetValue(args[0], temp.ParameterName,true);
+                        temp.ParameterName = temp.ParameterName.ToLower();
+                        param.Add(temp);
+                    }
                 }
 
                 using (var db = new DataContext(config.Key))
