@@ -90,11 +90,16 @@ interface  Service
     }
 
 //ioc  
- var write = testService.update("管理员", "admin");
- var readDic = testService.readDic("admin", "101");
- var readListDic = testService.readListDic("admin", "101");
- var readModel = testService.readModel("admin", "101");
- var readListModel = testService.readListModel("admin", "101");
+ var model = new TestResult();
+ model.userName = "管理员";
+ model.userId = "admin";
+ model.kid = "101";
+ 
+ var write = testService.update("管理员", "admin"); // or  testService.update(model);
+ var readDic = testService.readDic("admin", "101");// or  testService.readDic(model);
+ var readListDic = testService.readListDic("admin", "101");// or  testService.readListDic(model);
+ var readModel = testService.readModel("admin", "101");// or  testService.readModel(model);
+ var readListModel = testService.readListModel("admin", "101");// or  testService.readListModel(model);
             
  ```   
 in db.json         
