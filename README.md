@@ -75,18 +75,23 @@ interface  Service
     {
         [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
         List<Dictionary<string, object>> readListDic(string userId, string kid);
+        //List<Dictionary<string, object>> readListDic(TestResult model);
 
         [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
         Dictionary<string, object> readDic(string userId, string kid);
+        //List<Dictionary<string, object>> readDic(TestResult model);
 
         [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=:userId")]
         List<TestResult> readModel(string userId, string kid);
+        //List<Dictionary<string, object>> readModel(TestResult model);
 
         [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
         TestResult readListModel(string userId, string kid);
+        //List<Dictionary<string, object>> readListModel(TestResult model);
 
         [FastWriteAttribute(dbKey = "Write", sql = "update TestResult set userName=?userName where userId=?userId")]
         WriteReturn update(string userName, string userId);
+        //List<Dictionary<string, object>> update(TestResult model);
     }
 
 //ioc  
