@@ -739,7 +739,7 @@ namespace FastData.Core.Repository
         /// <param name="name"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public string MapCheckMap(string name, string param)
+        public string MapCheck(string name, string param)
         {
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.checkmap", name.ToLower(), param.ToLower())).ToStr();
         }
@@ -752,7 +752,7 @@ namespace FastData.Core.Repository
         /// <param name="name"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public string MapExistsMap(string name, string param)
+        public string MapExists(string name, string param)
         {
             return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.{1}.existsmap", name.ToLower(), param.ToLower())).ToStr();
         }

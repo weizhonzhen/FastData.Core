@@ -79,9 +79,9 @@ namespace FastData.Core.Repository
 
         string MapDate(string name, string param);
 
-        string MapCheckMap(string name, string param);
+        string MapCheck(string name, string param);
 
-        string MapExistsMap(string name, string param);
+        string MapExists(string name, string param);
 
         WriteReturn AddList<T>(List<T> list, string key = null, bool IsTrans = false, bool isLog = true) where T : class, new();
 
