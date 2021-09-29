@@ -16,5 +16,7 @@ namespace FastData.Core.CacheModel
         public System.Type type { get; set; }
 
         public String dbKey { get; set; }
+
+        public bool isSysType { get; set; }
     }
 }
