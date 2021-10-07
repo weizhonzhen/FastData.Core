@@ -19,13 +19,13 @@ namespace FastUntility.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static T DicToModel<T>(Dictionary<string, object> dic, bool isCache = true) where T : class, new()
+        public static T DicToModel<T>(Dictionary<string, object> dic) where T : class, new()
         {
             var result = new T();
             var info = new DynamicSet<T>();
-            PropertyInfo<T>(isCache).ForEach(a => {
+            PropertyInfo<T>().ForEach(a => {
                 if (dic.ContainsKey(a.Name.ToLower()) && !string.IsNullOrEmpty(dic[a.Name.ToLower()].ToStr()))
-                    info.SetValue(result, a.Name, Convert.ChangeType(dic[a.Name.ToLower()], a.PropertyType), isCache);
+                    info.SetValue(result, a.Name, Convert.ChangeType(dic[a.Name.ToLower()], a.PropertyType));
             });
 
             return result;
@@ -37,12 +37,12 @@ namespace FastUntility.Core.Base
         ///  T to dic
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, object> ModelToDic<T>(T model, bool isCache = true) where T : class, new()
+        public static Dictionary<string, object> ModelToDic<T>(T model) where T : class, new()
         {
             var dic = new Dictionary<string, object>();
             var info = new DynamicGet<T>();
-            PropertyInfo<T>(isCache).ForEach(a => {
-                dic.Add(a.Name, info.GetValue(model, a.Name, isCache));
+            PropertyInfo<T>().ForEach(a => {
+                dic.Add(a.Name, info.GetValue(model, a.Name));
             });
 
             return dic;
@@ -56,12 +56,12 @@ namespace FastUntility.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static List<T> DicToModel<T>(List<Dictionary<string, object>> dic, bool isCache = true) where T : class, new()
+        public static List<T> DicToModel<T>(List<Dictionary<string, object>> dic) where T : class, new()
         {
             var result = new List<T>();
 
             dic.ForEach(a => {
-                result.Add(DicToModel<T>(a, isCache));
+                result.Add(DicToModel<T>(a));
             });
 
             return result;
@@ -105,7 +105,6 @@ namespace FastUntility.Core.Base
     /// </summary>
     public class DynamicSet<T>
     {
-        private static bool IsSetCache;
         private static Action<object, string, object> SetValueDelegate;
 
         // 构建函数        
@@ -128,9 +127,8 @@ namespace FastUntility.Core.Base
         /// <param name="instance">类型</param>
         /// <param name="memberName">成员</param>
         /// <param name="newValue">值</param>
-        public void SetValue(T instance, string memberName, object newValue, bool IsCache)
+        public void SetValue(T instance, string memberName, object newValue)
         {
-            IsSetCache = IsCache;
             SetValueDelegate(instance, memberName, newValue);
         }
         #endregion
@@ -148,7 +146,7 @@ namespace FastUntility.Core.Base
             var nameHash = Expression.Variable(typeof(int), "nameHash");
             var calHash = Expression.Assign(nameHash, Expression.Call(memberName, typeof(object).GetMethod("GetHashCode")));
             var cases = new List<SwitchCase>();
-            foreach (var propertyInfo in BaseDic.PropertyInfo<T>(IsSetCache))
+            foreach (var propertyInfo in BaseDic.PropertyInfo<T>())
             {
                 var property = Expression.Property(Expression.Convert(instance, typeof(T)), propertyInfo.Name);
                 var setValue = Expression.Assign(property, Expression.Convert(newValue, propertyInfo.PropertyType));
@@ -168,7 +166,6 @@ namespace FastUntility.Core.Base
     /// </summary>
     public class DynamicGet<T>
     {
-        private static bool IsGetCache;
         private static Func<object, string, object> GetValueDelegate;
 
         // 构建函数        
@@ -191,9 +188,8 @@ namespace FastUntility.Core.Base
         /// <param name="instance">类型</param>
         /// <param name="memberName">成员</param>
         /// <returns></returns>
-        public object GetValue(T instance, string memberName, bool IsCache)
+        public object GetValue(T instance, string memberName)
         {
-            IsGetCache = IsCache;
             return GetValueDelegate(instance, memberName);
         }
         #endregion
@@ -211,7 +207,7 @@ namespace FastUntility.Core.Base
             var calHash = Expression.Assign(nameHash, Expression.Call(memberName, typeof(object).GetMethod("GetHashCode")));
             var cases = new List<SwitchCase>();
 
-            foreach (var propertyInfo in BaseDic.PropertyInfo<T>(IsGetCache))
+            foreach (var propertyInfo in BaseDic.PropertyInfo<T>())
             {
                 var property = Expression.Property(Expression.Convert(instance, typeof(T)), propertyInfo.Name);
                 var propertyHash = Expression.Constant(propertyInfo.Name.GetHashCode(), typeof(int));

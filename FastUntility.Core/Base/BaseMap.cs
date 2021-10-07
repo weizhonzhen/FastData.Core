@@ -44,7 +44,7 @@ namespace FastUntility.Core.Base
                     if (isList && !isLeafSystemType)
                     {
                         var leafList = Activator.CreateInstance(typeof(List<>).MakeGenericType(property.PropertyType.GetGenericArguments()[0]));
-                        var tempList = Convert.ChangeType(dynGet.GetValue(model, m.Name, true), m.PropertyType) as IEnumerable;
+                        var tempList = Convert.ChangeType(dynGet.GetValue(model, m.Name), m.PropertyType) as IEnumerable;
 
                         if (tempList != null)
                         {
@@ -65,19 +65,19 @@ namespace FastUntility.Core.Base
                                 var method = leafList.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
                                 method.Invoke(leafList, new object[] { leafModel });
                             }
-                            dynSet.SetValue(result, property.Name, leafList, true);
+                            dynSet.SetValue(result, property.Name, leafList);
                         }
                     }
                     else if (isSystemType)
                     {
                       if (m.PropertyType.Name == "Nullable`1" && m.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(result, property.Name, dynGet.GetValue(model, m.Name, true), true);
+                            dynSet.SetValue(result, property.Name, dynGet.GetValue(model, m.Name));
                         else
-                            dynSet.SetValue(result, property.Name, Convert.ChangeType(dynGet.GetValue(model, m.Name, true), m.PropertyType), true);
+                            dynSet.SetValue(result, property.Name, Convert.ChangeType(dynGet.GetValue(model, m.Name), m.PropertyType));
                     }
                     else
                     {
-                        var tempModel = Convert.ChangeType(dynGet.GetValue(model, m.Name, true), m.PropertyType);
+                        var tempModel = Convert.ChangeType(dynGet.GetValue(model, m.Name), m.PropertyType);
                         var leafModel = Activator.CreateInstance(property.PropertyType);
                         var propertyList = (property.PropertyType as TypeInfo).GetProperties().ToList();
 
@@ -89,7 +89,7 @@ namespace FastUntility.Core.Base
                                 temp.SetValue(leafModel, p.GetValue(tempModel));
                             }
                         });
-                        dynSet.SetValue(result, property.Name, leafModel, true);
+                        dynSet.SetValue(result, property.Name, leafModel);
                     }
                 }
                 else
@@ -98,9 +98,9 @@ namespace FastUntility.Core.Base
                     {
                         var temp = dic.ToList().Find(n => (n.Value as MemberExpression).Member.Name.ToLower() == m.Name.ToLower());
                         if (m.Name == "Nullable`1" && temp.Key.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(result, temp.Key.Name, dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name, true), true);
+                            dynSet.SetValue(result, temp.Key.Name, dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name));
                         else
-                            dynSet.SetValue(result, temp.Key.Name, Convert.ChangeType(dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name, true), m.PropertyType), true);
+                            dynSet.SetValue(result, temp.Key.Name, Convert.ChangeType(dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name), m.PropertyType));
                     }
                 }
             });
@@ -128,20 +128,20 @@ namespace FastUntility.Core.Base
             dic.ToList().ForEach(a =>
             {
                 var param = new Result();
-                dynResult.SetValue(param, "ParameterName", a.Key, true);
+                dynResult.SetValue(param, "ParameterName", a.Key);
                 if (a.Value is ConstantExpression)
-                    dynResult.SetValue(param, "Value", (a.Value as ConstantExpression).Value, true);
+                    dynResult.SetValue(param, "Value", (a.Value as ConstantExpression).Value);
                 else if (a.Value is MethodCallExpression)
-                    dynResult.SetValue(param, "Value", Expression.Lambda((a.Value as MethodCallExpression).ReduceExtensions().Reduce()).Compile().DynamicInvoke().ToString(), true);
+                    dynResult.SetValue(param, "Value", Expression.Lambda((a.Value as MethodCallExpression).ReduceExtensions().Reduce()).Compile().DynamicInvoke().ToString());
                 else if (a.Value is MemberExpression)
                 {
                     if ((a.Value as MemberExpression).Expression is ParameterExpression)
-                        dynResult.SetValue(param, "Value", dyn.GetValue(item, (a.Value as MemberExpression).Member.Name, true), true);
+                        dynResult.SetValue(param, "Value", dyn.GetValue(item, (a.Value as MemberExpression).Member.Name));
                     else
-                        dynResult.SetValue(param, "Value", Expression.Lambda(a.Value as MemberExpression).Compile().DynamicInvoke(), true);
+                        dynResult.SetValue(param, "Value", Expression.Lambda(a.Value as MemberExpression).Compile().DynamicInvoke());
                 }
                 else
-                    dynResult.SetValue(param, "Value", dyn.GetValue(item, a.Value.ToStr(), true), true);
+                    dynResult.SetValue(param, "Value", dyn.GetValue(item, a.Value.ToStr()));
 
                 result.Add(param);
             });
