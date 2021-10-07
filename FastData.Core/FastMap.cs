@@ -360,7 +360,16 @@ namespace FastData.Core
                             if (m.ReturnType.isSysType())
                                 throw new Exception($"FastReadAttribute[service:{a.Name}, method:{m.Name}, return type:{m.ReturnType} is not support]");
 
+                            model.isPage = read.isPage;
                             model.type = m.ReturnType;
+
+                            if (model.isPage && m.ReturnType.GetGenericArguments().Length > 0 && m.ReturnType == typeof(PageResult<>).MakeGenericType(new System.Type[] { m.ReturnType.GetGenericArguments()[0] }))
+                                model.type = m.ReturnType.GetGenericArguments()[0];
+                            else if (model.isPage && m.ReturnType == typeof(PageResult))
+                                model.type = null;
+                            else if (model.isPage)
+                                throw new Exception($"FastReadAttribute[service:{a.Name}, method:{m.Name}, read data by page , return type:{m.ReturnType} is not support]");
+
                             ServiceParam(m, model, config);
                         }
 
@@ -405,14 +414,26 @@ namespace FastData.Core
         /// <param name="model"></param>
         private static void ServiceParam(MethodInfo info, ServiceModel model, ConfigModel config)
         {
-            var dic = new Dictionary<int, string>();
+            if (model.isPage && !info.GetParameters().ToList().Exists(a => a.ParameterType == typeof(PageModel)))
+                throw new Exception($"FastReadAttribute[service:{info.DeclaringType.Name}, method:{info.Name}, read data by page , parameter type:{typeof(PageModel).FullName} not exists]");
 
             if (info.GetParameters().Length == 1 && info.GetParameters()[0].ParameterType.IsGenericType)
                 throw new Exception($"FastReadAttribute[service:{info.DeclaringType.Name}, method:{info.Name}, parameter type:{info.GetParameters()[0].ParameterType} is not support]");
-            else if (info.GetParameters().Length == 1 && !info.GetParameters()[0].ParameterType.isSysType())
+
+            var dic = new Dictionary<int, string>();
+            var isPageDic = (model.isPage && info.GetParameters().Length > 1 && info.GetParameters().ToList().Exists(a => a.ParameterType == typeof(Dictionary<string, object>)));
+            var isPageSysType = (model.isPage && info.GetParameters().Length > 1 && info.GetParameters().ToList().Exists(a => a.ParameterType.isSysType()));
+            var isDic = info.GetParameters().Length == 1 && info.GetParameters()[0].ParameterType == typeof(Dictionary<string, object>);
+            var isSysType = info.GetParameters().Length == 1 && info.GetParameters()[0].ParameterType.IsGenericType;
+
+            if (isDic || isPageDic)
+                model.isDic = true; 
+            else if (!isPageSysType && !isSysType)
             {
-                var pro = PropertyCache.GetPropertyInfo(Activator.CreateInstance(info.GetParameters()[0].ParameterType));
-                pro.ForEach(a => {
+                var type = info.GetParameters().ToList().Find(a => a.ParameterType != typeof(PageModel)).ParameterType;
+                var pro = PropertyCache.GetPropertyInfo(Activator.CreateInstance(type));
+                pro.ForEach(a =>
+                {
                     var key = string.Format("{0}{1}", config.Flag, a.Name).ToLower();
                     if (model.sql.IndexOf(key) > 0)
                     {
