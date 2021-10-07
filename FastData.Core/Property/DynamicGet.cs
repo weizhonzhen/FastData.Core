@@ -10,7 +10,6 @@ namespace FastData.Core.Property
     /// </summary>
     internal class DynamicGet<T>
     {
-        private bool IsGetCache;
         private Func<object, string, object> GetValueDelegate;
 
         // 构建函数        
@@ -33,9 +32,8 @@ namespace FastData.Core.Property
         /// <param name="instance">类型</param>
         /// <param name="memberName">成员</param>
         /// <returns></returns>
-        public object GetValue(T instance, string memberName, bool IsCache)
+        public object GetValue(T instance, string memberName)
         {
-            IsGetCache = IsCache;
             return GetValueDelegate(instance, memberName);
         }
         #endregion
@@ -53,7 +51,7 @@ namespace FastData.Core.Property
             var calHash = Expression.Assign(nameHash, Expression.Call(memberName, typeof(object).GetMethod("GetHashCode")));
             var cases = new List<SwitchCase>();
 
-            foreach (var propertyInfo in PropertyCache.GetPropertyInfo<T>(IsGetCache))
+            foreach (var propertyInfo in PropertyCache.GetPropertyInfo<T>())
             {
                 if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                     continue;
@@ -74,7 +72,6 @@ namespace FastData.Core.Property
     internal class DynamicGet
     {
         private object Instance;
-        private bool IsGetCache;
         private Func<object, string, object> GetValueDelegate;
 
         // 构建函数        
@@ -99,9 +96,8 @@ namespace FastData.Core.Property
         /// <param name="instance">类型</param>
         /// <param name="memberName">成员</param>
         /// <returns></returns>
-        public object GetValue(object instance, string memberName, bool IsCache)
+        public object GetValue(object instance, string memberName)
         {
-            IsGetCache = IsCache;
             return GetValueDelegate(instance, memberName);
         }
         #endregion
@@ -119,7 +115,7 @@ namespace FastData.Core.Property
             var calHash = Expression.Assign(nameHash, Expression.Call(memberName, typeof(object).GetMethod("GetHashCode")));
             var cases = new List<SwitchCase>();
 
-            foreach (var propertyInfo in PropertyCache.GetPropertyInfo(Instance, IsGetCache))
+            foreach (var propertyInfo in PropertyCache.GetPropertyInfo(Instance))
             {
                 if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                     continue;

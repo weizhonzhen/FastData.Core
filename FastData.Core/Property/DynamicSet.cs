@@ -10,7 +10,6 @@ namespace FastData.Core.Property
     /// </summary>
     internal class DynamicSet<T>
     {
-        private bool IsSetCache;
         private Action<object, string, object> SetValueDelegate;
 
         // 构建函数        
@@ -33,9 +32,8 @@ namespace FastData.Core.Property
         /// <param name="instance">类型</param>
         /// <param name="memberName">成员</param>
         /// <param name="newValue">值</param>
-        public void SetValue(T instance, string memberName, object newValue, bool IsCache)
+        public void SetValue(T instance, string memberName, object newValue)
         {
-            IsSetCache = IsCache;
             SetValueDelegate(instance, memberName, newValue);
         }
         #endregion
@@ -53,7 +51,7 @@ namespace FastData.Core.Property
             var nameHash = Expression.Variable(typeof(int), "nameHash");
             var calHash = Expression.Assign(nameHash, Expression.Call(memberName, typeof(object).GetMethod("GetHashCode")));
             var cases = new List<SwitchCase>();
-            foreach (var propertyInfo in PropertyCache.GetPropertyInfo<T>(IsSetCache))
+            foreach (var propertyInfo in PropertyCache.GetPropertyInfo<T>())
             {
                 if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                     continue;
@@ -77,7 +75,6 @@ namespace FastData.Core.Property
     internal class DynamicSet
     {
         private object Instance;
-        private bool IsSetCache;
         private Action<object, string, object> SetValueDelegate;
 
         // 构建函数        
@@ -101,9 +98,8 @@ namespace FastData.Core.Property
         /// <param name="instance">类型</param>
         /// <param name="memberName">成员</param>
         /// <param name="newValue">值</param>
-        public void SetValue(object instance, string memberName, object newValue, bool IsCache)
+        public void SetValue(object instance, string memberName, object newValue)
         {
-            IsSetCache = IsCache;
             SetValueDelegate(instance, memberName, newValue);
         }
         #endregion
@@ -122,7 +118,7 @@ namespace FastData.Core.Property
             var calHash = Expression.Assign(nameHash, Expression.Call(memberName, typeof(object).GetMethod("GetHashCode")));
             var cases = new List<SwitchCase>();
 
-            foreach (var propertyInfo in PropertyCache.GetPropertyInfo(Instance, IsSetCache))
+            foreach (var propertyInfo in PropertyCache.GetPropertyInfo(Instance))
             {
                 if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                     continue;

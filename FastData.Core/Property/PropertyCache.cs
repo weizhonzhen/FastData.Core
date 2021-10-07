@@ -126,7 +126,7 @@ namespace FastData.Core.Property
                     {
                         b.NamedArguments.ToList().ForEach(c => {
                             if (paramList.Exists(p => p.Name.ToLower() == c.MemberName.ToLower()))
-                                dynSet.SetValue(temp, c.MemberName, c.TypedValue.Value, true);
+                                dynSet.SetValue(temp, c.MemberName, c.TypedValue.Value);
                         });
                     }
                 });
