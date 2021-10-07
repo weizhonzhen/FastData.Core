@@ -91,7 +91,7 @@ namespace FastData.Core.Base
             list.ForEach(a => {
                 var row = dt.NewRow();
                 PropertyCache.GetPropertyInfo<T>().ForEach(p => {
-                    row[p.Name] = dyn.GetValue(a, p.Name, true);
+                    row[p.Name] = dyn.GetValue(a, p.Name);
                 });
                 dt.Rows.Add(row);
             });
@@ -168,7 +168,7 @@ namespace FastData.Core.Base
 
             list.ForEach(a => {
                 sql.Append("(");
-                PropertyCache.GetPropertyInfo<T>().ForEach(b => { sql.AppendFormat("'{0}',", dyn.GetValue(a, b.Name, true)); });
+                PropertyCache.GetPropertyInfo<T>().ForEach(b => { sql.AppendFormat("'{0}',", dyn.GetValue(a, b.Name)); });
                 sql.Append("),").Replace(",)", ")");
             });
 

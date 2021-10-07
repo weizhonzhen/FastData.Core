@@ -248,9 +248,9 @@ namespace FastData.Core.Base
                     if (!dr.IsDBNull(id))
                     {
                         if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, Nullable.GetUnderlyingType(info.PropertyType)), config.IsPropertyCache);
+                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, Nullable.GetUnderlyingType(info.PropertyType)));
                         else
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, info.PropertyType), config.IsPropertyCache);
+                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, info.PropertyType));
                     }
                 }
                 else
@@ -258,9 +258,9 @@ namespace FastData.Core.Base
                     if (!dr.IsDBNull(id))
                     {
                         if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), Nullable.GetUnderlyingType(info.PropertyType)), config.IsPropertyCache);
+                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), Nullable.GetUnderlyingType(info.PropertyType)));
                         else
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), info.PropertyType), config.IsPropertyCache);
+                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), info.PropertyType));
                     }
                 }
 
@@ -349,9 +349,9 @@ namespace FastData.Core.Base
                     if (!dr.IsDBNull(id))
                     {
                         if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, Nullable.GetUnderlyingType(info.PropertyType)), config.IsPropertyCache);
+                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, Nullable.GetUnderlyingType(info.PropertyType)));
                         else
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, info.PropertyType), config.IsPropertyCache);
+                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, info.PropertyType));
                     }
                 }
                 else
@@ -359,9 +359,9 @@ namespace FastData.Core.Base
                     if (!dr.IsDBNull(id))
                     {
                         if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), Nullable.GetUnderlyingType(info.PropertyType)), config.IsPropertyCache);
+                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), Nullable.GetUnderlyingType(info.PropertyType)));
                         else
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), info.PropertyType), config.IsPropertyCache);
+                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), info.PropertyType));
                     }
                 }
 
