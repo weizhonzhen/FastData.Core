@@ -15,6 +15,7 @@ namespace FastData.Core.Filter
         Query_Page_Lambda_Dic = 7,
         Query_Page_Lambda_Model = 8,
         Query_Page_Sql_Model = 9,
-        Query_Page_Sql_Dic = 10
+        Query_Page_Sql_Dic = 10,
+        FastRead_Page =11
     }
 }
