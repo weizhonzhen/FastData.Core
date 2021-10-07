@@ -41,7 +41,7 @@ namespace FastData.Core.Aop
 
         Navigate = 28,
         FastRead = 29,
-        FaseWrite = 30
-
+        FaseWrite = 30,
+        FastRead_Page = 31
     }
 }
