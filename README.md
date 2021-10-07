@@ -89,9 +89,11 @@ interface  Service
         TestResult readListModel(string userId, string kid);
         //TestResult readListModel(TestResult model);
         
-        
         [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId",isPage =true)]
         PageResult<TestResult> readPage(PageModel page ,Dictionary<string, object> item);
+        
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId",isPage =true)]
+        PageResult readPage1(PageModel page ,Dictionary<string, object> item);
 
         [FastWriteAttribute(dbKey = "Write", sql = "update TestResult set userName=?userName where userId=?userId")]
         WriteReturn update(string userName, string userId);
@@ -113,6 +115,7 @@ interface  Service
  var page = new PageModel();
  page.PageSize = 2;
  var pageData = testService.readPage(page,model);
+ var pageData1 = testService.readPage1(page,model);
  ```   
 in db.json         
 ```csharp
