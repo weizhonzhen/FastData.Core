@@ -73,30 +73,30 @@ interface  Service
 ```csharp
     public interface TestService
     {
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
         List<Dictionary<string, object>> readListDic(string userId, string kid);
         //List<Dictionary<string, object>> readListDic(TestResult model);
 
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
         Dictionary<string, object> readDic(string userId, string kid);
         //Dictionary<string, object> readDic(TestResult model);
 
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=:userId")]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
         List<TestResult> readModel(string userId, string kid);
         //List<TestResult> readModel(TestResult model);
 
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId")]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid")]
         TestResult readListModel(string userId, string kid);
         //TestResult readListModel(TestResult model);
         
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId",isPage =true)]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid",isPage =true)]
         PageResult<TestResult> readPage(PageModel page ,Dictionary<string, object> item);
         
-        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and userId=?userId",isPage =true)]
+        [FastReadAttribute(dbKey = "Write", sql = "select * from TestResult where userId=?userId and kid=?kid",isPage =true)]
         PageResult readPage1(PageModel page ,Dictionary<string, object> item);
 
-        [FastWriteAttribute(dbKey = "Write", sql = "update TestResult set userName=?userName where userId=?userId")]
-        WriteReturn update(string userName, string userId);
+        [FastWriteAttribute(dbKey = "Write", sql = "update TestResult set userName=?userName where kid=?kid")]
+        WriteReturn update(string userName, string kid);
         //WriteReturn update(TestResult model);
     }
 
