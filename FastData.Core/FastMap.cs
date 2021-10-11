@@ -421,14 +421,10 @@ namespace FastData.Core
                 throw new Exception($"FastReadAttribute[service:{info.DeclaringType.Name}, method:{info.Name}, parameter type:{info.GetParameters()[0].ParameterType} is not support]");
 
             var dic = new Dictionary<int, string>();
-            var isPageDic = (model.isPage && info.GetParameters().Length > 1 && info.GetParameters().ToList().Exists(a => a.ParameterType == typeof(Dictionary<string, object>)));
-            var isPageSysType = (model.isPage && info.GetParameters().Length > 1 && info.GetParameters().ToList().Exists(a => a.ParameterType.isSysType()));
-            var isDic = info.GetParameters().Length == 1 && info.GetParameters()[0].ParameterType == typeof(Dictionary<string, object>);
-            var isSysType = info.GetParameters().Length == 1 && info.GetParameters()[0].ParameterType.IsGenericType;
-
-            if (isDic || isPageDic)
+           
+            if (info.GetParameters().ToList().Exists(a => a.ParameterType == typeof(Dictionary<string, object>)))
                 model.isDic = true; 
-            else if (!isPageSysType && !isSysType)
+            else if (!info.GetParameters().ToList().Exists(a => a.ParameterType.isSysType()))
             {
                 var type = info.GetParameters().ToList().Find(a => a.ParameterType != typeof(PageModel)).ParameterType;
                 var pro = PropertyCache.GetPropertyInfo(Activator.CreateInstance(type));
