@@ -330,6 +330,7 @@ namespace FastData.Core
                         var model = new ServiceModel();
                         var read = m.GetCustomAttribute<FastReadAttribute>();
                         var write = m.GetCustomAttribute<FastWriteAttribute>();
+                        var map = m.GetCustomAttribute<FastMapAttribute>();
 
                         if (read != null)
                         {
@@ -337,61 +338,40 @@ namespace FastData.Core
                             model.isWrite = false;
                             model.sql = read.sql.ToLower();
                             model.dbKey = read.dbKey;
-                            config = DataConfig.Get(model.dbKey);
-
-                            if (m.ReturnType == typeof(Dictionary<string, object>))
-                                model.isList = false;
-                            else if (m.ReturnType == typeof(List<Dictionary<string, object>>))
-                                model.isList = true;
-                            else
-                            {
-                                model.isList = m.ReturnType.GetGenericArguments().Length > 0;
-                                System.Type argType;
-
-                                if (model.isList)
-                                    argType = m.ReturnType.GetGenericArguments()[0];
-                                else
-                                    argType = m.ReturnType;
-
-                                if (argType.isSysType())
-                                    throw new Exception($"FastReadAttribute[service:{a.Name}, method:{m.Name}, return type:{m.ReturnType} is not support]");
-                            }
-
-                            if (m.ReturnType.isSysType())
-                                throw new Exception($"FastReadAttribute[service:{a.Name}, method:{m.Name}, return type:{m.ReturnType} is not support]");
-
+                            config = DataConfig.Get(model.dbKey);                                                       
                             model.isPage = read.isPage;
                             model.type = m.ReturnType;
-
-                            if (model.isPage && m.ReturnType.GetGenericArguments().Length > 0 && m.ReturnType == typeof(PageResult<>).MakeGenericType(new System.Type[] { m.ReturnType.GetGenericArguments()[0] }))
-                                model.type = m.ReturnType.GetGenericArguments()[0];
-                            else if (model.isPage && m.ReturnType == typeof(PageResult))
-                                model.type = null;
-                            else if (model.isPage)
-                                throw new Exception($"FastReadAttribute[service:{a.Name}, method:{m.Name}, read data by page , return type:{m.ReturnType} is not support]");
-
                             ServiceParam(m, model, config);
                         }
 
                         if (write != null)
                         {
                             isRegister = true;
-
-                            if (m.ReturnType != typeof(WriteReturn))
-                                throw new Exception($"FastWriteAttribute[return type only WriteReturn, service:{a.Name}, method:{m.Name}, return type:{m.ReturnType} is not support]");
-
                             model.isWrite = true;
                             model.sql = write.sql.ToLower();
                             model.dbKey = write.dbKey;
                             model.type = m.ReturnType;
-                            model.isList = false;
                             config = DataConfig.Get(model.dbKey);
+                            ServiceParam(m, model, config);
+                            model.isList = false;
+                        }
+
+                        if (map != null)
+                        {
+                            isRegister = true;
+                            model.isWrite = false;
+                            model.isXml = true;
+                            model.dbKey = map.dbKey;
+                            model.isPage = map.isPage;
+                            model.type = m.ReturnType;
+                            config = DataConfig.Get(model.dbKey);
+                            MapXml.ReadFastMap(map.xml, m, config);
                             ServiceParam(m, model, config);
                         }
 
                         if (isRegister)
                         {
-                            var key = string.Format("{0}.{1}", a.Name, m.Name);
+                            var key = string.Format("{0}.{1}", a.FullName, m.Name);
                             DbCache.Set<ServiceModel>(config.CacheType, key, model);
                         }
                     });
@@ -414,16 +394,53 @@ namespace FastData.Core
         /// <param name="model"></param>
         private static void ServiceParam(MethodInfo info, ServiceModel model, ConfigModel config)
         {
+            if (info.ReturnType != typeof(WriteReturn) && model.isWrite)
+                throw new Exception($"[return type only WriteReturn, service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
+
+            if (string.IsNullOrEmpty(model.dbKey))
+                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, dbkey is not null]");
+
+            if (info.ReturnType.isSysType())
+                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
+
+            if (string.IsNullOrEmpty(model.sql) && !model.isXml)
+                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, sql is not null]");
+
             if (model.isPage && !info.GetParameters().ToList().Exists(a => a.ParameterType == typeof(PageModel)))
-                throw new Exception($"FastReadAttribute[service:{info.DeclaringType.Name}, method:{info.Name}, read data by page , parameter type:{typeof(PageModel).FullName} not exists]");
+                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, read data by page , parameter type:{typeof(PageModel).FullName} not exists]");
 
             if (info.GetParameters().Length == 1 && info.GetParameters()[0].ParameterType.IsGenericType)
-                throw new Exception($"FastReadAttribute[service:{info.DeclaringType.Name}, method:{info.Name}, parameter type:{info.GetParameters()[0].ParameterType} is not support]");
+                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, parameter type:{info.GetParameters()[0].ParameterType} is not support]");
+
+            if (model.isPage && info.ReturnType.GetGenericArguments().Length > 0 && info.ReturnType == typeof(PageResult<>).MakeGenericType(new System.Type[] { info.ReturnType.GetGenericArguments()[0] }))
+                model.type = info.ReturnType.GetGenericArguments()[0];
+            else if (model.isPage && info.ReturnType == typeof(PageResult))
+                model.type = null;
+            else if (model.isPage)
+                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, read data by page , return type:{info.ReturnType} is not support]");
+
+            if (info.ReturnType == typeof(Dictionary<string, object>) && (!model.isWrite || model.isXml))
+                model.isList = false;
+            else if (info.ReturnType == typeof(List<Dictionary<string, object>>) && (!model.isWrite || model.isXml))
+                model.isList = true;
+            else if (!model.isWrite || model.isXml)
+            {
+                model.isList = info.ReturnType.GetGenericArguments().Length > 0;
+                System.Type argType;
+
+                if (model.isList)
+                    argType = info.ReturnType.GetGenericArguments()[0];
+                else
+                    argType = info.ReturnType;
+
+                if (argType.isSysType())
+                    throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
+            }
 
             var dic = new Dictionary<int, string>();
-           
+
             if (info.GetParameters().ToList().Exists(a => a.ParameterType == typeof(Dictionary<string, object>)))
-                model.isDic = true; 
+                model.isDic = true;
             else if (!info.GetParameters().ToList().Exists(a => a.ParameterType.isSysType()))
             {
                 var type = info.GetParameters().ToList().Find(a => a.ParameterType != typeof(PageModel)).ParameterType;
@@ -431,7 +448,7 @@ namespace FastData.Core
                 pro.ForEach(a =>
                 {
                     var key = string.Format("{0}{1}", config.Flag, a.Name).ToLower();
-                    if (model.sql.IndexOf(key) > 0)
+                    if (!model.isXml && model.sql.IndexOf(key) > 0)
                     {
                         dic.Add(model.sql.IndexOf(key), a.Name);
                     }
@@ -442,7 +459,7 @@ namespace FastData.Core
                 for (int i = 0; i < info.GetParameters().Length; i++)
                 {
                     var key = string.Format("{0}{1}", config.Flag, info.GetParameters()[i].Name).ToLower();
-                    if (model.sql.IndexOf(key) > 0)
+                    if (!model.isXml && model.sql.IndexOf(key) > 0)
                     {
                         dic.Add(model.sql.IndexOf(key), info.GetParameters()[i].Name.ToLower());
                     }
@@ -458,6 +475,7 @@ namespace FastData.Core
             }
         }
         #endregion
+
 
         #region maq 执行返回结果
         /// <summary>
