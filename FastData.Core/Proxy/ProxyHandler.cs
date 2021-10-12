@@ -20,7 +20,7 @@ namespace FastData.Core.Proxy
             var pModel = new PageModel();
             var param = new List<DbParameter>();
             var config = DataConfig.Get();
-            var key = string.Format("{0}.{1}", method.DeclaringType.Name, method.Name);
+            var key = string.Format("{0}.{1}", method.DeclaringType.FullName, method.Name);
 
             if (DbCache.Exists(config.CacheType, key))
             {
@@ -30,13 +30,14 @@ namespace FastData.Core.Proxy
                     pModel = (PageModel)args.ToList().Find(a => a.GetType() == typeof(PageModel));
 
                 config = DataConfig.Get(model.dbKey);
-                if (model.isSysType)
+
+               if (model.isSysType)
                 {
                     for (int i = 0; i < args.Length; i++)
                     {
-                        if (args[i].GetType() == typeof(PageModel))                        
+                        if (args[i].GetType() == typeof(PageModel))
                             continue;
-                        
+
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = model.param.GetValue(i.ToString()).ToStr();
                         temp.Value = args[i];
@@ -48,15 +49,15 @@ namespace FastData.Core.Proxy
                     if (!args.ToList().Exists(a => a.GetType() == typeof(Dictionary<string, object>)))
                         throw new Exception($"error: service {method.DeclaringType.Name} , method {method.Name} , param type {args[0].GetType().Name} is not support");
 
-                    var dic = (Dictionary < string, object>)args.ToList().Find(a => a.GetType() == typeof(Dictionary<string, object>));
+                    var dic = (Dictionary<string, object>)args.ToList().Find(a => a.GetType() == typeof(Dictionary<string, object>));
                     var tempDic = new Dictionary<int, string>();
 
                     foreach (KeyValuePair<string, object> keyValue in dic)
                     {
                         key = string.Format("{0}{1}", config.Flag, keyValue.Key).ToLower();
-                        if (model.sql.IndexOf(key) > 0)
+                        if (model?.sql.IndexOf(key) > 0 || model.isXml)
                         {
-                            tempDic.Add(model.sql.IndexOf(key), keyValue.Key);
+                            tempDic.Add((int)(model?.sql.IndexOf(key)), keyValue.Key);
                         }
                     }
                     var list = tempDic.OrderBy(d => d.Key).ToList();
@@ -83,6 +84,10 @@ namespace FastData.Core.Proxy
                         param.Add(temp);
                     }
                 }
+
+
+                if (model.isXml)
+                    model.sql = MapXml.GetFastMapSql(method, config, args, ref param);
 
                 using (var db = new DataContext(config.Key))
                 {
