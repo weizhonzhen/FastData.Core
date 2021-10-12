@@ -29,7 +29,7 @@ namespace FastData.Core.Base
         /// <param name="name"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static int MapForEachCount(string name, ConfigModel config)
+        internal static int MapForEachCount(string name, ConfigModel config)
         {
             return DbCache.Get(config.CacheType, string.Format("{0}.foreach", name.ToLower())).ToInt(1);
         }
@@ -401,13 +401,24 @@ namespace FastData.Core.Base
         }
         #endregion
 
+        #region fastmap sql
+        internal static string GetFastMapSql(MethodInfo methodInfo,ConfigModel config, object[] args, ref List<DbParameter> param)
+        {
+            var temp = param.ToArray();
+            var key = string.Format("{0}.{1}", methodInfo.DeclaringType.FullName, methodInfo.Name);
+            var sql = GetMapSql(key, ref temp, null, config.Key);
+            param = temp.ToList();
+            return sql;
+        }
+        #endregion
+
         #region 是否foreach
         /// <summary>
         /// 是否foreach
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static bool MapIsForEach(string name, ConfigModel config, int i = 1)
+        internal static bool MapIsForEach(string name, ConfigModel config, int i = 1)
         {
             var keyName = string.Format("{0}.foreach.name.{1}", name.ToLower(), i);
             var keyField = string.Format("{0}.foreach.field.{1}", name.ToLower(), i);
@@ -427,7 +438,7 @@ namespace FastData.Core.Base
         /// <param name="db"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static List<Dictionary<string, object>> MapForEach(List<Dictionary<string, object>> data, string name, DataContext db,string key, ConfigModel config, int i = 1)
+        internal static List<Dictionary<string, object>> MapForEach(List<Dictionary<string, object>> data, string name, DataContext db,string key, ConfigModel config, int i = 1)
         {
             var result = new List<Dictionary<string, object>>();
             var param = new List<DbParameter>();
@@ -473,7 +484,7 @@ namespace FastData.Core.Base
         /// <param name="db"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static List<T> MapForEach<T>(List<T> data, string name, DataContext db, ConfigModel config, int i = 1) where T : class, new()
+        internal static List<T> MapForEach<T>(List<T> data, string name, DataContext db, ConfigModel config, int i = 1) where T : class, new()
         {
             var result = new List<T>();
             var param = new List<DbParameter>();
@@ -566,7 +577,7 @@ namespace FastData.Core.Base
         /// <param name="dbKey"></param>
         /// <param name="key"></param>
         /// <param name="info"></param>
-        public static bool SaveXml(string dbKey, string key, FileInfo info, ConfigModel config, DataContext db)
+        internal static bool SaveXml(string dbKey, string key, FileInfo info, ConfigModel config, DataContext db)
         {
             if (config.IsMapSave)
             {
@@ -651,7 +662,7 @@ namespace FastData.Core.Base
         /// <summary>
         /// 读取xml map并缓存
         /// </summary>
-        public static List<string> ReadXml(string path, ConfigModel config, string fileName,string xml = null)
+        internal static List<string> ReadXml(string path, ConfigModel config, string fileName,string xml = null)
         {
             var map = DbCache.Get<Dictionary<string, object>>(DataConfig.Get().CacheType, "FastMap.Api") ?? new Dictionary<string, object>();
             var result = GetXmlList(path, "sqlMap", config, xml);
@@ -704,6 +715,29 @@ namespace FastData.Core.Base
         }
         #endregion
 
+        #region 读取fastmap xml 并缓存
+        /// <summary>
+        /// 读取fastmap xml 并缓存
+        /// </summary>
+        /// <param name="xml"></param>
+        /// <param name="methodInfo"></param>
+        internal static void ReadFastMap(string xml, MethodInfo methodInfo,ConfigModel config)
+        {
+            var key = string.Format("{0}.{1}", methodInfo.DeclaringType.FullName, methodInfo.Name).ToLower();
+            var result = GetXmlList(null, "sqlMap", config, string.Format("<sqlMap>{0}</sqlMap>", xml),key);
+
+            for (var i = 0; i < result.key.Count; i++)
+            {
+                DbCache.Set(config.CacheType, result.key[i].ToLower(), result.sql[i]);
+            }
+
+            result.param.ToList().ForEach(a => {
+                DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", a.Key.ToLower()), a.Value as List<string>);
+                result.key.Add(string.Format("{0}.param", a.Key.ToLower()));
+            });
+        }
+        #endregion
+
         #region 返回字符串列表
         /// <summary>
         /// 返回字符串列表
@@ -711,7 +745,7 @@ namespace FastData.Core.Base
         /// <param name="path">文件名</param>
         /// <param name="xmlNode">结点</param>
         /// <returns></returns>
-        public static XmlModel GetXmlList(string path, string xmlNode, ConfigModel config,string xml=null)
+        internal static XmlModel GetXmlList(string path, string xmlNode, ConfigModel config,string xml=null,string id =null)
         {
             var result = new XmlModel();
             result.isSuccess = true;
@@ -751,7 +785,10 @@ namespace FastData.Core.Base
                         {
                             var tempParam = new List<string>();
                             #region XmlElement
-                            tempKey = temp.Attributes["id"].Value.ToLower();
+                            if (id == null)
+                                tempKey = temp.Attributes["id"].Value.ToLower();
+                            else
+                                tempKey = id;
 
                             //节点数
                             if (Array.Exists(result.key.ToArray(), element => element == tempKey))
@@ -963,10 +1000,17 @@ namespace FastData.Core.Base
                         else if (temp is XmlText)
                         {
                             #region XmlText
-                            result.key.Add(string.Format("{0}.{1}", item.Attributes["id"].Value.ToLower(), i));
+                            if (id == null)
+                                result.key.Add(string.Format("{0}.{1}", item.Attributes["id"].Value.ToLower(), i));
+                            else
+                                result.key.Add(string.Format("{0}.{1}", id.ToLower(), i));
+
                             result.sql.Add(temp.InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
 
-                            result.key.Add(item.Attributes["id"].Value.ToLower());
+                            if (id == null)
+                                result.key.Add(item.Attributes["id"].Value.ToLower());
+                            else
+                                result.key.Add(id);
                             result.sql.Add("0");
                             #endregion
                         }
@@ -989,13 +1033,12 @@ namespace FastData.Core.Base
         }
         #endregion
 
-
         #region 初始化建日记表
         /// <summary>
         /// 初始化建日记表
         /// </summary>
         /// <param name="query"></param>
-        public static void CreateLogTable(DataQuery query)
+        internal static void CreateLogTable(DataQuery query)
         {
             if (query.Config.SqlErrorType.ToLower() == SqlErrorType.Db)
             {
