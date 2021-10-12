@@ -98,6 +98,22 @@ interface  Service
         [FastWriteAttribute(dbKey = "Write", sql = "update TestResult set userName=?userName where kid=?kid")]
         WriteReturn update(string userName, string kid);
         //WriteReturn update(TestResult model);
+        
+        [FastMap(dbKey = "Write", xml = @"<select>select a.DNAME, a.GH, a.DID from TestResult a where rownum &lt;= 15
+                            <dynamic prepend=' '>
+                                <isNotNullOrEmpty prepend=' and ' property='userName'>userName=:userName'</isNotNullOrEmpty>
+                                <isNotNullOrEmpty prepend=' and ' property='userId'>userId=:userId</isNotNullOrEmpty>
+                            </dynamic>
+                            order by a.REGISTDATE</select>",isPage =true)]
+        PageResult read_MapPage(PageModel page ,Dictionary<string, object> item);
+        
+         [FastMap(dbKey = "Write", xml = @"<select>select a.DNAME, a.GH, a.DID from TestResult a where rownum &lt;= 15
+                            <dynamic prepend=' '>
+                                <isNotNullOrEmpty prepend=' and ' property='userName'>userName=:userName'</isNotNullOrEmpty>
+                                <isNotNullOrEmpty prepend=' and ' property='userId'>userId=:userId</isNotNullOrEmpty>
+                            </dynamic>
+                            order by a.REGISTDATE</select>")]
+        List<TestResult> read_Map(Dictionary<string, object> item);
     }
 
 //ioc  
@@ -115,7 +131,9 @@ interface  Service
  var page = new PageModel();
  page.PageSize = 2;
  var pageData = testService.readPage(page,model);
- var pageData1 = testService.readPage1(page,model);
+ var pageData1 = testService.readPage1(page,model); 
+ var page1 = testService.read_MapPage(page,model); 
+ var page2 = testService.read_Map(model);
  ```   
 in db.json         
 ```csharp
