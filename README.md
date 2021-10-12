@@ -99,7 +99,7 @@ interface  Service
         WriteReturn update(string userName, string kid);
         //WriteReturn update(TestResult model);
         
-        [FastMap(dbKey = "Write", xml = @"<select>select a.DNAME, a.GH, a.DID from TestResult a where rownum &lt;= 15
+        [FastMapAttribute(dbKey = "Write", xml = @"<select>select a.DNAME, a.GH, a.DID from TestResult a where rownum &lt;= 15
                             <dynamic prepend=' '>
                                 <isNotNullOrEmpty prepend=' and ' property='userName'>userName=:userName'</isNotNullOrEmpty>
                                 <isNotNullOrEmpty prepend=' and ' property='userId'>userId=:userId</isNotNullOrEmpty>
@@ -107,7 +107,7 @@ interface  Service
                             order by a.REGISTDATE</select>",isPage =true)]
         PageResult read_MapPage(PageModel page ,Dictionary<string, object> item);
         
-         [FastMap(dbKey = "Write", xml = @"<select>select a.DNAME, a.GH, a.DID from TestResult a where rownum &lt;= 15
+         [FastMapAttribute(dbKey = "Write", xml = @"<select>select a.DNAME, a.GH, a.DID from TestResult a where rownum &lt;= 15
                             <dynamic prepend=' '>
                                 <isNotNullOrEmpty prepend=' and ' property='userName'>userName=:userName'</isNotNullOrEmpty>
                                 <isNotNullOrEmpty prepend=' and ' property='userId'>userId=:userId</isNotNullOrEmpty>
