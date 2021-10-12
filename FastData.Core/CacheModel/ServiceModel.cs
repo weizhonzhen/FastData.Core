@@ -22,5 +22,7 @@ namespace FastData.Core.CacheModel
         public bool isDic { get; set; }
 
         public bool isPage { get; set; }
+
+        public bool isXml { get; set; }
     }
 }
