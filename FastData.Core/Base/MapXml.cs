@@ -402,7 +402,7 @@ namespace FastData.Core.Base
         #endregion
 
         #region fastmap sql
-        internal static string GetFastMapSql(MethodInfo methodInfo,ConfigModel config, object[] args, ref List<DbParameter> param)
+        internal static string GetFastMapSql(MethodInfo methodInfo,ConfigModel config, ref List<DbParameter> param)
         {
             var temp = param.ToArray();
             var key = string.Format("{0}.{1}", methodInfo.DeclaringType.FullName, methodInfo.Name);
