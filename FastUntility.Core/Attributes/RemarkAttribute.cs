@@ -5,7 +5,7 @@ namespace FastUntility.Core.Attributes
     /// <summary>
     /// 特性
     /// </summary>
-    [AttributeUsage(AttributeTargets.Enum)]
+    //[AttributeUsage(AttributeTargets.Enum)]
     public sealed class RemarkAttribute : Attribute
     {
         private string m_value = "";
