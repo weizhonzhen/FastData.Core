@@ -26,11 +26,15 @@ namespace FastData.Core.Base
         public static List<T> ToList<T>(DbDataReader dr, ConfigModel config, List<string> field = null) where T : class,new()
         {
             var list = new List<T>();
+            var colList = new List<string>();
             var dynSet = new DynamicSet<T>();
 
             if (dr == null)
                 return list;
-            
+
+            if (dr.HasRows)
+                colList = GetCol(dr);
+
             var propertyList = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
 
             while (dr.Read())
@@ -41,6 +45,9 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
+                        if (!colList.Exists(a => a.ToLower() == info.Name.ToLower()))
+                            continue;
+
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                             continue;
 
@@ -51,6 +58,9 @@ namespace FastData.Core.Base
                 {
                     for (var i = 0; i < field.Count; i++)
                     {
+                        if (!colList.Exists(a => a.ToLower() == field[i].ToLower()))
+                            continue;
+
                         if (propertyList.Exists(a => a.Name.ToLower() == field[i].ToLower()))
                         {
                             var info = propertyList.Find(a => a.Name.ToLower() == field[i].ToLower());
@@ -77,10 +87,14 @@ namespace FastData.Core.Base
         public static IList ToList(System.Type type,Object model, DbDataReader dr, ConfigModel config, List<string> field = null)
         {
             var list = Activator.CreateInstance(type);
+            var colList = new List<string>();
             var dynSet = new DynamicSet(model);
 
             if (dr == null)
                 return null;
+
+            if (dr.HasRows)
+                colList = GetCol(dr);
 
             var propertyList = PropertyCache.GetPropertyInfo(model,config.IsPropertyCache);
 
@@ -92,6 +106,9 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
+                        if (!colList.Exists(a => a.ToLower() == info.Name.ToLower()))
+                            continue;
+
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                             continue;
 
@@ -102,6 +119,9 @@ namespace FastData.Core.Base
                 {
                     for (var i = 0; i < field.Count; i++)
                     {
+                        if (!colList.Exists(a => a.ToLower() == field[i].ToLower()))
+                            continue;
+
                         if (propertyList.Exists(a => a.Name.ToLower() == field[i].ToLower()))
                         {
                             var info = propertyList.Find(a => a.Name.ToLower() == field[i].ToLower());
@@ -133,10 +153,14 @@ namespace FastData.Core.Base
         public static Object ToModel(Object model, DbDataReader dr, ConfigModel config, List<string> field = null)
         {
             var result = Activator.CreateInstance(model.GetType());
+            var colList = new List<string>();
             var dynSet = new DynamicSet(model);
 
             if (dr == null)
                 return null;
+
+            if (dr.HasRows)
+                colList = GetCol(dr);
 
             var propertyList = PropertyCache.GetPropertyInfo(model, config.IsPropertyCache);
 
@@ -146,6 +170,9 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
+                        if (!colList.Exists(a => a.ToLower() == info.Name.ToLower()))
+                            continue;
+
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                             continue;
 
@@ -156,6 +183,9 @@ namespace FastData.Core.Base
                 {
                     for (var i = 0; i < field.Count; i++)
                     {
+                        if (!colList.Exists(a => a.ToLower() == field[i].ToLower()))
+                            continue;
+
                         if (propertyList.Exists(a => a.Name.ToLower() == field[i].ToLower()))
                         {
                             var info = propertyList.Find(a => a.Name.ToLower() == field[i].ToLower());
@@ -184,9 +214,6 @@ namespace FastData.Core.Base
             try
             {
                 var colName = config.DbType == DataDbType.Oracle ? info.Name.ToUpper() : info.Name;
-                if (!dr.GetColumnSchema().ToList().Exists(a => a.ColumnName == colName))
-                    return item;
-
                 var id = dr.GetOrdinal(colName);
                 if (DataDbType.Oracle == config.DbType)
                 {
@@ -289,9 +316,6 @@ namespace FastData.Core.Base
             try
             {
                 var colName = config.DbType == DataDbType.Oracle ? info.Name.ToUpper() : info.Name;
-                if (!dr.GetColumnSchema().ToList().Exists(a => a.ColumnName == colName))
-                    return item;
-
                 var id = dr.GetOrdinal(colName);
                 if (DataDbType.Oracle == config.DbType)
                 {
@@ -380,6 +404,19 @@ namespace FastData.Core.Base
                 return item; 
             }
         }
+        #endregion
+
+        #region get datareader col
+        private static List<string> GetCol(DbDataReader dr)
+        {
+            var list = new List<string>();
+            for (var i = 0; i < dr.FieldCount; i++)
+            {
+                list.Add(dr.GetName(i));
+            }
+            return list;
+        }
+
         #endregion
     }
 }
