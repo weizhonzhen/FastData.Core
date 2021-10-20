@@ -63,7 +63,7 @@ namespace FastData.Core.Check
                     result.AddName.Add(GetColumnType(modelItem, type, name));
             }
 
-            if (modelItem.DataType.ToLower() != cacheItem.DataType.ToLower())
+            if (modelItem.DataType.ToLower() != cacheItem.DataType.ToStr().ToLower())
             {
                 result.IsUpdate = true;
                 result.Type.Add(GetColumnType(modelItem, type, name));
