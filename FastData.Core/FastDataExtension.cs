@@ -28,6 +28,11 @@ namespace Microsoft.Extensions.DependencyInjection
             if (config.aop != null)
                 serviceCollection.AddSingleton<IFastAop>(config.aop);
 
+            if (!string.IsNullOrEmpty(config.NamespaceService))
+                FastMap.InstanceService(serviceCollection, config.NamespaceService);
+
+            ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
+
             var projectName = Assembly.GetCallingAssembly().GetName().Name;
             if (config.IsResource)
                 FastMap.InstanceMapResource(config.dbKey, config.dbFile, config.mapFile, projectName);
@@ -56,11 +61,6 @@ namespace Microsoft.Extensions.DependencyInjection
                       FastMap.InstanceProperties(b.Namespace, config.dbFile);
               });
             }
-
-            if (!string.IsNullOrEmpty(config.NamespaceService))
-                FastMap.InstanceService(serviceCollection, config.NamespaceService);
-
-            ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
             return serviceCollection;
         }
 
