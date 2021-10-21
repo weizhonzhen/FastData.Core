@@ -12,24 +12,25 @@ namespace FastRedis.Core.Repository
         private ConnectionMultiplexer Context;
         public RedisRepository(IOptions<ConfigModel> options)
         {
-            if (options == null)
+            try
             {
-                try
+                if (options == null || options.Value.Server == null)
                 {
                     var config = BaseConfig.GetValue<ConfigModel>(AppSettingKey.Redis, "db.json");
                     _db = config.Db;
                     Context = ConnectionMultiplexer.Connect(config.Server);
                 }
-                catch
+                else
                 {
-                    throw new Exception("services.AddFastRedis(a => { a.Server = 'redis address' });");
+                    var config = options.Value;
+                    _db = config.Db;
+                    Context = ConnectionMultiplexer.Connect(config.Server);
                 }
             }
-            else
+            catch
             {
-                var config = options.Value;
-                _db = config.Db;
-                Context = ConnectionMultiplexer.Connect(config.Server);
+                throw new Exception(@"services.AddFastRedis(a => { a.Server = 'redis address' }); 
+                                    or ( services.AddFastRedis(); and db.json add 'Redis':{'Server':'redis address'} )");
             }
         }
 
