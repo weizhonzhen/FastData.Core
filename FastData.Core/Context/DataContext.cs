@@ -1128,7 +1128,7 @@ namespace FastData.Core.Context
                 else if (isTrans && result.writeReturn.IsSuccess == false)
                     RollbackTrans();
 
-                BaseAop.AopAfter(tableName, sql.ToString(), visitModel.Param, config, false, AopType.Delete_Lambda, result.writeReturn.IsSuccess);
+                BaseAop.AopAfter(tableName, sql.ToString(), visitModel.Param, config, false, AopType.Delete_Lambda, result.writeReturn);
             }
             catch (Exception ex)
             {
@@ -1177,7 +1177,7 @@ namespace FastData.Core.Context
                     cmd.Parameters.AddRange(optionModel.Param.ToArray());
 
                 tableName.Add(typeof(T).Name);
-                BaseAop.AopBefore(tableName, optionModel.Sql, optionModel.Param, config, false, AopType.Delete_PrimaryKey);
+                BaseAop.AopBefore(tableName, optionModel.Sql, optionModel.Param, config, false, AopType.Delete_PrimaryKey,model);
 
                 if (optionModel.IsSuccess)
                     result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, optionModel.Sql);
@@ -1192,11 +1192,11 @@ namespace FastData.Core.Context
                 else if (isTrans && result.writeReturn.IsSuccess == false)
                     RollbackTrans();
 
-                BaseAop.AopAfter(tableName, optionModel.Sql, optionModel.Param, config, false, AopType.Delete_PrimaryKey, result.writeReturn.IsSuccess);
+                BaseAop.AopAfter(tableName, optionModel.Sql, optionModel.Param, config, false, AopType.Delete_PrimaryKey, result.writeReturn,model);
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, "Delete by Primary Key tableName" + typeof(T).Name, AopType.Delete_PrimaryKey, config);
+                BaseAop.AopException(ex, "Delete by Primary Key tableName" + typeof(T).Name, AopType.Delete_PrimaryKey, config,model);
 
                 if (isTrans)
                     RollbackTrans();
@@ -1254,7 +1254,7 @@ namespace FastData.Core.Context
                     result.sql = ParameterToSql.ObjectParamToSql(Parameter.ParamMerge(update.Param, visitModel.Param), sql, config);
 
                     tableName.Add(typeof(T).Name);
-                    BaseAop.AopBefore(tableName, sql, Parameter.ParamMerge(update.Param, visitModel.Param), config, false, AopType.Update_Lambda);
+                    BaseAop.AopBefore(tableName, sql, Parameter.ParamMerge(update.Param, visitModel.Param), config, false, AopType.Update_Lambda,model);
 
                     if (visitModel.IsSuccess)
                         result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, sql);
@@ -1272,11 +1272,11 @@ namespace FastData.Core.Context
                 else if (isTrans && result.writeReturn.IsSuccess == false)
                     RollbackTrans();
 
-                BaseAop.AopAfter(tableName, sql, Parameter.ParamMerge(update.Param, visitModel.Param), config, false, AopType.Update_Lambda, result.writeReturn.IsSuccess);
+                BaseAop.AopAfter(tableName, sql, Parameter.ParamMerge(update.Param, visitModel.Param), config, false, AopType.Update_Lambda, result.writeReturn,model);
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, "Update by Lambda tableName:" + typeof(T).Name, AopType.Update_Lambda, config);
+                BaseAop.AopException(ex, "Update by Lambda tableName:" + typeof(T).Name, AopType.Update_Lambda, config,model);
 
                 if (isTrans)
                     RollbackTrans();
@@ -1323,7 +1323,7 @@ namespace FastData.Core.Context
                     result.sql = ParameterToSql.ObjectParamToSql(update.Param, update.Sql, config);
 
                     tableName.Add(typeof(T).Name);
-                    BaseAop.AopBefore(tableName, update.Sql, update.Param, config, false, AopType.Update_PrimaryKey);
+                    BaseAop.AopBefore(tableName, update.Sql, update.Param, config, false, AopType.Update_PrimaryKey,model);
 
                     result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, update.Sql);
                 }
@@ -1338,11 +1338,11 @@ namespace FastData.Core.Context
                 else if (isTrans && result.writeReturn.IsSuccess == false)
                     RollbackTrans();
 
-                BaseAop.AopAfter(tableName, update.Sql, update.Param, config, false, AopType.Update_PrimaryKey, result.writeReturn.IsSuccess);
+                BaseAop.AopAfter(tableName, update.Sql, update.Param, config, false, AopType.Update_PrimaryKey, result.writeReturn,model);
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, "Update by Primary Key tableName:" + typeof(T).Name, AopType.Update_PrimaryKey, config);
+                BaseAop.AopException(ex, "Update by Primary Key tableName:" + typeof(T).Name, AopType.Update_PrimaryKey, config,model);
 
                 if (isTrans)
                     RollbackTrans();
@@ -1402,7 +1402,7 @@ namespace FastData.Core.Context
                         result.sql = ParameterToSql.ObjectParamToSql(update.Param, update.Sql, config);
 
                         tableName.Add(typeof(T).Name);
-                        BaseAop.AopBefore(tableName, update.Sql, update.Param, config, false, AopType.UpdateList);
+                        BaseAop.AopBefore(tableName, update.Sql, update.Param, config, false, AopType.UpdateList, list);
 
                         result.writeReturn.IsSuccess = adapter.Update(update.table) > 0;
                         if (result.writeReturn.IsSuccess)
@@ -1410,7 +1410,7 @@ namespace FastData.Core.Context
                         else
                             RollbackTrans();
 
-                        BaseAop.AopAfter(tableName, update.Sql, update.Param, config, false, AopType.UpdateList, result.writeReturn.IsSuccess);
+                        BaseAop.AopAfter(tableName, update.Sql, update.Param, config, false, AopType.UpdateList, result.writeReturn,list);
                     }
                 }
                 else
@@ -1421,7 +1421,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, "Update List tableName:" + typeof(T).Name, AopType.UpdateList, config);
+                BaseAop.AopException(ex, "Update List tableName:" + typeof(T).Name, AopType.UpdateList, config,list);
 
                 if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
                     DbLogTable.LogException<T>(config, ex, "UpdateList<T>", "");
@@ -1466,7 +1466,7 @@ namespace FastData.Core.Context
                         cmd.Parameters.AddRange(insert.Param.ToArray());
 
                     tableName.Add(typeof(T).Name);
-                    BaseAop.AopBefore(tableName, insert.Sql, insert.Param, config, false, AopType.Add);
+                    BaseAop.AopBefore(tableName, insert.Sql, insert.Param, config, false, AopType.Add,model);
 
                     result.writeReturn.IsSuccess = BaseExecute.ToBool(cmd, insert.Sql);
 
@@ -1475,7 +1475,7 @@ namespace FastData.Core.Context
                     else if (isTrans && result.writeReturn.IsSuccess == false)
                         RollbackTrans();
 
-                    BaseAop.AopAfter(tableName, insert.Sql, insert.Param, config, false, AopType.Add, result.writeReturn.IsSuccess);
+                    BaseAop.AopAfter(tableName, insert.Sql, insert.Param, config, false, AopType.Add, result.writeReturn,model);
 
                     return result;
                 }
@@ -1484,7 +1484,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, "Add tableName: " + typeof(T).Name, AopType.Add, config);
+                BaseAop.AopException(ex, "Add tableName: " + typeof(T).Name, AopType.Add, config,model);
 
                 if (isTrans)
                     RollbackTrans();
@@ -1580,7 +1580,7 @@ namespace FastData.Core.Context
                     cmd.CommandText = sql.ToString().Replace(",)", ")");
 
                     tableName.Add(typeof(T).Name);
-                    BaseAop.AopBefore(tableName, cmd.CommandText, null, config, false, AopType.AddList);
+                    BaseAop.AopBefore(tableName, cmd.CommandText, null, config, false, AopType.AddList, list);
 
                     result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
 
@@ -1628,7 +1628,7 @@ namespace FastData.Core.Context
                     cmd.CommandText = CommandParam.GetTvps<T>();
 
                     tableName.Add(typeof(T).Name);
-                    BaseAop.AopBefore(tableName, cmd.CommandText, null, config, false, AopType.AddList);
+                    BaseAop.AopBefore(tableName, cmd.CommandText, null, config, false, AopType.AddList, list);
 
                     result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
                     #endregion
@@ -1641,7 +1641,7 @@ namespace FastData.Core.Context
                     cmd.CommandText = CommandParam.GetMySql<T>(list);
 
                     tableName.Add(typeof(T).Name);
-                    BaseAop.AopBefore(tableName, cmd.CommandText, null, config, false, AopType.AddList);
+                    BaseAop.AopBefore(tableName, cmd.CommandText, null, config, false, AopType.AddList, list);
 
                     result.writeReturn.IsSuccess = cmd.ExecuteNonQuery() > 0;
                     #endregion
@@ -1661,11 +1661,11 @@ namespace FastData.Core.Context
                 else if (result.writeReturn.IsSuccess == false && IsTrans)
                     RollbackTrans();
 
-                BaseAop.AopAfter(tableName, cmd.CommandText, null, config, false, AopType.AddList, result.writeReturn.IsSuccess);
+                BaseAop.AopAfter(tableName, cmd.CommandText, null, config, false, AopType.AddList, result.writeReturn, list);
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, "Add List tableName:" + typeof(T).Name, AopType.AddList, config);
+                BaseAop.AopException(ex, "Add List tableName:" + typeof(T).Name, AopType.AddList, config,list);
 
                 if (IsTrans)
                     RollbackTrans();
@@ -1726,7 +1726,7 @@ namespace FastData.Core.Context
                     RollbackTrans();
 
                 if (isAop)
-                    BaseAop.AopAfter(null, sql, param?.ToList(), config, false, type, result.writeReturn.IsSuccess);
+                    BaseAop.AopAfter(null, sql, param?.ToList(), config, false, type, result.writeReturn);
             }
             catch (Exception ex)
             {
