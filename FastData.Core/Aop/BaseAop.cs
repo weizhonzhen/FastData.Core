@@ -18,7 +18,7 @@ namespace FastData.Core.Aop
         /// <param name="name"></param>
         /// <param name="param"></param>
         /// <param name="config"></param>
-        public static void AopBefore(List<string> tableName, string sql, List<DbParameter> param, ConfigModel config, bool isRead, AopType type)
+        public static void AopBefore(List<string> tableName, string sql, List<DbParameter> param, ConfigModel config, bool isRead, AopType type,object model=null)
         {
             IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
@@ -37,6 +37,7 @@ namespace FastData.Core.Aop
                 context.isRead = isRead;
                 context.isWrite = !isRead;
                 context.type = type;
+                context.model = model;
 
                 aop.Before(context);
             }
@@ -51,7 +52,7 @@ namespace FastData.Core.Aop
         /// <param name="name"></param>
         /// <param name="param"></param>
         /// <param name="config"></param>
-        public static void AopAfter(List<string> tableName, string sql, List<DbParameter> param, ConfigModel config, bool isRead, AopType type, object result)
+        public static void AopAfter(List<string> tableName, string sql, List<DbParameter> param, ConfigModel config, bool isRead, AopType type, object result, object model = null)
         {
             IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
@@ -71,6 +72,7 @@ namespace FastData.Core.Aop
                 context.isWrite = !isRead;
                 context.result = result;
                 context.type = type;
+                context.model = model;
 
                 aop.After(context);
             }
@@ -83,7 +85,7 @@ namespace FastData.Core.Aop
         /// </summary>
         /// <param name="ex"></param>
         /// <param name="name"></param>
-        public static void AopException(Exception ex, string name, AopType type, ConfigModel config)
+        public static void AopException(Exception ex, string name, AopType type, ConfigModel config, object model = null)
         {
             IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
@@ -93,6 +95,7 @@ namespace FastData.Core.Aop
                 context.type = type;
                 context.ex = ex;
                 context.dbType = config?.DbType;
+                context.model = model;
 
                 aop.Exception(context);
             }

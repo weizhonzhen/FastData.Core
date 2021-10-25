@@ -20,5 +20,7 @@ namespace FastData.Core.Aop
         public bool isWrite { get; internal set; } = true;
 
         public AopType type { get; internal set; }
+
+        public object model { get; internal set; }
     }
 }

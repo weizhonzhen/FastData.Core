@@ -11,5 +11,7 @@ namespace FastData.Core.Aop
         public string name { get; internal set; }
 
         public Exception ex { get; internal set; }
+
+        public object model { get; internal set; }
     }
 }
