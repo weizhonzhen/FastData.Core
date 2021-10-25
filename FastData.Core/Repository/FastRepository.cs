@@ -213,14 +213,14 @@ namespace FastData.Core.Repository
 
                 BaseAop.AopMapBefore(name, sql, param, config, AopType.Map_Write);
                 var data = FastWrite.ExecuteSql(sql, param, db, key, isOutSql,false);
-                BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Write,data.IsSuccess);
+                BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Write,data);
                 return data;
             }
             else
             {
                 BaseAop.AopMapBefore(name, "", param, config, AopType.Map_Write);
                 var data = new WriteReturn();
-                BaseAop.AopMapAfter(name, "", param, config, AopType.Map_Write, data.IsSuccess);
+                BaseAop.AopMapAfter(name, "", param, config, AopType.Map_Write, data);
                 return data;
             }
         }
