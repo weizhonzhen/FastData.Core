@@ -661,14 +661,14 @@ namespace FastData.Core
                 BaseAop.AopMapBefore(name, sql, param, config, AopType.Map_Write);
                 isOutSql = isOutSql ? isOutSql : IsMapLog(name);
                 var result = FastWrite.ExecuteSql(sql, param, db, key, isOutSql,false);
-                BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Write, result.IsSuccess);
+                BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Write, result);
                 return result;
             }
             else
             {
                 BaseAop.AopMapBefore(name, "", param, config, AopType.Map_Write);
                 var data = new WriteReturn();
-                BaseAop.AopMapAfter(name, "", param, config, AopType.Map_Write, data.IsSuccess);
+                BaseAop.AopMapAfter(name, "", param, config, AopType.Map_Write, data);
                 return data;
             }
         }
