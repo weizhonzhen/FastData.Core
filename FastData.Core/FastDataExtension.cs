@@ -17,7 +17,6 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class FastDataExtension
     {
         private static ConfigData config;
-
         public static IServiceCollection AddFastData(this IServiceCollection serviceCollection, Action<ConfigData> action)
         {
             config = new ConfigData();
@@ -64,7 +63,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return serviceCollection;
         }
 
-        public static IServiceCollection AddFastFilter<T>(this IServiceCollection serviceCollection, Expression<Func<T, bool>> predicate, FilterType type)
+        public static IServiceCollection AddFastDataFilter<T>(this IServiceCollection serviceCollection, Expression<Func<T, bool>> predicate, FilterType type)
         {
             if (config != null)
             {
@@ -88,5 +87,20 @@ namespace Microsoft.Extensions.DependencyInjection
 
             return serviceCollection;
         }
+
+        public static IServiceCollection AddFastDataKey(this IServiceCollection serviceCollection,Action<ConfigKey> action)
+        {
+            var model = new ConfigKey();
+            action(model);
+
+            var key = $"FastData.Key.{typeof(ConfigKey).Name}";
+            DbCache.Set<ConfigKey>(CacheType.Web, key, model);
+            return serviceCollection;
+        }
+    }
+
+    public class ConfigKey
+    {
+        public string dbKey { get; set; }
     }
 }
