@@ -62,12 +62,14 @@ in Startup.cs Startup mothod
             });
             
             //Filter
-            services.AddFastFilter<TestResult>(a => a.USERID != "", FilterType.Query_Page_Lambda_Model);
-            services.AddFastFilter<BASE_AREA>(a => a.HOSPITALID != "", FilterType.Query_Page_Lambda_Model);
+            services.AddFastDataFilter<TestResult>(a => a.USERID != "", FilterType.Query_Page_Lambda_Model);
+            services.AddFastDataFilter<BASE_AREA>(a => a.HOSPITALID != "", FilterType.Query_Page_Lambda_Model);
             
             var data1 = IFast.Query<TestResult>(a => a.ORGID == "1",null,"test").ToPage<TestResult>(page);
             var data2 = IFast.Query<TestResult>(a => a.ORGID == "1",null,"test").Filter(false).ToPage<TestResult>(page);
             
+           // more db all set change
+           services.AddFastDataKey(a => { a.dbKey = "Api"; });
           
 interface  Service            
 ```csharp
