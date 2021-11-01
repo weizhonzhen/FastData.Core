@@ -63,13 +63,13 @@ namespace FastData.Core.Check
                     result.AddName.Add(GetColumnType(modelItem, type, name));
             }
 
-            if (modelItem.DataType.ToLower() != cacheItem.DataType.ToStr().ToLower())
+            if (modelItem.DataType.ToStr().ToLower() != cacheItem.DataType.ToStr().ToLower())
             {
                 result.IsUpdate = true;
                 result.Type.Add(GetColumnType(modelItem, type, name));
             }
             else
-                switch (modelItem.DataType.ToLower())
+                switch (modelItem.DataType.ToStr().ToLower())
                 {
                     case "char":
                     case "nchar":
