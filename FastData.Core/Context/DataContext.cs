@@ -1759,6 +1759,58 @@ namespace FastData.Core.Context
         }
         #endregion
 
+        #region 执行 ddl sql
+        /// <summary>
+        /// 执行 ddl sql
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="param"></param>
+        /// <param name="isLog"></param>
+        /// <param name="isAop"></param>
+        /// <returns></returns>
+        public DataReturn ExecuteDDL(string sql, DbParameter[] param, bool isLog = false, bool isAop = true)
+        {
+            var result = new DataReturn();
+            try
+            {
+                if (param != null)
+                    result.Sql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
+                else
+                    result.Sql = sql;
+
+                DbLog.LogSql(isLog, result.Sql, config.DbType, 0);
+
+                Dispose(cmd);
+
+                if (param != null)
+                    cmd.Parameters.AddRange(param.ToArray());
+
+                if (isAop)
+                    BaseAop.AopBefore(null, sql, param?.ToList(), config, false, AopType.Execute_Sql_DDL);
+
+                BaseExecute.ToBool(cmd, sql);
+
+                result.writeReturn.IsSuccess = true;
+
+                if (isAop)
+                    BaseAop.AopAfter(null, sql, param?.ToList(), config, false, AopType.Execute_Sql_DDL, result.writeReturn);
+            }
+            catch (Exception ex)
+            {
+                BaseAop.AopException(ex, "Execute DDL", AopType.Execute_Sql_DDL, config);
+
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "Execute DDL", result.Sql);
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "Execute DDL", result.Sql);
+                result.writeReturn.IsSuccess = false;
+                result.writeReturn.Message = ex.Message;
+            }
+
+            return result;
+        }
+        #endregion
+
         #region 开始事务
         public void BeginTrans()
         {
