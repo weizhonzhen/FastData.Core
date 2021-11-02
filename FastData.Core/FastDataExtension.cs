@@ -32,9 +32,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.AddTransient<IFastRepository, FastRepository>();
 
-            Assembly.GetCallingAssembly().GetReferencedAssemblies().ToList().ForEach(a => {
+            Assembly.GetCallingAssembly().GetReferencedAssemblies().ToList().ForEach(a =>
+            {
                 if (!AppDomain.CurrentDomain.GetAssemblies().ToList().Exists(b => b.GetName().Name == a.Name))
-                    Assembly.Load(a.Name);            
+                    try { Assembly.Load(a.Name); } catch (Exception ex) { }
             });
 
             if (config.aop != null)
