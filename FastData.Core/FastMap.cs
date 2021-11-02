@@ -59,87 +59,84 @@ namespace FastData.Core
         /// <param name="dll">dll名称</param>
         public static void InstanceProperties(string nameSpace, string dbFile = "db.json", string projectName = null)
         {
-            if (projectName == null)
-                projectName = Assembly.GetCallingAssembly().GetName().Name;
-
             var config = DataConfig.Get("", projectName, dbFile);
 
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName);
-            if (assembly == null)
-                assembly = Assembly.Load(projectName);
-
-            if (assembly != null)
+            AppDomain.CurrentDomain.GetAssemblies().ToList().ForEach(assembly =>
             {
-                assembly.ExportedTypes.ToList().ForEach(p =>
+                try
                 {
-                    var typeInfo = (p as TypeInfo);
-                    if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
+                    assembly.ExportedTypes.ToList().ForEach(p =>
                     {
-                        var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
-                        var navigateKey = string.Format("{0}.navigate", key);
-                        var cacheList = new List<PropertyModel>();
-                        var cacheNavigate = new List<NavigateModel>();
-
-                        typeInfo.DeclaredProperties.ToList().ForEach(a =>
+                        var typeInfo = (p as TypeInfo);
+                        if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
                         {
-                            var navigateType = a.GetCustomAttribute<NavigateTypeAttribute>();
+                            var key = string.Format("{0}.{1}", typeInfo.Namespace, typeInfo.Name);
+                            var navigateKey = string.Format("{0}.navigate", key);
+                            var cacheList = new List<PropertyModel>();
+                            var cacheNavigate = new List<NavigateModel>();
 
-                            if (navigateType != null && a.PropertyType == typeof(Dictionary<string, object>) && a.GetMethod.IsVirtual)
+                            typeInfo.DeclaredProperties.ToList().ForEach(a =>
                             {
-                                var navigate = GetNavigate(navigateType.Type);
-                                navigate.IsList = false;
-                                navigate.PropertyType = navigateType.Type;
-                                navigate.MemberName = a.Name;
-                                navigate.MemberType = a.PropertyType;
-                                if (navigate.Name.Count != 0)
-                                    cacheNavigate.Add(navigate);
-                            }
-                            else if (navigateType != null && a.PropertyType == typeof(List<Dictionary<string, object>>) && a.GetMethod.IsVirtual)
-                            {
-                                var navigate = GetNavigate(navigateType.Type);
-                                navigate.IsList = true;
-                                navigate.PropertyType = navigateType.Type;
-                                navigate.MemberName = a.Name;
-                                navigate.MemberType = a.PropertyType;
-                                if (navigate.Name.Count != 0)
-                                    cacheNavigate.Add(navigate);
-                            }
-                            else if (a.PropertyType.GetGenericArguments().Length > 0 && a.GetMethod.IsVirtual)
-                            {
-                                var navigate = GetNavigate(a.PropertyType.GenericTypeArguments[0]);
-                                navigate.IsList = true;
-                                navigate.PropertyType = a.PropertyType.GenericTypeArguments[0];
-                                navigate.MemberName = a.Name;
-                                navigate.MemberType = a.PropertyType;
-                                if (navigate.Name.Count != 0)
-                                    cacheNavigate.Add(navigate);
-                            }
-                            else if (a.GetMethod.IsVirtual)
-                            {
-                                var navigate = GetNavigate(a.PropertyType);
-                                navigate.IsList = false;
-                                navigate.PropertyType = a.PropertyType;
-                                navigate.MemberName = a.Name;
-                                navigate.MemberType = a.PropertyType;
-                                if (navigate.Name.Count != 0)
-                                    cacheNavigate.Add(navigate);
-                            }
-                            else
-                            {
-                                var model = new PropertyModel();
-                                model.Name = a.Name;
-                                model.PropertyType = a.PropertyType;
-                                cacheList.Add(model);
-                            }
-                        });
+                                var navigateType = a.GetCustomAttribute<NavigateTypeAttribute>();
 
-                        if (cacheNavigate.Count > 0)
-                            DbCache.Set<List<NavigateModel>>(config.CacheType, navigateKey, cacheNavigate);
+                                if (navigateType != null && a.PropertyType == typeof(Dictionary<string, object>) && a.GetMethod.IsVirtual)
+                                {
+                                    var navigate = GetNavigate(navigateType.Type);
+                                    navigate.IsList = false;
+                                    navigate.PropertyType = navigateType.Type;
+                                    navigate.MemberName = a.Name;
+                                    navigate.MemberType = a.PropertyType;
+                                    if (navigate.Name.Count != 0)
+                                        cacheNavigate.Add(navigate);
+                                }
+                                else if (navigateType != null && a.PropertyType == typeof(List<Dictionary<string, object>>) && a.GetMethod.IsVirtual)
+                                {
+                                    var navigate = GetNavigate(navigateType.Type);
+                                    navigate.IsList = true;
+                                    navigate.PropertyType = navigateType.Type;
+                                    navigate.MemberName = a.Name;
+                                    navigate.MemberType = a.PropertyType;
+                                    if (navigate.Name.Count != 0)
+                                        cacheNavigate.Add(navigate);
+                                }
+                                else if (a.PropertyType.GetGenericArguments().Length > 0 && a.GetMethod.IsVirtual)
+                                {
+                                    var navigate = GetNavigate(a.PropertyType.GenericTypeArguments[0]);
+                                    navigate.IsList = true;
+                                    navigate.PropertyType = a.PropertyType.GenericTypeArguments[0];
+                                    navigate.MemberName = a.Name;
+                                    navigate.MemberType = a.PropertyType;
+                                    if (navigate.Name.Count != 0)
+                                        cacheNavigate.Add(navigate);
+                                }
+                                else if (a.GetMethod.IsVirtual)
+                                {
+                                    var navigate = GetNavigate(a.PropertyType);
+                                    navigate.IsList = false;
+                                    navigate.PropertyType = a.PropertyType;
+                                    navigate.MemberName = a.Name;
+                                    navigate.MemberType = a.PropertyType;
+                                    if (navigate.Name.Count != 0)
+                                        cacheNavigate.Add(navigate);
+                                }
+                                else
+                                {
+                                    var model = new PropertyModel();
+                                    model.Name = a.Name;
+                                    model.PropertyType = a.PropertyType;
+                                    cacheList.Add(model);
+                                }
+                            });
 
-                        DbCache.Set<List<PropertyModel>>(config.CacheType, key, cacheList);
-                    }
-                });
-            }
+                            if (cacheNavigate.Count > 0)
+                                DbCache.Set<List<NavigateModel>>(config.CacheType, navigateKey, cacheNavigate);
+
+                            DbCache.Set<List<PropertyModel>>(config.CacheType, key, cacheList);
+                        }
+                    });
+                }
+                catch (Exception ex) { };
+            });
         }
         #endregion
 
@@ -152,28 +149,24 @@ namespace FastData.Core
         /// <param name="dll">dll名称</param>
         public static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json", string projectName = null)
         {
-            if (projectName == null)
-                projectName = Assembly.GetCallingAssembly().GetName().Name;
-
             var query = new DataQuery();
             query.Config = DataConfig.Get(dbKey, projectName, dbFile);
             query.Key = dbKey;
 
             MapXml.CreateLogTable(query);
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == projectName);
-
-            if (assembly == null)
-                assembly = Assembly.Load(projectName);
-
-            if (assembly != null)
+            AppDomain.CurrentDomain.GetAssemblies().ToList().ForEach(assembly =>
             {
-                assembly.ExportedTypes.ToList().ForEach(a =>
+                try
                 {
-                    var typeInfo = (a as TypeInfo);
-                    if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace)
-                        BaseTable.Check(query, a.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
-                });
-            }
+                    assembly.ExportedTypes.ToList().ForEach(a =>
+                    {
+                        var typeInfo = (a as TypeInfo);
+                        if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace && typeInfo.GetCustomAttribute<TableAttribute>() != null)
+                            BaseTable.Check(query, a.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
+                    });
+                }
+                catch (Exception ex) { };
+            });
         }
         #endregion
 
@@ -319,69 +312,77 @@ namespace FastData.Core
         public static void InstanceService(IServiceCollection serviceCollection, string nameSpace)
         {
             var handler = new ProxyHandler();
-            Assembly.GetEntryAssembly().ExportedTypes.ToList().ForEach(a =>
+
+            AppDomain.CurrentDomain.GetAssemblies().ToList().ForEach(assembly =>
             {
-                if (a.Namespace == nameSpace)
+                try
                 {
-                    var isRegister = false;
-                    a.GetMethods().ToList().ForEach(m =>
+                    assembly.ExportedTypes.ToList().ForEach(a =>
                     {
-                        ConfigModel config = new ConfigModel();
-                        var model = new ServiceModel();
-                        var read = m.GetCustomAttribute<FastReadAttribute>();
-                        var write = m.GetCustomAttribute<FastWriteAttribute>();
-                        var map = m.GetCustomAttribute<FastMapAttribute>();
-
-                        if (read != null)
+                        if (a.Namespace == nameSpace)
                         {
-                            isRegister = true;
-                            model.isWrite = false;
-                            model.sql = read.sql.ToLower();
-                            model.dbKey = read.dbKey;
-                            config = DataConfig.Get(model.dbKey);                                                       
-                            model.isPage = read.isPage;
-                            model.type = m.ReturnType;
-                            ServiceParam(m, model, config);
-                        }
+                            var isRegister = false;
+                            a.GetMethods().ToList().ForEach(m =>
+                            {
+                                ConfigModel config = new ConfigModel();
+                                var model = new ServiceModel();
+                                var read = m.GetCustomAttribute<FastReadAttribute>();
+                                var write = m.GetCustomAttribute<FastWriteAttribute>();
+                                var map = m.GetCustomAttribute<FastMapAttribute>();
 
-                        if (write != null)
-                        {
-                            isRegister = true;
-                            model.isWrite = true;
-                            model.sql = write.sql.ToLower();
-                            model.dbKey = write.dbKey;
-                            model.type = m.ReturnType;
-                            config = DataConfig.Get(model.dbKey);
-                            ServiceParam(m, model, config);
-                            model.isList = false;
-                        }
+                                if (read != null)
+                                {
+                                    isRegister = true;
+                                    model.isWrite = false;
+                                    model.sql = read.sql.ToLower();
+                                    model.dbKey = read.dbKey;
+                                    config = DataConfig.Get(model.dbKey);
+                                    model.isPage = read.isPage;
+                                    model.type = m.ReturnType;
+                                    ServiceParam(m, model, config);
+                                }
 
-                        if (map != null)
-                        {
-                            isRegister = true;
-                            model.isWrite = false;
-                            model.isXml = true;
-                            model.dbKey = map.dbKey;
-                            model.isPage = map.isPage;
-                            model.type = m.ReturnType;
-                            config = DataConfig.Get(model.dbKey);
-                            MapXml.ReadFastMap(map.xml, m, config);
-                            ServiceParam(m, model, config);
-                        }
+                                if (write != null)
+                                {
+                                    isRegister = true;
+                                    model.isWrite = true;
+                                    model.sql = write.sql.ToLower();
+                                    model.dbKey = write.dbKey;
+                                    model.type = m.ReturnType;
+                                    config = DataConfig.Get(model.dbKey);
+                                    ServiceParam(m, model, config);
+                                    model.isList = false;
+                                }
 
-                        if (isRegister)
-                        {
-                            var key = string.Format("{0}.{1}", a.FullName, m.Name);
-                            DbCache.Set<ServiceModel>(config.CacheType, key, model);
+                                if (map != null)
+                                {
+                                    isRegister = true;
+                                    model.isWrite = false;
+                                    model.isXml = true;
+                                    model.dbKey = map.dbKey;
+                                    model.isPage = map.isPage;
+                                    model.type = m.ReturnType;
+                                    config = DataConfig.Get(model.dbKey);
+                                    MapXml.ReadFastMap(map.xml, m, config);
+                                    ServiceParam(m, model, config);
+                                }
+
+                                if (isRegister)
+                                {
+                                    var key = string.Format("{0}.{1}", a.FullName, m.Name);
+                                    DbCache.Set<ServiceModel>(config.CacheType, key, model);
+                                }
+                            });
+
+                            if (isRegister)
+                            {
+                                var service = FastProxy.Invoke(a, handler);
+                                serviceCollection.AddSingleton(a, service);
+                            }
                         }
                     });
-
-                    if (isRegister)
-                    {
-                        var service = FastProxy.Invoke(a, handler);
-                        serviceCollection.AddSingleton(a, service);
-                    }
                 }
+                catch (Exception ex) { };
             });
         }
         #endregion

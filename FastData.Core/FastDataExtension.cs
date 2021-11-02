@@ -8,6 +8,7 @@ using FastData.Core.Repository;
 using FastRedis.Core.Repository;
 using FastUntility.Core;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -31,6 +32,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.AddTransient<IFastRepository, FastRepository>();
 
+            Assembly.GetCallingAssembly().GetReferencedAssemblies().ToList().ForEach(a => {
+                if (!AppDomain.CurrentDomain.GetAssemblies().ToList().Exists(b => b.GetName().Name == a.Name))
+                    Assembly.Load(a.Name);            
+            });
+
             if (config.aop != null)
                 serviceCollection.AddSingleton<IFastAop>(config.aop);
 
@@ -50,23 +56,24 @@ namespace Microsoft.Extensions.DependencyInjection
                 FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile, projectName);
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
             }
-            else if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
+            
+            if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst) && !config.IsResource)
             {
-                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile, projectName);
-                FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
+                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile);
+                FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile);
             }
-
             if (!string.IsNullOrEmpty(config.NamespaceProperties))
             {
-                AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName(Assembly.GetCallingAssembly().GetName().Name)).GetTypes()
-              .Where(a => a.Namespace != null && a.Namespace.Contains(config.NamespaceProperties)).ToList().ForEach(b =>
-              {
-                  if (config.IsResource)
-                      FastMap.InstanceProperties(b.Namespace, config.dbFile, projectName);
-                  else
-                      FastMap.InstanceProperties(b.Namespace, config.dbFile);
-              });
+                AppDomain.CurrentDomain.GetAssemblies().ToList().ForEach(assembly =>
+                    assembly.GetTypes().Where(a => a.Namespace != null && a.Namespace.Contains(config.NamespaceProperties)).ToList().ForEach(b =>
+                    {
+                        if (config.IsResource)
+                            FastMap.InstanceProperties(b.Namespace, config.dbFile, projectName);
+                        else
+                            FastMap.InstanceProperties(b.Namespace, config.dbFile);
+                    }));
             }
+                       
             return serviceCollection;
         }
 
