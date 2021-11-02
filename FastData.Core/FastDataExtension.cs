@@ -5,6 +5,7 @@ using FastData.Core.Filter;
 using FastData.Core.Model;
 using FastData.Core.Proxy;
 using FastData.Core.Repository;
+using FastRedis.Core.Repository;
 using FastUntility.Core;
 using System;
 using System.Linq;
@@ -21,6 +22,12 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             config = new ConfigData();
             action(config);
+
+            if (!config.IsResource && DataConfig.Get(config.dbKey, null, config.dbFile).CacheType == CacheType.Redis && ServiceContext.Engine.Resolve<IRedisRepository>() == null)
+                throw new System.Exception("ConfigureServices First add services.AddFastRedis(); Second add services.AddFastData()");
+
+            if (DataConfig.Get(config.dbKey, Assembly.GetCallingAssembly().GetName().Name, config.dbFile).CacheType == CacheType.Redis && ServiceContext.Engine.Resolve<IRedisRepository>() == null)
+                throw new System.Exception("ConfigureServices First add services.AddFastRedis(); Second add services.AddFastData()");
 
             serviceCollection.AddTransient<IFastRepository, FastRepository>();
 
@@ -45,7 +52,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst))
             {
-                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile ,projectName);
+                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile, projectName);
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
             }
 
