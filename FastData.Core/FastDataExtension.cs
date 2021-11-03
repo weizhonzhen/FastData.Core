@@ -66,13 +66,19 @@ namespace Microsoft.Extensions.DependencyInjection
             if (!string.IsNullOrEmpty(config.NamespaceProperties))
             {
                 AppDomain.CurrentDomain.GetAssemblies().ToList().ForEach(assembly =>
-                    assembly.GetTypes().Where(a => a.Namespace != null && a.Namespace.Contains(config.NamespaceProperties)).ToList().ForEach(b =>
+                {
+                    try
                     {
-                        if (config.IsResource)
-                            FastMap.InstanceProperties(b.Namespace, config.dbFile, projectName);
-                        else
-                            FastMap.InstanceProperties(b.Namespace, config.dbFile);
-                    }));
+                        assembly.GetTypes().Where(a => a.Namespace != null && a.Namespace.StartsWith(config.NamespaceProperties)).ToList().ForEach(b =>
+                        {
+                            if (config.IsResource)
+                                FastMap.InstanceProperties(b.Namespace, config.dbFile, projectName);
+                            else
+                                FastMap.InstanceProperties(b.Namespace, config.dbFile);
+                        });
+                    }
+                    catch (Exception ex) { }
+                });
             }
                        
             return serviceCollection;
