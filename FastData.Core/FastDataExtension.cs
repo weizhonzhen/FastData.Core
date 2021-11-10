@@ -69,7 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     try
                     {
-                        assembly.GetTypes().Where(a => a.Namespace != null && a.Namespace.StartsWith(config.NamespaceProperties)).ToList().ForEach(b =>
+                        assembly.ExportedTypes.Where(a => a.Namespace != null && a.Namespace.StartsWith(config.NamespaceProperties)).ToList().ForEach(b =>
                         {
                             if (config.IsResource)
                                 FastMap.InstanceProperties(b.Namespace, config.dbFile, projectName);
