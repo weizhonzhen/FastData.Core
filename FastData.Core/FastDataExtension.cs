@@ -63,23 +63,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile);
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile);
             }
-            if (!string.IsNullOrEmpty(config.NamespaceProperties))
-            {
-                AppDomain.CurrentDomain.GetAssemblies().ToList().ForEach(assembly =>
-                {
-                    try
-                    {
-                        assembly.ExportedTypes.Where(a => a.Namespace != null && a.Namespace.StartsWith(config.NamespaceProperties)).ToList().ForEach(b =>
-                        {
-                            if (config.IsResource)
-                                FastMap.InstanceProperties(b.Namespace, config.dbFile, projectName);
-                            else
-                                FastMap.InstanceProperties(b.Namespace, config.dbFile);
-                        });
-                    }
-                    catch (Exception ex) { }
-                });
-            }
+
+            if (!string.IsNullOrEmpty(config.NamespaceProperties) && config.IsResource)
+                FastMap.InstanceProperties(config.NamespaceProperties, config.dbFile, projectName);
+
+            if (!string.IsNullOrEmpty(config.NamespaceProperties) && !config.IsResource)
+                FastMap.InstanceProperties(config.NamespaceProperties, config.dbFile);
                        
             return serviceCollection;
         }
