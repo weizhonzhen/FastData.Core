@@ -76,6 +76,7 @@ namespace FastRedis.Core
         }
         #endregion
 
+
         #region 设置值 item
         /// <summary>
         /// 设置值 item
@@ -102,6 +103,34 @@ namespace FastRedis.Core
             }
         }
         #endregion
+
+        #region 设置值 item
+        /// <summary>
+        /// 设置值 item
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="key">键</param>
+        /// <param name="model">值</param>
+        /// <param name="hours">存期限</param>
+        /// <returns></returns>
+        public static bool Set<T>(string key, T model, TimeSpan timeSpan, int db = 0)
+        {
+            try
+            {
+                db = db == 0 ? _db : db;
+                if (!string.IsNullOrEmpty(key))
+                    return Context.GetDatabase(db).StringSet(key, BaseJson.ModelToJson(model), timeSpan);
+                else
+                    return false;
+            }
+            catch (RedisException ex)
+            {
+                SaveLog<T>(ex, "Set<T>");
+                return false;
+            }
+        }
+        #endregion
+
 
         #region 设置值 item asy
         /// <summary>
@@ -130,6 +159,34 @@ namespace FastRedis.Core
         }
         #endregion
 
+        #region 设置值 item asy
+        /// <summary>
+        /// 设置值 item asy
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="key">键</param>
+        /// <param name="model">值</param>
+        /// <param name="hours">存期限</param>
+        /// <returns></returns>
+        public static Task<bool> SetAsy<T>(string key, T model, TimeSpan timeSpan, int db = 0)
+        {
+            try
+            {
+                db = db == 0 ? _db : db;
+                if (!string.IsNullOrEmpty(key))
+                    return Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), timeSpan);
+                else
+                    return Task.FromResult(false);
+            }
+            catch (RedisException ex)
+            {
+                SaveLog<T>(ex, "Set<T>");
+                return Task.FromResult(false);
+            }
+        }
+        #endregion
+
+
         #region 设置值 item
         /// <summary>
         /// 设置值 item
@@ -156,6 +213,34 @@ namespace FastRedis.Core
             }
         }
         #endregion
+
+        #region 设置值 item
+        /// <summary>
+        /// 设置值 item
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="key">键</param>
+        /// <param name="model">值</param>
+        /// <param name="hours">存期限</param>
+        /// <returns></returns>
+        public static bool Set(string key, string model, TimeSpan timeSpan, int db = 0)
+        {
+            try
+            {
+                db = db == 0 ? _db : db;
+                if (!string.IsNullOrEmpty(key))
+                    return Context.GetDatabase(db).StringSet(key, model, timeSpan);
+                else
+                    return false;
+            }
+            catch (RedisException ex)
+            {
+                SaveLog(ex, "Set", key);
+                return false;
+            }
+        }
+        #endregion
+
 
         #region 设置值 item asy
         /// <summary>
@@ -184,33 +269,6 @@ namespace FastRedis.Core
         }
         #endregion
 
-        #region 设置值 item
-        /// <summary>
-        /// 设置值 item
-        /// </summary>
-        /// <typeparam name="T">泛型</typeparam>
-        /// <param name="key">键</param>
-        /// <param name="model">值</param>
-        /// <param name="Minutes">存期限</param>
-        /// <returns></returns>
-        public static bool Set(string key, string model, double Minutes, int db = 0)
-        {
-            try
-            {
-                db = db == 0 ? _db : db;
-                if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSet(key, model, TimeSpan.FromMilliseconds(Minutes));
-                else
-                    return false;
-            }
-            catch (RedisException ex)
-            {
-                SaveLog(ex, "Set", key);
-                return false;
-            }
-        }
-        #endregion
-
         #region 设置值 item asy
         /// <summary>
         /// 设置值 item asy
@@ -218,15 +276,15 @@ namespace FastRedis.Core
         /// <typeparam name="T">泛型</typeparam>
         /// <param name="key">键</param>
         /// <param name="model">值</param>
-        /// <param name="Minutes">存期限</param>
+        /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static Task<bool> SetAsy(string key, string model, double Minutes, int db = 0)
+        public static Task<bool> SetAsy(string key, string model, TimeSpan timeSpan, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromMilliseconds(Minutes));
+                    return Context.GetDatabase(db).StringSetAsync(key, model, timeSpan);
                 else
                     return Task.FromResult(false);
             }
@@ -237,6 +295,57 @@ namespace FastRedis.Core
             }
         }
         #endregion
+
+
+        #region 命令
+        /// <summary>
+        /// 命令
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="args"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static RedisResult Execute(string command, int db = 0, params object[] args)
+        {
+            try
+            {
+                db = db == 0 ? _db : db;
+                if (!string.IsNullOrEmpty(command))
+                    return Context.GetDatabase(db).Execute(command, args);
+                else
+                    return RedisResult.Create(RedisValue.Null);
+            }
+            catch (RedisException ex)
+            {
+                SaveLog(ex, "Execute", command);
+                return RedisResult.Create(RedisValue.Null);
+            }
+        }
+        #endregion
+
+        #region 命令
+        /// <summary>
+        /// 命令
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="args"></param>
+        public static Task<RedisResult> ExecuteAsy(string command, int db = 0, params object[] args)
+        {
+            try
+            {
+                db = db == 0 ? _db : db;
+                if (!string.IsNullOrEmpty(command))
+                    return Context.GetDatabase(db).ExecuteAsync(command, args);
+                else
+                    return Task.FromResult(RedisResult.Create(RedisValue.Null));
+            }
+            catch (RedisException ex)
+            {
+                SaveLog(ex, "Execute", command);
+                return Task.FromResult(RedisResult.Create(RedisValue.Null));
+            }
+        }
+        #endregion
+
 
         #region 获取值 item
         /// <summary>
@@ -288,6 +397,7 @@ namespace FastRedis.Core
         }
         #endregion
 
+
         #region 获取值 item
         /// <summary>
         /// 获取值 item
@@ -338,6 +448,7 @@ namespace FastRedis.Core
         }
         #endregion
 
+
         #region 删除值 item
         /// <summary>
         /// 删除值 item
@@ -385,6 +496,7 @@ namespace FastRedis.Core
             }
         }
         #endregion
+
 
         #region 出错日志
         /// <summary>
