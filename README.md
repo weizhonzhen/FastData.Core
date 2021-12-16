@@ -209,7 +209,7 @@ map xml
           </sqlMap>
   
   
-```
+```csharp
   
              db option
                  FastWrite.Update<Base_LogLogin>(new Base_LogLogin { LoginOutTime = DateTime.Now }, 
