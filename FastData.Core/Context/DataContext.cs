@@ -42,6 +42,10 @@ namespace FastData.Core.Context
                 {
                     var dynGet = new Property.DynamicGet<T>();
                     var list = DbCache.Get<List<NavigateModel>>(config.CacheType, key);
+
+                    if (list.Count == 0)
+                        return;
+
                     list.ForEach(a =>
                     {
                         var instance = Activator.CreateInstance(a.PropertyType);
@@ -65,11 +69,8 @@ namespace FastData.Core.Context
                             {
                                 sql.AppendFormat(" and {0}={1}{0} ", a.Name[i], config.Flag);
 
-                                if (!string.IsNullOrEmpty(a.Appand[i]) && a.Appand[i].ToLower().TrimStart().StartsWith("and"))
+                                if (!string.IsNullOrEmpty(a.Appand[i]))
                                     sql.Append(a.Appand[i]);
-
-                                if (!string.IsNullOrEmpty(a.Appand[i]) && !a.Appand[i].ToLower().TrimStart().StartsWith("and"))
-                                    sql.AppendFormat(" and {0} ", a.Appand[i]);
 
                                 var param = DbProviderFactories.GetFactory(config).CreateParameter();
                                 param.ParameterName = a.Name[i];
@@ -107,11 +108,13 @@ namespace FastData.Core.Context
                             dr.Close();
                             BaseAop.AopAfter(table, cmd.CommandText, paramList, config, true, AopType.Navigate, result);
                             if (result != null)
+                            {
                                 d.GetType().GetProperties().ToList().ForEach(p =>
                                 {
                                     if (p.Name == a.MemberName)
                                         p.SetValue(d, Convert.ChangeType(result, a.MemberType));
                                 });
+                            }
                         });
                     });
                 }
@@ -593,7 +596,7 @@ namespace FastData.Core.Context
                 pModel.StarId = (pModel.PageId - 1) * pModel.PageSize + 1;
                 pModel.EndId = pModel.PageId * pModel.PageSize;
                 Dispose(cmd);
-                pModel.TotalRecord = BaseExecute.ToPageCountSql(param, cmd, sql, config, ref countSql, FilterType.Query_Page_Lambda_Model, typeof(T).Name);
+                pModel.TotalRecord = BaseExecute.ToPageCountSql(param, cmd, sql, config, ref countSql, FilterType.Query_Page_Sql_Model, typeof(T).Name);
 
                 if (pModel.TotalRecord > 0)
                 {
@@ -609,7 +612,7 @@ namespace FastData.Core.Context
                         BaseAop.AopBefore(null, sql, param?.ToList(), config, true, AopType.Query_Page_Sql_Model);
 
                     Dispose(cmd);
-                    var dr = BaseExecute.ToPageDataReaderSql(param, cmd, pModel, sql, config, ref pageSql, FilterType.Query_Page_Lambda_Model, typeof(T).Name);
+                    var dr = BaseExecute.ToPageDataReaderSql(param, cmd, pModel, sql, config, ref pageSql, FilterType.Query_Page_Sql_Model, typeof(T).Name);
 
                     result.pageResult.list = BaseDataReader.ToList<T>(dr, config, null);
                     result.sql = string.Format("count:{0},page:{1}", countSql, pageSql);
@@ -620,6 +623,8 @@ namespace FastData.Core.Context
 
                     if (isAop)
                         BaseAop.AopAfter(null, cmd.CommandText, param?.ToList(), config, true, AopType.Query_Page_Sql_Model, result.pageResult.list);
+
+                    Navigate<T>(result, config, true);
                 }
                 else
                     result.pageResult.list = new List<T>();
@@ -834,7 +839,9 @@ namespace FastData.Core.Context
                 dr = null;
 
                 if (isAop)
-                    BaseAop.AopAfter(tableName, sql, param.ToList(), config, true, AopType.Execute_Sql_Model, result.list);
+                    BaseAop.AopAfter(tableName, sql, param?.ToList(), config, true, AopType.Execute_Sql_Model, result.list);
+
+                Navigate<T>(result, config, false);
             }
             catch (Exception ex)
             {
@@ -884,7 +891,7 @@ namespace FastData.Core.Context
                 dr = null;
 
                 if (isAop)
-                    BaseAop.AopAfter(null, sql, param.ToList(), config, true, AopType.Execute_Sql_Dic, result.DicList);
+                    BaseAop.AopAfter(null, sql, param?.ToList(), config, true, AopType.Execute_Sql_Dic, result.DicList);
             }
             catch (Exception ex)
             {
