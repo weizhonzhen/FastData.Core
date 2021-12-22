@@ -18,6 +18,7 @@ namespace FastData.Core.Filter
 
                 if (DbCache.Exists(CacheType.Web, key))
                 {
+                    param = param ?? new List<DbParameter>();
                     var model = DbCache.Get<VisitModel>(CacheType.Web, key);
                     if (model.IsSuccess)
                     {
@@ -38,11 +39,9 @@ namespace FastData.Core.Filter
 
                 if (DbCache.Exists(CacheType.Web, key))
                 {
+                    param = param ?? (new List<DbParameter>()).ToArray();
                     var model = DbCache.Get<VisitModel>(CacheType.Web, key);
                     sql = string.Format("{0} and {1}", sql, model.Where);
-
-                    if (param == null)
-                        param = (new List<DbParameter>()).ToArray();
 
                     param.ToList().AddRange(model.Param.ToArray());
                 }
