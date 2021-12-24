@@ -73,6 +73,33 @@ namespace FastData.Core.Base
         }
         #endregion
 
+        #region tvsps sql
+        /// <summary>
+        /// tvsps sql
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dyn"></param>
+        /// <returns></returns>
+        public static string GetTvps(object model)
+        {
+            var sql1 = new StringBuilder();
+            var sql2 = new StringBuilder();
+
+            sql1.AppendFormat("insert into {0} (", model.GetType().Name);
+            sql2.Append("select ");
+
+            PropertyCache.GetPropertyInfo(model).ForEach(a => {
+                sql1.AppendFormat("{0},", a.Name);
+                sql2.AppendFormat("tb.{0},", a.Name);
+            });
+
+            sql1.Append(")");
+            sql2.AppendFormat("from @{0} as tb", model.GetType().Name);
+
+            return string.Format("{0}{1}", sql1.ToString().Replace(",)", ") "), sql2.ToString().Replace(",from", " from"));
+        }
+        #endregion
+
         #region 获取datatabel
         /// <summary>
         /// 获取datatabel
@@ -100,6 +127,35 @@ namespace FastData.Core.Base
         }
         #endregion
 
+        #region 获取datatabel
+        /// <summary>
+        /// 获取datatabel
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        public static DataTable GetTable(DbCommand cmd, List<object> list, System.Type type)
+        {
+            var dyn = new Property.DynamicGet(list[0]);
+            var dt = new DataTable();
+            cmd.CommandText = string.Format("select top 1 * from {0}", type.Name);
+            dt.Load(cmd.ExecuteReader());
+            dt.Clear();
+
+            list.ForEach(a =>
+            {
+                var row = dt.NewRow();
+                PropertyCache.GetPropertyInfo(list[0]).ForEach(p =>
+                {
+                    row[p.Name] = dyn.GetValue(a, p.Name);
+                });
+                dt.Rows.Add(row);
+            });
+
+            return dt;
+        }
+        #endregion
+
         #region tvps
         /// <summary>
         /// tvps
@@ -108,16 +164,28 @@ namespace FastData.Core.Base
         /// <param name="cmd"></param>
         public static void InitTvps<T>(DbCommand cmd)
         {
+            InitTvps(cmd, typeof(T));
+        }
+        #endregion
+
+        #region tvps
+        /// <summary>
+        /// tvps
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cmd"></param>
+        public static void InitTvps(DbCommand cmd,System.Type type)
+        {
             var sql = new StringBuilder();
-            cmd.CommandText = string.Format("select a.name,(select top 1 name from sys.systypes c where a.xtype=c.xtype) as type,length,isnullable,prec,scale from syscolumns a where a.id=object_id('{0}') order by a.colid asc", typeof(T).Name);
+            cmd.CommandText = string.Format("select a.name,(select top 1 name from sys.systypes c where a.xtype=c.xtype) as type,length,isnullable,prec,scale from syscolumns a where a.id=object_id('{0}') order by a.colid asc", type.Name);
             var dr = cmd.ExecuteReader();
             var dic = BaseJson.DataReaderToDic(dr);
             dr.Close();
 
-            sql.AppendFormat("if not exists(SELECT 1 FROM sys.table_types where name='{0}')", typeof(T).Name);
-            sql.AppendFormat("CREATE TYPE {0} AS TABLE(", typeof(T).Name);
+            sql.AppendFormat("if not exists(SELECT 1 FROM sys.table_types where name='{0}')", type.Name);
+            sql.AppendFormat("CREATE TYPE {0} AS TABLE(", type.Name);
 
-            foreach(var item in dic)
+            foreach (var item in dic)
             {
                 switch (item.GetValue("type").ToStr())
                 {
@@ -169,6 +237,33 @@ namespace FastData.Core.Base
             list.ForEach(a => {
                 sql.Append("(");
                 PropertyCache.GetPropertyInfo<T>().ForEach(b => { sql.AppendFormat("'{0}',", dyn.GetValue(a, b.Name)); });
+                sql.Append("),").Replace(",)", ")");
+            });
+
+            return sql.ToStr().Substring(0, sql.ToStr().Length - 1);
+        }
+        #endregion
+
+        #region mysql 
+        /// <summary>
+        /// mysql
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static string GetMySql(List<object> list)
+        {
+            var sql = new StringBuilder();
+            sql.AppendFormat("insert into {0}(", list[0].GetType().Name);
+            var dyn = new Property.DynamicGet(list[0]);
+
+            PropertyCache.GetPropertyInfo(list[0]).ForEach(a => { sql.AppendFormat("{0},", a.Name); });
+
+            sql.Append(")").Replace(",)", ")");
+
+            list.ForEach(a =>
+            {
+                sql.Append("(");
+                PropertyCache.GetPropertyInfo(list[0]).ForEach(b => { sql.AppendFormat("'{0}',", dyn.GetValue(a, b.Name)); });
                 sql.Append("),").Replace(",)", ")");
             });
 

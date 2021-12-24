@@ -32,7 +32,7 @@ namespace FastData.Core.Base
             var result = new OptionModel();
             var dynGet = new DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
-            var where = PrimaryKey(config, cmd, typeof(T).Name);
+            var where = PrimaryKey(config, cmd, typeof(T));
 
             try
             {
@@ -153,6 +153,58 @@ namespace FastData.Core.Base
         }
         #endregion
 
+        #region model 转 insert sql
+        /// <summary>
+        /// model 转 insert sql
+        /// </summary>
+        /// <param name="model">实体</param>
+        /// <param name="sql">sql</param>
+        /// <param name="oracleParam">参数</param>
+        /// <returns></returns>
+        public static OptionModel InsertToSql(object model, ConfigModel config)
+        {
+            var sbName = new StringBuilder();
+            var sbValue = new StringBuilder();
+            var dynGet = new DynamicGet(model);
+            var list = new List<MemberInfo>();
+            var result = new OptionModel();
+
+            try
+            {
+                sbName.AppendFormat("insert into {0} (", model.GetType().Name);
+                sbValue.Append(" values (");
+                PropertyCache.GetPropertyInfo(model, config.IsPropertyCache).ForEach(p =>
+                {
+                    if (!list.Exists(a => a.Name == p.Name))
+                    {
+                        sbName.AppendFormat("{0},", p.Name);
+                        sbValue.AppendFormat("{1}{0},", p.Name, config.Flag);
+                        var itemValue = dynGet.GetValue(model, p.Name);
+                        var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                        temp.ParameterName = p.Name;
+                        temp.Value = itemValue == null ? DBNull.Value : itemValue;
+                        result.Param.Add(temp);
+                    }
+                });
+
+                result.Sql = string.Format("{0}) {1})", sbName.ToString().Substring(0, sbName.ToString().Length - 1)
+                                                , sbValue.ToString().Substring(0, sbValue.ToString().Length - 1));
+                result.IsSuccess = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "InsertToSql", result.Sql);
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "InsertToSql", result.Sql);
+
+                result.IsSuccess = false;
+                return result;
+            }
+        }
+        #endregion
+
         #region model 转 update sql
         /// <summary>
         /// model 转 update sql
@@ -167,7 +219,7 @@ namespace FastData.Core.Base
             var result = new OptionModel();
             var dynGet = new DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
-            var where = PrimaryKey(config, cmd, typeof(T).Name);
+            var where = PrimaryKey(config, cmd, typeof(T));
 
             if (where.Count == 0)
             {
@@ -263,6 +315,91 @@ namespace FastData.Core.Base
         }
         #endregion
 
+        #region model 转 update sql
+        /// <summary>
+        /// model 转 update sql
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="model"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public static OptionModel UpdateToSql(DbCommand cmd, object model, ConfigModel config)
+        {
+            var result = new OptionModel();
+            var dynGet = new DynamicGet(model);
+            result.IsCache = config.IsPropertyCache;
+            var where = PrimaryKey(config, cmd, model.GetType());
+
+            if (where.Count == 0)
+            {
+                result.Message = string.Format("{0}没有主键", model.GetType().Name);
+                result.IsSuccess = false;
+                return result;
+            }
+
+            try
+            {
+                result.Sql = string.Format("update {0} set", model.GetType().Name);
+                var pInfo = PropertyCache.GetPropertyInfo(model,config.IsPropertyCache);
+
+                foreach (var item in pInfo)
+                {
+                    if (where.Exists(a => a == item.Name))
+                        continue;
+
+                    result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
+
+                    var itemValue = dynGet.GetValue(model, item.Name);
+                    var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                    temp.ParameterName = item.Name;
+                    temp.Value = itemValue == null ? DBNull.Value : itemValue;
+                    result.Param.Add(temp);
+                }
+
+                result.Sql = result.Sql.Substring(0, result.Sql.Length - 1);
+
+                var count = 1;
+                foreach (var item in where)
+                {
+                    var itemValue = dynGet.GetValue(model, item);
+
+                    if (itemValue == null)
+                    {
+                        result.IsSuccess = false;
+                        result.Message = string.Format("主键{0}值为空", item);
+                        return result;
+                    }
+
+                    if (count == 1)
+                        result.Sql = string.Format("{2} where {0}={1}{0} ", item, config.Flag, result.Sql);
+                    else
+                        result.Sql = string.Format("{2} and {0}={1}{0} ", item, config.Flag, result.Sql);
+
+                    var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                    temp.ParameterName = item;
+                    temp.Value = itemValue == null ? DBNull.Value : itemValue;
+
+                    result.Param.Add(temp);
+
+                    count++;
+                }
+
+                result.IsSuccess = true;
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "UpdateToSql", result.Sql);
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "UpdateToSql", result.Sql);
+                result.IsSuccess = false;
+                return result;
+            }
+        }
+        #endregion
+
         #region model 转 update list sql
         /// <summary>
         /// model 转 update list sql
@@ -277,7 +414,7 @@ namespace FastData.Core.Base
             var dynGet = new DynamicGet<T>();
             var result = new OptionModel();
             result.IsCache = config.IsPropertyCache;
-            var where = PrimaryKey(config, cmd, typeof(T).Name);
+            var where = PrimaryKey(config, cmd, typeof(T));
 
             if (where.Count == 0)
             {
@@ -397,7 +534,7 @@ namespace FastData.Core.Base
             var result = new OptionModel();
             var dynGet = new DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
-            var where = PrimaryKey(config, cmd, typeof(T).Name);
+            var where = PrimaryKey(config, cmd, typeof(T));
 
             if (where.Count == 0)
             {
@@ -452,6 +589,74 @@ namespace FastData.Core.Base
         }
         #endregion
 
+        #region model 转 delete sql
+        /// <summary>
+        /// model 转 delete sql
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="model"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public static OptionModel DeleteToSql(DbCommand cmd,object model,ConfigModel config)
+        {
+            var result = new OptionModel();
+            var dynGet = new DynamicGet(model);
+            result.IsCache = config.IsPropertyCache;
+            var where = PrimaryKey(config, cmd, model.GetType());
+
+            if (where.Count == 0)
+            {
+                result.Message = string.Format("{0}没有主键", model.GetType().Name);
+                result.IsSuccess = false;
+                return result;
+            }
+
+            try
+            {
+                result.Sql = string.Format("delete {0} ", model.GetType().Name);
+
+                var count = 1;
+                foreach (var item in where)
+                {
+                    var itemValue = dynGet.GetValue(model, item);
+
+                    if (itemValue == null)
+                    {
+                        result.IsSuccess = false;
+                        result.Message = string.Format("主键{0}值为空", item);
+                        return result;
+                    }
+
+                    if (count == 1)
+                        result.Sql = string.Format("{2} where {0}={1}{0} ", item, config.Flag, result.Sql);
+                    else
+                        result.Sql = string.Format("{2} and {0}={1}{0} ", item, config.Flag, result.Sql);
+
+                    var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                    temp.ParameterName = item;
+                    temp.Value = itemValue == null ? DBNull.Value : itemValue;
+
+                    result.Param.Add(temp);
+
+                    count++;
+                }
+
+                result.IsSuccess = true;
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "UpdateToSql", result.Sql);
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "DeleteToSql", result.Sql);
+                result.IsSuccess = false;
+                return result;
+            }
+        }
+        #endregion
+
         #region 主键
         /// <summary>
         /// 主键
@@ -460,9 +665,10 @@ namespace FastData.Core.Base
         /// <param name="config"></param>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        public static List<string> PrimaryKey(ConfigModel config, DbCommand cmd,string tableName)
+        public static List<string> PrimaryKey(ConfigModel config, DbCommand cmd, System.Type type)
         {
             var list = new List<string>();
+            var tableName = type.Name;
 
             if (config.DbType == DataDbType.Oracle)
                 cmd.CommandText = string.Format("select a.COLUMN_NAME from all_cons_columns a,all_constraints b where a.constraint_name = b.constraint_name and b.constraint_type = 'P' and b.table_name = '{0}'", tableName.ToUpper());
@@ -488,6 +694,15 @@ namespace FastData.Core.Base
                 }
 
                 dr.Close();
+
+                type.GetProperties().ToList().ForEach(a => {
+                    if (list.Exists(l => l.ToLower() == a.Name.ToLower()))
+                    {
+                        list.RemoveAll(r => r.ToLower() == a.Name.ToLower());
+                        list.Add(a.Name);
+                    }
+                });
+
                 return list;
             }
         }
