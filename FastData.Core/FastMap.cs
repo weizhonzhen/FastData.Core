@@ -35,7 +35,7 @@ namespace FastData.Core
         /// <returns></returns>
         private static NavigateModel GetNavigate(System.Type type)
         {
-            var navigate = new NavigateModel(); 
+            var navigate = new NavigateModel();
             type.GetProperties().ToList().ForEach(a =>
             {
                 var attribute = a.GetCustomAttribute<NavigateAttribute>();
@@ -86,6 +86,9 @@ namespace FastData.Core
                                     navigate.PropertyType = navigateType.Type;
                                     navigate.MemberName = a.Name;
                                     navigate.MemberType = a.PropertyType;
+                                    navigate.IsUpdate = navigateType.IsUpdate;
+                                    navigate.IsDel = navigateType.IsDel;
+                                    navigate.IsAdd = navigateType.IsAdd;
                                     if (navigate.Name.Count != 0)
                                         cacheNavigate.Add(navigate);
                                 }
@@ -96,6 +99,9 @@ namespace FastData.Core
                                     navigate.PropertyType = navigateType.Type;
                                     navigate.MemberName = a.Name;
                                     navigate.MemberType = a.PropertyType;
+                                    navigate.IsUpdate = navigateType.IsUpdate;
+                                    navigate.IsDel = navigateType.IsDel;
+                                    navigate.IsAdd = navigateType.IsAdd;
                                     if (navigate.Name.Count != 0)
                                         cacheNavigate.Add(navigate);
                                 }
@@ -106,6 +112,12 @@ namespace FastData.Core
                                     navigate.PropertyType = a.PropertyType.GenericTypeArguments[0];
                                     navigate.MemberName = a.Name;
                                     navigate.MemberType = a.PropertyType;
+                                    if (navigateType != null)
+                                    {
+                                        navigate.IsUpdate = navigateType.IsUpdate;
+                                        navigate.IsDel = navigateType.IsDel;
+                                        navigate.IsAdd = navigateType.IsAdd;
+                                    }
                                     if (navigate.Name.Count != 0)
                                         cacheNavigate.Add(navigate);
                                 }
@@ -116,6 +128,12 @@ namespace FastData.Core
                                     navigate.PropertyType = a.PropertyType;
                                     navigate.MemberName = a.Name;
                                     navigate.MemberType = a.PropertyType;
+                                    if (navigateType != null)
+                                    {
+                                        navigate.IsUpdate = navigateType.IsUpdate;
+                                        navigate.IsDel = navigateType.IsDel;
+                                        navigate.IsAdd = navigateType.IsAdd;
+                                    }
                                     if (navigate.Name.Count != 0)
                                         cacheNavigate.Add(navigate);
                                 }
@@ -135,7 +153,7 @@ namespace FastData.Core
                         }
                     });
                 }
-                catch (Exception ex) { };
+                catch (Exception ex) { }
             });
         }
         #endregion
@@ -165,7 +183,7 @@ namespace FastData.Core
                             BaseTable.Check(query, a.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
                     });
                 }
-                catch (Exception ex) { };
+                catch (Exception ex) { }
             });
         }
         #endregion
@@ -382,7 +400,7 @@ namespace FastData.Core
                         }
                     });
                 }
-                catch (Exception ex) { };
+                catch (Exception ex) { }
             });
         }
         #endregion
@@ -492,8 +510,8 @@ namespace FastData.Core
             {
                 var sql = MapXml.GetMapSql(name, ref param, db, key);
                 isOutSql = isOutSql ? isOutSql : IsMapLog(name);
-               BaseAop.AopMapBefore(name, sql, param, config, AopType.Map_List_Model);
-                var result = FastRead.ExecuteSql<T>(sql, param, db, key, isOutSql,false);
+                BaseAop.AopMapBefore(name, sql, param, config, AopType.Map_List_Model);
+                var result = FastRead.ExecuteSql<T>(sql, param, db, key, isOutSql, false);
                 if (MapXml.MapIsForEach(name, config))
                 {
                     if (db == null)
@@ -577,7 +595,7 @@ namespace FastData.Core
 
                 BaseAop.AopMapBefore(name, sql, param, config, AopType.Map_List_Dic);
 
-                var result = FastRead.ExecuteSql(sql, param, db, key, isOutSql,false);
+                var result = FastRead.ExecuteSql(sql, param, db, key, isOutSql, false);
 
                 if (MapXml.MapIsForEach(name, config))
                 {
@@ -615,9 +633,9 @@ namespace FastData.Core
         public static Task<List<Dictionary<string, object>>> QueryAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return Task.Run(() =>
-           {
-               return Query(name, param, db, key, isOutSql);
-           });
+            {
+                return Query(name, param, db, key, isOutSql);
+            });
         }
         #endregion
 
@@ -638,9 +656,9 @@ namespace FastData.Core
         public static Task<Lazy<List<Dictionary<string, object>>>> QueryLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return Task.Run(() =>
-           {
-               return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key, isOutSql));
-           });
+            {
+                return new Lazy<List<Dictionary<string, object>>>(() => Query(name, param, db, key, isOutSql));
+            });
         }
         #endregion
 
@@ -661,7 +679,7 @@ namespace FastData.Core
                 var sql = MapXml.GetMapSql(name, ref param, db, key);
                 BaseAop.AopMapBefore(name, sql, param, config, AopType.Map_Write);
                 isOutSql = isOutSql ? isOutSql : IsMapLog(name);
-                var result = FastWrite.ExecuteSql(sql, param, db, key, isOutSql,false);
+                var result = FastWrite.ExecuteSql(sql, param, db, key, isOutSql, false);
                 BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Write, result);
                 return result;
             }
@@ -682,9 +700,9 @@ namespace FastData.Core
         public static Task<WriteReturn> WriteAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return Task.Run(() =>
-           {
-               return Write(name, param, db, key, isOutSql);
-           });
+            {
+                return Write(name, param, db, key, isOutSql);
+            });
         }
         #endregion
 
@@ -705,9 +723,9 @@ namespace FastData.Core
         public static Task<Lazy<WriteReturn>> WriteLazyAsy(string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return Task.Run(() =>
-           {
-               return new Lazy<WriteReturn>(() => Write(name, param, db, key, isOutSql));
-           });
+            {
+                return new Lazy<WriteReturn>(() => Write(name, param, db, key, isOutSql));
+            });
         }
         #endregion
 
@@ -731,11 +749,11 @@ namespace FastData.Core
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.GetPageSql(pModel, sql, param,false);
+                    result = tempDb.GetPageSql(pModel, sql, param, false);
                 }
             }
             else
-                result = db.GetPageSql(pModel, sql, param,false);
+                result = db.GetPageSql(pModel, sql, param, false);
 
             stopwatch.Stop();
 
@@ -804,9 +822,9 @@ namespace FastData.Core
         public static Task<PageResult> QueryPageAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return Task.Run(() =>
-           {
-               return QueryPage(pModel, name, param, db, key, isOutSql);
-           });
+            {
+                return QueryPage(pModel, name, param, db, key, isOutSql);
+            });
         }
         #endregion
 
@@ -827,9 +845,9 @@ namespace FastData.Core
         public static Task<Lazy<PageResult>> QueryPageLazyAsy(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
             return Task.Run(() =>
-           {
-               return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key, isOutSql));
-           });
+            {
+                return new Lazy<PageResult>(() => QueryPage(pModel, name, param, db, key, isOutSql));
+            });
         }
         #endregion
 
@@ -853,11 +871,11 @@ namespace FastData.Core
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.GetPageSql<T>(pModel, sql, param,false);
+                    result = tempDb.GetPageSql<T>(pModel, sql, param, false);
                 }
             }
             else
-                result = db.GetPageSql<T>(pModel, sql, param,false);
+                result = db.GetPageSql<T>(pModel, sql, param, false);
 
             stopwatch.Stop();
 
@@ -922,9 +940,9 @@ namespace FastData.Core
         public static Task<PageResult<T>> QueryPageAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             return Task.Run(() =>
-           {
-               return QueryPage<T>(pModel, name, param, db, key, isOutSql);
-           });
+            {
+                return QueryPage<T>(pModel, name, param, db, key, isOutSql);
+            });
         }
         #endregion
 
@@ -945,9 +963,9 @@ namespace FastData.Core
         public static Task<Lazy<PageResult<T>>> QueryPageLazyAsy<T>(PageModel pModel, string name, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
             return Task.Run(() =>
-           {
-               return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key, isOutSql));
-           });
+            {
+                return new Lazy<PageResult<T>>(() => QueryPage<T>(pModel, name, param, db, key, isOutSql));
+            });
         }
         #endregion
 
