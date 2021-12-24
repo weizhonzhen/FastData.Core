@@ -17,13 +17,11 @@ namespace FastData.Core.Aop
         Execute_Sql_Model = 9,
         Execute_Sql_Dic = 10,
 
-
         Map_List_Model = 11,
         Map_List_Dic = 12,
         Map_Page_Dic = 13,
         Map_Page_Model = 14,
         Map_Write = 15,
-
 
         Query_List_Lambda = 16,
         Query_Dic_Lambda = 17,
@@ -44,6 +42,11 @@ namespace FastData.Core.Aop
         FaseWrite = 30,
         FastRead_Page = 31,
 
-        Execute_Sql_DDL = 32
+        Execute_Sql_DDL = 32,
+
+        Navigate_Add = 33,
+        Navigate_Delete = 34,
+        Navigate_Update = 35,
+        Navigate_AddList = 36
     }
 }
