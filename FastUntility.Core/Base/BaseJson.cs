@@ -114,6 +114,26 @@ namespace FastUntility.Core.Base
         }
         #endregion
 
+        #region Json转model
+        /// <summary>
+        /// Json转model
+        /// </summary>
+        /// <param name="jsonValue"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static object JsonToModel(string jsonValue,Type type)
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject(jsonValue,type);
+            }
+            catch
+            {
+                return new object();
+            }
+        }
+        #endregion
+
         #region json转list
         /// <summary>
         /// json转list
@@ -142,6 +162,38 @@ namespace FastUntility.Core.Base
             catch
             {
                 return new List<T>();
+            }
+        }
+        #endregion
+
+        #region json转list
+        /// <summary>
+        /// json转list
+        /// </summary>
+        /// <param name="jsonValue"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static List<object> JsonToList(string jsonValue,Type type)
+        {
+            try
+            {
+                var list = new List<object>(); ;
+
+                if (string.IsNullOrEmpty(jsonValue))
+                    return list;
+
+                var ja = JArray.Parse(jsonValue);
+
+                foreach (var jo in ja)
+                {
+                    list.Add(JsonToModel(jo.ToString(),type));
+                }
+
+                return list;
+            }
+            catch
+            {
+                return new List<object>();
             }
         }
         #endregion
