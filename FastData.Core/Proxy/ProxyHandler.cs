@@ -73,7 +73,7 @@ namespace FastData.Core.Proxy
                 {
                     var data = args.ToList().Find(a => a.GetType() != typeof(PageModel));
                     var type = method.GetParameters().ToList().Find(a => a.ParameterType != typeof(PageModel)).ParameterType;
-                    var dyn = new DynamicGet(Activator.CreateInstance(type));
+                    var dyn = new Property.DynamicGet(Activator.CreateInstance(type));
 
                     for (int i = 0; i < model.param.Count; i++)
                     {
