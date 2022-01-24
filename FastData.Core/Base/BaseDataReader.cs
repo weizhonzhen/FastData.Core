@@ -7,6 +7,7 @@ using FastData.Core.Model;
 using FastData.Core.CacheModel;
 using System.Linq;
 using System.Collections;
+using FastUntility.Core.Base;
 
 namespace FastData.Core.Base
 {
@@ -27,7 +28,6 @@ namespace FastData.Core.Base
         {
             var list = new List<T>();
             var colList = new List<string>();
-            var dynSet = new DynamicSet<T>();
 
             if (dr == null)
                 return list;
@@ -51,7 +51,7 @@ namespace FastData.Core.Base
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                             continue;
 
-                        item = SetValue<T>(item, dynSet, dr, info, config);
+                        item = SetValue<T>(item, dr, info, config);
                     }
                 }
                 else
@@ -64,7 +64,7 @@ namespace FastData.Core.Base
                         if (propertyList.Exists(a => a.Name.ToLower() == field[i].ToLower()))
                         {
                             var info = propertyList.Find(a => a.Name.ToLower() == field[i].ToLower());
-                            item = SetValue<T>(item, dynSet, dr, info, config);
+                            item = SetValue<T>(item, dr, info, config);
                         }
                     }
                 }
@@ -88,7 +88,6 @@ namespace FastData.Core.Base
         {
             var list = Activator.CreateInstance(type);
             var colList = new List<string>();
-            var dynSet = new DynamicSet(model);
 
             if (dr == null)
                 return null;
@@ -112,7 +111,7 @@ namespace FastData.Core.Base
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                             continue;
 
-                        item = SetValue(item, dynSet, dr, info, config);
+                        item = SetValue(item, dr, info, config);
                     }
                 }
                 else
@@ -125,7 +124,7 @@ namespace FastData.Core.Base
                         if (propertyList.Exists(a => a.Name.ToLower() == field[i].ToLower()))
                         {
                             var info = propertyList.Find(a => a.Name.ToLower() == field[i].ToLower());
-                            item = SetValue(item, dynSet, dr, info, config);
+                            item = SetValue(item, dr, info, config);
                         }
                     }
                 }
@@ -154,7 +153,6 @@ namespace FastData.Core.Base
         {
             var result = Activator.CreateInstance(model.GetType());
             var colList = new List<string>();
-            var dynSet = new DynamicSet(model);
 
             if (dr == null)
                 return null;
@@ -176,7 +174,7 @@ namespace FastData.Core.Base
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
                             continue;
 
-                        result = SetValue(result, dynSet, dr, info, config);
+                        result = SetValue(result, dr, info, config);
                     }
                 }
                 else
@@ -189,7 +187,7 @@ namespace FastData.Core.Base
                         if (propertyList.Exists(a => a.Name.ToLower() == field[i].ToLower()))
                         {
                             var info = propertyList.Find(a => a.Name.ToLower() == field[i].ToLower());
-                            result = SetValue(result, dynSet, dr, info, config);
+                            result = SetValue(result, dr, info, config);
                         }
                     }
                 }
@@ -209,7 +207,7 @@ namespace FastData.Core.Base
         /// <param name="dr"></param>
         /// <param name="info"></param>
         /// <param name="config"></param>
-        private static T SetValue<T>(T item ,DynamicSet<T> dynSet, DbDataReader dr, PropertyModel info, ConfigModel config)
+        private static T SetValue<T>(T item ,DbDataReader dr, PropertyModel info, ConfigModel config)
         {
             try
             {
@@ -277,22 +275,12 @@ namespace FastData.Core.Base
                         value = dr.GetValue(id);
 
                     if (!dr.IsDBNull(id))
-                    {
-                        if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, Nullable.GetUnderlyingType(info.PropertyType)));
-                        else
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, info.PropertyType));
-                    }
+                        BaseEmit.Set(item, info.Name,value);
                 }
                 else
                 {
                     if (!dr.IsDBNull(id))
-                    {
-                        if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), Nullable.GetUnderlyingType(info.PropertyType)));
-                        else
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), info.PropertyType));
-                    }
+                        BaseEmit.Set(item, info.Name, dr.GetValue(id));
                 }
 
                 return item;
@@ -311,7 +299,7 @@ namespace FastData.Core.Base
         /// <param name="info"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        private static Object SetValue(Object item, DynamicSet dynSet, DbDataReader dr, PropertyModel info, ConfigModel config)
+        private static Object SetValue(Object item, DbDataReader dr, PropertyModel info, ConfigModel config)
         {
             try
             {
@@ -379,22 +367,12 @@ namespace FastData.Core.Base
                         value = dr.GetValue(id);
 
                     if (!dr.IsDBNull(id))
-                    {
-                        if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, Nullable.GetUnderlyingType(info.PropertyType)));
-                        else
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(value, info.PropertyType));
-                    }
+                        BaseEmit.Set(item, info.Name, value);
                 }
                 else
                 {
                     if (!dr.IsDBNull(id))
-                    {
-                        if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), Nullable.GetUnderlyingType(info.PropertyType)));
-                        else
-                            dynSet.SetValue(item, info.Name, Convert.ChangeType(dr.GetValue(id), info.PropertyType));
-                    }
+                        BaseEmit.Set(item, info.Name, dr.GetValue(id));
                 }
 
                 return item;

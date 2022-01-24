@@ -9,6 +9,7 @@ using FastData.Core.Model;
 using System.Data.Common;
 using FastData.Core.Type;
 using System.Linq;
+using FastUntility.Core.Base;
 
 namespace FastData.Core.Base
 {
@@ -30,7 +31,7 @@ namespace FastData.Core.Base
         public static OptionModel UpdateToSql<T>(T model, ConfigModel config, Expression<Func<T, object>> field = null, DbCommand cmd = null)
         {
             var result = new OptionModel();
-            var dynGet = new DynamicGet<T>();
+            var dynGet = new Property.DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T));
 
@@ -113,7 +114,7 @@ namespace FastData.Core.Base
         {
             var sbName = new StringBuilder();
             var sbValue = new StringBuilder();
-            var dynGet = new DynamicGet<T>();
+            var dynGet = new Property.DynamicGet<T>();
             var list = new List<MemberInfo>();
             var result = new OptionModel();
 
@@ -165,7 +166,7 @@ namespace FastData.Core.Base
         {
             var sbName = new StringBuilder();
             var sbValue = new StringBuilder();
-            var dynGet = new DynamicGet(model);
+            var dynGet = new Property.DynamicGet(model);
             var list = new List<MemberInfo>();
             var result = new OptionModel();
 
@@ -217,7 +218,7 @@ namespace FastData.Core.Base
         public static OptionModel UpdateToSql<T>(DbCommand cmd, T model, ConfigModel config, Expression<Func<T, object>> field = null)
         {
             var result = new OptionModel();
-            var dynGet = new DynamicGet<T>();
+            var dynGet = new Property.DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T));
 
@@ -326,7 +327,7 @@ namespace FastData.Core.Base
         public static OptionModel UpdateToSql(DbCommand cmd, object model, ConfigModel config)
         {
             var result = new OptionModel();
-            var dynGet = new DynamicGet(model);
+            var dynGet = new Property.DynamicGet(model);
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, model.GetType());
 
@@ -350,6 +351,7 @@ namespace FastData.Core.Base
                     result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
                     var itemValue = dynGet.GetValue(model, item.Name);
+                    
                     var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                     temp.ParameterName = item.Name;
                     temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -411,7 +413,7 @@ namespace FastData.Core.Base
         /// <returns></returns>
         public static OptionModel UpdateListToSql<T>(DbCommand cmd, List<T> list, ConfigModel config, Expression<Func<T, object>> field = null)
         {
-            var dynGet = new DynamicGet<T>();
+            var dynGet = new Property.DynamicGet<T>();
             var result = new OptionModel();
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T));
@@ -532,7 +534,7 @@ namespace FastData.Core.Base
         public static OptionModel DeleteToSql<T>(DbCommand cmd, T model, ConfigModel config)
         {
             var result = new OptionModel();
-            var dynGet = new DynamicGet<T>();
+            var dynGet = new Property.DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T));
 
@@ -600,7 +602,7 @@ namespace FastData.Core.Base
         public static OptionModel DeleteToSql(DbCommand cmd,object model,ConfigModel config)
         {
             var result = new OptionModel();
-            var dynGet = new DynamicGet(model);
+            var dynGet = new Property.DynamicGet(model);
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, model.GetType());
 

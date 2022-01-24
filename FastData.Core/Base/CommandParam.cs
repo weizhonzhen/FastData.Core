@@ -1,5 +1,5 @@
-﻿using FastData.Core.Property;
-using FastUntility.Core.Base;
+﻿using FastUntility.Core.Base;
+using FastData.Core.Property;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;

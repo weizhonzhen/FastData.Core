@@ -516,8 +516,7 @@ namespace FastData.Core.Base
                         var model = Activator.CreateInstance(assembly.GetType(type.Split(',')[0]));
                         var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(assembly.GetType(type.Split(',')[0])));
                         var infoResult = BaseDic.PropertyInfo<T>().Find(a => a.PropertyType.FullName == list.GetType().FullName);
-                        var dynSet = new DynamicSet(model);
-
+                   
                         //param
                         param.Clear();
                         if (field.IndexOf(',') > 0)
@@ -549,10 +548,7 @@ namespace FastData.Core.Base
                                 if (temp.GetValue(info.Name).ToStr() == "" && info.PropertyType.Name == "Nullable`1")
                                     continue;
 
-                                if (info.PropertyType.Name == "Nullable`1" && info.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                                    dynSet.SetValue(model, info.Name, Convert.ChangeType(temp.GetValue(info.Name), Nullable.GetUnderlyingType(info.PropertyType)));
-                                else
-                                    dynSet.SetValue(model, info.Name, Convert.ChangeType(temp.GetValue(info.Name), info.PropertyType));
+                                BaseEmit.Set(model, info.Name, temp.GetValue(info.Name));  dynSet.SetValue(model, info.Name, Convert.ChangeType(temp.GetValue(info.Name), info.PropertyType));
                             }
 
                             var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
