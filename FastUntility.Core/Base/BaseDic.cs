@@ -1,4 +1,5 @@
-﻿using FastUntility.Core.Cache;
+﻿using FastUntility.Core.Base;
+using FastUntility.Core.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +23,11 @@ namespace FastUntility.Core.Base
         public static T DicToModel<T>(Dictionary<string, object> dic) where T : class, new()
         {
             var result = new T();
-            var info = new DynamicSet<T>();
+            //var info = new DynamicSet<T>();
             PropertyInfo<T>().ForEach(a => {
                 if (dic.ContainsKey(a.Name.ToLower()) && !string.IsNullOrEmpty(dic[a.Name.ToLower()].ToStr()))
-                    info.SetValue(result, a.Name, Convert.ChangeType(dic[a.Name.ToLower()], a.PropertyType));
+                    //info.SetValue(result, a.Name, Convert.ChangeType(dic[a.Name.ToLower()], a.PropertyType));
+                    BaseEmit.Set(result, a.Name, dic[a.Name.ToLower()]);
             });
 
             return result;

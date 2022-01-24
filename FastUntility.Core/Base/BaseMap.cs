@@ -20,7 +20,6 @@ namespace FastUntility.Core.Base
         {
             var result = new T();
             var dynGet = new DynamicGet<T1>();
-            var dynSet = new DynamicSet<T>();
             var list = BaseDic.PropertyInfo<T>();
             var dic = new Dictionary<MemberInfo, Expression>();
             if (field != null)
@@ -65,19 +64,16 @@ namespace FastUntility.Core.Base
                                 var method = leafList.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
                                 method.Invoke(leafList, new object[] { leafModel });
                             }
-                            dynSet.SetValue(result, property.Name, leafList);
+                            BaseEmit.Set<T>(result, property.Name, leafList);
                         }
                     }
                     else if (isSystemType)
                     {
-                      if (m.PropertyType.Name == "Nullable`1" && m.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(result, property.Name, dynGet.GetValue(model, m.Name));
-                        else
-                            dynSet.SetValue(result, property.Name, Convert.ChangeType(dynGet.GetValue(model, m.Name), m.PropertyType));
+                        BaseEmit.Set<T>(result, property.Name, dynGet.GetValue(model, m.Name));
                     }
                     else
                     {
-                        var tempModel = Convert.ChangeType(dynGet.GetValue(model, m.Name), m.PropertyType);
+                        var tempModel = Convert.ChangeType(dynGet.GetValue(model, m.Name), m.PropertyType); 
                         var leafModel = Activator.CreateInstance(property.PropertyType);
                         var propertyList = (property.PropertyType as TypeInfo).GetProperties().ToList();
 
@@ -89,7 +85,7 @@ namespace FastUntility.Core.Base
                                 temp.SetValue(leafModel, p.GetValue(tempModel));
                             }
                         });
-                        dynSet.SetValue(result, property.Name, leafModel);
+                        BaseEmit.Set<T>(result, property.Name, leafModel);
                     }
                 }
                 else
@@ -97,10 +93,7 @@ namespace FastUntility.Core.Base
                     if (dic.ToList().Exists(n => (n.Value as MemberExpression).Member.Name.ToLower() == m.Name.ToLower()))
                     {
                         var temp = dic.ToList().Find(n => (n.Value as MemberExpression).Member.Name.ToLower() == m.Name.ToLower());
-                        if (m.Name == "Nullable`1" && temp.Key.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            dynSet.SetValue(result, temp.Key.Name, dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name));
-                        else
-                            dynSet.SetValue(result, temp.Key.Name, Convert.ChangeType(dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name), m.PropertyType));
+                        BaseEmit.Set<T>(result, temp.Key.Name, dynGet.GetValue(model, (temp.Value as MemberExpression).Member.Name));
                     }
                 }
             });
@@ -114,7 +107,6 @@ namespace FastUntility.Core.Base
 
             var result = new List<Result>();
             var dyn = new DynamicGet<T>();
-            var dynResult = new DynamicSet<Result>();
             var dic = new Dictionary<string, object>();
 
             var name = (field.Body as NewExpression).Members.ToList();
@@ -128,20 +120,20 @@ namespace FastUntility.Core.Base
             dic.ToList().ForEach(a =>
             {
                 var param = new Result();
-                dynResult.SetValue(param, "ParameterName", a.Key);
+                BaseEmit.Set<Result>(param, "ParameterName", a.Key);
                 if (a.Value is ConstantExpression)
-                    dynResult.SetValue(param, "Value", (a.Value as ConstantExpression).Value);
+                    BaseEmit.Set<Result>(param, "Value", (a.Value as ConstantExpression).Value);
                 else if (a.Value is MethodCallExpression)
-                    dynResult.SetValue(param, "Value", Expression.Lambda((a.Value as MethodCallExpression).ReduceExtensions().Reduce()).Compile().DynamicInvoke().ToString());
+                    BaseEmit.Set<Result>(param, "Value", Expression.Lambda((a.Value as MethodCallExpression).ReduceExtensions().Reduce()).Compile().DynamicInvoke().ToString());
                 else if (a.Value is MemberExpression)
                 {
                     if ((a.Value as MemberExpression).Expression is ParameterExpression)
-                        dynResult.SetValue(param, "Value", dyn.GetValue(item, (a.Value as MemberExpression).Member.Name));
+                        BaseEmit.Set<Result>(param, "Value", dyn.GetValue(item, (a.Value as MemberExpression).Member.Name));
                     else
-                        dynResult.SetValue(param, "Value", Expression.Lambda(a.Value as MemberExpression).Compile().DynamicInvoke());
+                        BaseEmit.Set<Result>(param, "Value", Expression.Lambda(a.Value as MemberExpression).Compile().DynamicInvoke());
                 }
                 else
-                    dynResult.SetValue(param, "Value", dyn.GetValue(item, a.Value.ToStr()));
+                    BaseEmit.Set<Result>(param, "Value", dyn.GetValue(item,a.Value.ToStr()));
 
                 result.Add(param);
             });
