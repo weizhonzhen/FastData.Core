@@ -548,7 +548,7 @@ namespace FastData.Core.Base
                                 if (temp.GetValue(info.Name).ToStr() == "" && info.PropertyType.Name == "Nullable`1")
                                     continue;
 
-                                BaseEmit.Set(model, info.Name, temp.GetValue(info.Name));  dynSet.SetValue(model, info.Name, Convert.ChangeType(temp.GetValue(info.Name), info.PropertyType));
+                                BaseEmit.Set(model, info.Name, temp.GetValue(info.Name));  
                             }
 
                             var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);

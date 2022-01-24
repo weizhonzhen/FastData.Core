@@ -31,7 +31,6 @@ namespace FastData.Core.Base
         public static OptionModel UpdateToSql<T>(T model, ConfigModel config, Expression<Func<T, object>> field = null, DbCommand cmd = null)
         {
             var result = new OptionModel();
-            var dynGet = new Property.DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T));
 
@@ -46,7 +45,7 @@ namespace FastData.Core.Base
                     pInfo.ForEach(a =>
                     {
                         result.Sql = string.Format("{2} {0}={1}{0},", a.Name, config.Flag, result.Sql);
-                        var itemValue = dynGet.GetValue(model, a.Name);
+                        var itemValue = BaseEmit.Get<T>(model, a.Name); 
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = a.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -60,7 +59,7 @@ namespace FastData.Core.Base
                     (field.Body as NewExpression).Members.ToList().ForEach(a =>
                     {
                         result.Sql = string.Format("{2} {0}={1}{0},", a.Name, config.Flag, result.Sql);
-                        var itemValue = dynGet.GetValue(model, a.Name);
+                        var itemValue = BaseEmit.Get<T>(model, a.Name);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = a.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -73,7 +72,7 @@ namespace FastData.Core.Base
                 {
                     if (result.Param.Exists(a => a.ParameterName == item))
                     {
-                        var itemValue = dynGet.GetValue(model, item);
+                        var itemValue = BaseEmit.Get<T>(model, item);
                         if (itemValue == null)
                         {
                             result.IsSuccess = false;
@@ -114,7 +113,6 @@ namespace FastData.Core.Base
         {
             var sbName = new StringBuilder();
             var sbValue = new StringBuilder();
-            var dynGet = new Property.DynamicGet<T>();
             var list = new List<MemberInfo>();
             var result = new OptionModel();
 
@@ -128,7 +126,7 @@ namespace FastData.Core.Base
                     {
                         sbName.AppendFormat("{0},", p.Name);
                         sbValue.AppendFormat("{1}{0},", p.Name, config.Flag);
-                        var itemValue = dynGet.GetValue(model, p.Name);
+                        var itemValue = BaseEmit.Get<T>(model, p.Name);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = p.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -166,7 +164,6 @@ namespace FastData.Core.Base
         {
             var sbName = new StringBuilder();
             var sbValue = new StringBuilder();
-            var dynGet = new Property.DynamicGet(model);
             var list = new List<MemberInfo>();
             var result = new OptionModel();
 
@@ -180,7 +177,7 @@ namespace FastData.Core.Base
                     {
                         sbName.AppendFormat("{0},", p.Name);
                         sbValue.AppendFormat("{1}{0},", p.Name, config.Flag);
-                        var itemValue = dynGet.GetValue(model, p.Name);
+                        var itemValue = BaseEmit.Get(model, p.Name);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = p.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -218,7 +215,6 @@ namespace FastData.Core.Base
         public static OptionModel UpdateToSql<T>(DbCommand cmd, T model, ConfigModel config, Expression<Func<T, object>> field = null)
         {
             var result = new OptionModel();
-            var dynGet = new Property.DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T));
 
@@ -244,7 +240,7 @@ namespace FastData.Core.Base
 
                         result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
-                        var itemValue = dynGet.GetValue(model, item.Name);
+                        var itemValue = BaseEmit.Get<T>(model, item.Name);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = item.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -263,7 +259,7 @@ namespace FastData.Core.Base
 
                         result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
-                        var itemValue = dynGet.GetValue(model, item.Name);
+                        var itemValue = BaseEmit.Get<T>(model, item.Name);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = item.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -277,7 +273,7 @@ namespace FastData.Core.Base
                 var count = 1;
                 foreach (var item in where)
                 {
-                    var itemValue = dynGet.GetValue(model, item);
+                    var itemValue = BaseEmit.Get<T>(model, item);
 
                     if (itemValue == null)
                     {
@@ -327,7 +323,6 @@ namespace FastData.Core.Base
         public static OptionModel UpdateToSql(DbCommand cmd, object model, ConfigModel config)
         {
             var result = new OptionModel();
-            var dynGet = new Property.DynamicGet(model);
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, model.GetType());
 
@@ -350,7 +345,7 @@ namespace FastData.Core.Base
 
                     result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
-                    var itemValue = dynGet.GetValue(model, item.Name);
+                    var itemValue = BaseEmit.Get(model, item.Name);
                     
                     var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                     temp.ParameterName = item.Name;
@@ -363,7 +358,7 @@ namespace FastData.Core.Base
                 var count = 1;
                 foreach (var item in where)
                 {
-                    var itemValue = dynGet.GetValue(model, item);
+                    var itemValue = BaseEmit.Get(model, item); 
 
                     if (itemValue == null)
                     {
@@ -413,7 +408,6 @@ namespace FastData.Core.Base
         /// <returns></returns>
         public static OptionModel UpdateListToSql<T>(DbCommand cmd, List<T> list, ConfigModel config, Expression<Func<T, object>> field = null)
         {
-            var dynGet = new Property.DynamicGet<T>();
             var result = new OptionModel();
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T));
@@ -487,21 +481,21 @@ namespace FastData.Core.Base
                     var row = result.table.NewRow();
                     where.ForEach(a =>
                     {
-                        row[a] = dynGet.GetValue(p, a);
+                        row[a] = BaseEmit.Get<T>(p, a);
                     });
 
                     if (field == null)
                     {
                         PropertyCache.GetPropertyInfo<T>().ForEach(a =>
                         {
-                            row[a.Name] = dynGet.GetValue(p, a.Name);
+                            row[a.Name] = BaseEmit.Get<T>(p, a.Name);
                         });
                     }
                     else
                     {
                         (field.Body as NewExpression).Members.ToList().ForEach(a =>
                         {
-                            row[a.Name] = dynGet.GetValue(p, a.Name);
+                            row[a.Name] = BaseEmit.Get<T>(p, a.Name);
                         });
                     }
                     result.table.Rows.Add(row);
@@ -534,7 +528,6 @@ namespace FastData.Core.Base
         public static OptionModel DeleteToSql<T>(DbCommand cmd, T model, ConfigModel config)
         {
             var result = new OptionModel();
-            var dynGet = new Property.DynamicGet<T>();
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, typeof(T));
 
@@ -552,7 +545,7 @@ namespace FastData.Core.Base
                 var count = 1;
                 foreach (var item in where)
                 {
-                    var itemValue = dynGet.GetValue(model, item);
+                    var itemValue = BaseEmit.Get<T>(model, item);
 
                     if (itemValue == null)
                     {
@@ -602,7 +595,6 @@ namespace FastData.Core.Base
         public static OptionModel DeleteToSql(DbCommand cmd,object model,ConfigModel config)
         {
             var result = new OptionModel();
-            var dynGet = new Property.DynamicGet(model);
             result.IsCache = config.IsPropertyCache;
             var where = PrimaryKey(config, cmd, model.GetType());
 
@@ -620,7 +612,7 @@ namespace FastData.Core.Base
                 var count = 1;
                 foreach (var item in where)
                 {
-                    var itemValue = dynGet.GetValue(model, item);
+                    var itemValue = BaseEmit.Get(model, item); 
 
                     if (itemValue == null)
                     {
