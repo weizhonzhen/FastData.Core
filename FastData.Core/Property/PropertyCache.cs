@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using FastData.Core.CacheModel;
 using FastData.Core.Base;
+using FastUntility.Core.Base;
 
 namespace FastData.Core.Property
 {
@@ -118,7 +119,6 @@ namespace FastData.Core.Property
             ListInfo.ForEach(a => {
                 var temp = new ColumnModel();
                 temp.Name = a.Name;
-                var dynSet = new DynamicSet<ColumnModel>();
                 var paramList = GetPropertyInfo<ColumnModel>(true);
 
                 a.CustomAttributes.ToList().ForEach(b => {
@@ -126,7 +126,7 @@ namespace FastData.Core.Property
                     {
                         b.NamedArguments.ToList().ForEach(c => {
                             if (paramList.Exists(p => p.Name.ToLower() == c.MemberName.ToLower()))
-                                dynSet.SetValue(temp, c.MemberName, c.TypedValue.Value);
+                                BaseEmit.Set(temp, c.MemberName, c.TypedValue.Value);
                         });
                     }
                 });
