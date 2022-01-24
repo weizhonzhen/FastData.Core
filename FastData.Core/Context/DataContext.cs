@@ -17,6 +17,7 @@ using FastData.Core.CacheModel;
 using System.Collections;
 using FastUntility.Core;
 using FastData.Core.Filter;
+using FastUntility.Core.Base;
 
 namespace FastData.Core.Context
 {
@@ -170,7 +171,6 @@ namespace FastData.Core.Context
                 var key = string.Format("{0}.{1}.navigate", typeof(T).Namespace, typeof(T).Name);
                 if (DbCache.Exists(config.CacheType, key))
                 {
-                    var dynGet = new Property.DynamicGet<T>();
                     var list = DbCache.Get<List<NavigateModel>>(config.CacheType, key);
 
                     if (list.Count == 0)
@@ -204,7 +204,7 @@ namespace FastData.Core.Context
 
                                 var param = DbProviderFactories.GetFactory(config).CreateParameter();
                                 param.ParameterName = a.Name[i];
-                                param.Value = dynGet.GetValue(d, a.Key[i]);
+                                param.Value = BaseEmit.Get<T>(d, a.Key[i]);
                                 cmd.Parameters.Add(param);
                                 paramList.Add(param);
                             }
@@ -1857,7 +1857,6 @@ namespace FastData.Core.Context
         {
             var result = new DataReturn<T>();
             var sql = new StringBuilder();
-            var dyn = new Property.DynamicGet<T>();
             var tableName = new List<string>();
 
             try
@@ -1909,7 +1908,7 @@ namespace FastData.Core.Context
 
                         list.ForEach(l =>
                         {
-                            var value = dyn.GetValue(l, a.Name);
+                            var value = BaseEmit.Get<T>(l, a.Name);
                             if (value == null)
                                 value = DBNull.Value;
                             pValue.Add(value);
@@ -2048,7 +2047,7 @@ namespace FastData.Core.Context
                 if (list.Count == 0)
                     return result;
 
-                var dyn = new DynamicGet(list[0]);
+                //var dyn = new Property.DynamicGet(list[0]);
 
                 if (config.DbType == DataDbType.Oracle)
                 {
@@ -2088,7 +2087,7 @@ namespace FastData.Core.Context
 
                         list.ForEach(l =>
                         {
-                            var value = dyn.GetValue(l, a.Name);
+                            var value = BaseEmit.Get(l, a.Name); 
                             if (value == null)
                                 value = DBNull.Value;
                             pValue.Add(value);
