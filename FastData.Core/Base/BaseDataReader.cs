@@ -229,7 +229,7 @@ namespace FastData.Core.Base
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
                                     if (v.Name == "get_Value" && !dr.IsDBNull(id))
-                                        value = v.Invoke(temp, null);
+                                        value = BaseEmit.Get(temp, "Value");
                                 });
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
@@ -256,7 +256,7 @@ namespace FastData.Core.Base
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
                                     if (v.Name == "get_Value" && !dr.IsDBNull(id))
-                                        value = v.Invoke(temp, null);
+                                        value = BaseEmit.Get(temp, "Value");
                                 });
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
@@ -321,7 +321,7 @@ namespace FastData.Core.Base
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
                                     if (v.Name == "get_Value" && !dr.IsDBNull(id))
-                                        value = v.Invoke(temp, null);
+                                        value = BaseEmit.Get(temp, "Value");
                                 });
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
@@ -348,7 +348,7 @@ namespace FastData.Core.Base
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
                                     if (v.Name == "get_Value" && !dr.IsDBNull(id))
-                                        value = v.Invoke(temp, null);
+                                        value = BaseEmit.Get(temp, "Value");
                                 });
                                 temp.GetType().GetMethods().ToList().ForEach(v =>
                                 {
