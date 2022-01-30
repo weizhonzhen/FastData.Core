@@ -60,41 +60,26 @@ namespace FastUntility.Core.Base
                 if (method == null)
                     return;
 
-                var dynamicMethod = new DynamicMethod("SetEmit", null, new[] { type, typeof(object) }, type.Module);
-                var iL = dynamicMethod.GetILGenerator();
-
                 var parameter = method.GetParameters()[0];
                 if (parameter == null)
                     return;
 
-                Type defType = parameter.ParameterType;
+                var defType = parameter.ParameterType;
                 if (parameter.ParameterType.Name == "Nullable`1" && parameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
                     defType = Nullable.GetUnderlyingType(parameter.ParameterType);
 
                 value = Convert.ChangeType(value, defType);
-                var local = iL.DeclareLocal(defType, true);
 
-                iL.Emit(OpCodes.Ldarg_1);
-
-                if (defType.IsValueType)
-                    iL.Emit(OpCodes.Unbox_Any, defType);
-                else
-                    iL.Emit(OpCodes.Castclass, defType);
-
-                iL.Emit(OpCodes.Stloc, local);
-                iL.Emit(OpCodes.Ldarg_0);
-                iL.Emit(OpCodes.Ldloc, local);
-                iL.EmitCall(OpCodes.Callvirt, method, null);
-                iL.Emit(OpCodes.Ret);
-
-                var dyn = dynamicMethod.CreateDelegate(typeof(Action<object, object>)) as Action<object, object>;
-                dyn(model, value);
+                Invoke(model, method, new object[] { value });
             }
             catch (Exception ex) { }
         }
 
         public static object Get<T>(T model, string name)
         {
+            if (model == null || name.ToStr() == "")
+                return null;
+
             var type = typeof(T);
             var dynamicMethod = new DynamicMethod("GetEmit", typeof(object), new[] { typeof(object) }, type, true);
             var method = type.GetMethod($"get_{name}");
@@ -124,6 +109,9 @@ namespace FastUntility.Core.Base
 
         public static object Get(object model, string name)
         {
+            if (model == null || name.ToStr() == "")
+                return null;
+
             var type = model.GetType();
             var dynamicMethod = new DynamicMethod("GetEmit", typeof(object), new[] { typeof(object) }, type, true);
             var method = type.GetMethod($"get_{name}");
@@ -149,6 +137,132 @@ namespace FastUntility.Core.Base
             iL.Emit(OpCodes.Ret);
             var dyn = (Func<object, object>)dynamicMethod.CreateDelegate(typeof(Func<object, object>));
             return dyn(model);
+        }
+
+        private delegate object EmitInvoke(object target, object[] paramters);
+
+        public static object Invoke(object model, MethodInfo methodInfo, object[] param)
+        {
+            if (methodInfo == null || model == null)
+                return null;
+            try
+            {
+                var dynamicMethod = new DynamicMethod("InvokeEmit", typeof(object), new Type[] { typeof(object), typeof(object[]) }, methodInfo.DeclaringType.Module);
+                var iL = dynamicMethod.GetILGenerator();
+                var info = methodInfo.GetParameters();
+                var type = new Type[info.Length];
+                var local = new LocalBuilder[type.Length];
+
+                for (int i = 0; i < info.Length; i++)
+                {
+                    if (info[i].ParameterType.IsByRef)
+                        type[i] = info[i].ParameterType.GetElementType();
+                    else
+                        type[i] = info[i].ParameterType;
+                }
+
+                for (int i = 0; i < type.Length; i++)
+                {
+                    local[i] = iL.DeclareLocal(type[i], true);
+                }
+
+                for (int i = 0; i < type.Length; i++)
+                {
+                    iL.Emit(OpCodes.Ldarg_1);
+                    EmitInt(iL, i);
+                    iL.Emit(OpCodes.Ldelem_Ref);
+                    if (type[i].IsValueType)
+                        iL.Emit(OpCodes.Unbox_Any, type[i]);
+                    else
+                        iL.Emit(OpCodes.Castclass, type[i]);
+                    iL.Emit(OpCodes.Stloc, local[i]);
+                }
+
+                if (!methodInfo.IsStatic)
+                    iL.Emit(OpCodes.Ldarg_0);
+
+                for (int i = 0; i < type.Length; i++)
+                {
+                    if (info[i].ParameterType.IsByRef)
+                        iL.Emit(OpCodes.Ldloca_S, local[i]);
+                    else
+                        iL.Emit(OpCodes.Ldloc, local[i]);
+                }
+
+                if (methodInfo.IsStatic)
+                    iL.EmitCall(OpCodes.Call, methodInfo, null);
+                else
+                    iL.EmitCall(OpCodes.Callvirt, methodInfo, null);
+
+                if (methodInfo.ReturnType == typeof(void))
+                    iL.Emit(OpCodes.Ldnull);
+                else if (methodInfo.ReturnType.IsValueType)
+                    iL.Emit(OpCodes.Box, methodInfo.ReturnType);
+
+
+                for (int i = 0; i < type.Length; i++)
+                {
+                    if (info[i].ParameterType.IsByRef)
+                    {
+                        iL.Emit(OpCodes.Ldarg_1);
+                        EmitInt(iL, i);
+                        iL.Emit(OpCodes.Ldloc, local[i]);
+                        if (local[i].LocalType.IsValueType)
+                            iL.Emit(OpCodes.Box, local[i].LocalType);
+                        iL.Emit(OpCodes.Stelem_Ref);
+                    }
+                }
+
+                iL.Emit(OpCodes.Ret);
+                var dyn = dynamicMethod.CreateDelegate(typeof(EmitInvoke)) as EmitInvoke;
+                return dyn(model, param);
+            }
+            catch (Exception ex)
+            {
+                return methodInfo.Invoke(model, param);
+            }
+        }
+
+        private static void EmitInt(ILGenerator iL, int value)
+        {
+            switch (value)
+            {
+                case -1:
+                    iL.Emit(OpCodes.Ldc_I4_M1);
+                    return;
+                case 0:
+                    iL.Emit(OpCodes.Ldc_I4_0);
+                    return;
+                case 1:
+                    iL.Emit(OpCodes.Ldc_I4_1);
+                    return;
+                case 2:
+                    iL.Emit(OpCodes.Ldc_I4_2);
+                    return;
+                case 3:
+                    iL.Emit(OpCodes.Ldc_I4_3);
+                    return;
+                case 4:
+                    iL.Emit(OpCodes.Ldc_I4_4);
+                    return;
+                case 5:
+                    iL.Emit(OpCodes.Ldc_I4_5);
+                    return;
+                case 6:
+                    iL.Emit(OpCodes.Ldc_I4_6);
+                    return;
+                case 7:
+                    iL.Emit(OpCodes.Ldc_I4_7);
+                    return;
+                case 8:
+                    iL.Emit(OpCodes.Ldc_I4_8);
+                    return;
+            }
+
+            if (value > -129 && value < 128)
+                iL.Emit(OpCodes.Ldc_I4_S, (SByte)value);
+            else
+                iL.Emit(OpCodes.Ldc_I4, value);
         }
     }
 }

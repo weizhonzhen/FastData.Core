@@ -270,11 +270,7 @@ namespace FastUntility.Core.Base
         public static string DataReaderToJson(DbDataReader reader, bool isOracle = false)
         {
             var result = new List<Dictionary<string, object>>();
-            var cols = new List<string>();
-
-            //列名
-            for (var i = 0; i < reader.FieldCount; i++)
-                cols.Add(reader.GetName(i));
+            var cols = GetCol(reader);
 
             while (reader.Read())
             {
@@ -285,62 +281,7 @@ namespace FastUntility.Core.Base
                     if (reader[a] is DBNull)
                         dic.Add(a.ToLower(), "");
                     else if(isOracle)
-                    {
-                        var id = reader.GetOrdinal(a.ToUpper());
-                        var typeName = reader.GetDataTypeName(id).ToLower();
-                        if (typeName == "clob" || typeName == "nclob")
-                        {
-                            reader.GetType().GetMethods().ToList().ForEach(m => {
-                                if (m.Name == "GetOracleClob")
-                                {
-                                    var param = new object[1];
-                                    param[0] = id;
-                                    var temp = m.Invoke(reader, param);
-                                    temp.GetType().GetMethods().ToList().ForEach(v => {
-                                        if (v.Name == "get_Value")
-                                            dic.Add(a.ToLower(), BaseEmit.Get(temp, "Value"));
-                                    });
-                                    temp.GetType().GetMethods().ToList().ForEach(v =>
-                                    {
-                                        if (v.Name == "Close")
-                                            v.Invoke(temp, null);
-                                    });
-                                    temp.GetType().GetMethods().ToList().ForEach(v =>
-                                    {
-                                        if (v.Name == "Dispose")
-                                             v.Invoke(temp, null);
-                                    });
-                                }
-                            });
-                        }
-                        else if (typeName == "blob")
-                        {
-                            reader.GetType().GetMethods().ToList().ForEach(m => {
-                                if (m.Name == "GetOracleBlob")
-                                {
-                                    var param = new object[1];
-                                    param[0] = id;
-                                    var temp = m.Invoke(reader, param);
-                                    temp.GetType().GetMethods().ToList().ForEach(v => {
-                                        if (v.Name == "get_Value")
-                                            dic.Add(a.ToLower(), BaseEmit.Get(temp, "Value"));
-                                    });
-                                    temp.GetType().GetMethods().ToList().ForEach(v =>
-                                    {
-                                        if (v.Name == "Close")
-                                            v.Invoke(temp, null);
-                                    });
-                                    temp.GetType().GetMethods().ToList().ForEach(v =>
-                                    {
-                                        if (v.Name == "Dispose")
-                                           v.Invoke(temp, null);
-                                    });
-                                }
-                            });
-                        }
-                        else
-                            dic.Add(a.ToLower(), reader[a]);
-                    }
+                        ReadOracle(reader, a, dic);
                     else
                         dic.Add(a.ToLower(), reader[a]);
                 });
@@ -361,86 +302,57 @@ namespace FastUntility.Core.Base
         public static List<Dictionary<string, object>> DataReaderToDic(DbDataReader reader, bool isOracle = false)
         {
             var result = new List<Dictionary<string, object>>();
-            var cols = new List<string>();
-
-            //列名
-            for (var i = 0; i < reader.FieldCount; i++)
-            {
-                if (!cols.Exists(a => a.ToLower() == reader.GetName(i).ToLower()))
-                    cols.Add(reader.GetName(i));
-            }
+            var cols = GetCol(reader);
 
             while (reader.Read())
             {
                 var dic = new Dictionary<string, object>();
-                cols.ForEach(a => {
+                cols.ForEach(a =>
+                {
                     if (reader[a] is DBNull)
                         dic.Add(a.ToLower(), "");
                     else if (isOracle)
-                    {
-                        var id = reader.GetOrdinal(a);
-                        var typeName = reader.GetDataTypeName(id).ToLower();
-                        if (typeName == "clob" || typeName == "nclob")
-                        {
-                            reader.GetType().GetMethods().ToList().ForEach(m => {
-                                if (m.Name == "GetOracleClob")
-                                {
-                                    var param = new object[1];
-                                    param[0] = id;
-                                    var temp = m.Invoke(reader, param);
-                                    temp.GetType().GetMethods().ToList().ForEach(v => {
-                                        if (v.Name == "get_Value" && !reader.IsDBNull(id))
-                                            dic.Add(a.ToLower(), BaseEmit.Get(temp, "Value"));
-                                    }); 
-                                    temp.GetType().GetMethods().ToList().ForEach(v =>
-                                    {
-                                        if (v.Name == "Close")
-                                            v.Invoke(temp, null);
-                                    });
-                                    temp.GetType().GetMethods().ToList().ForEach(v =>
-                                    {
-                                        if (v.Name == "Dispose")
-                                            v.Invoke(temp, null);
-                                    });
-                                }
-                            });
-                        }
-                        else if (typeName == "blob")
-                        {
-                            reader.GetType().GetMethods().ToList().ForEach(m => {
-                                if (m.Name == "GetOracleBlob")
-                                {
-                                    var param = new object[1];
-                                    param[0] = id;
-                                    var temp = m.Invoke(reader, param);
-                                    temp.GetType().GetMethods().ToList().ForEach(v => {
-                                        if (v.Name == "get_Value" && !reader.IsDBNull(id))
-                                            dic.Add(a.ToLower(), BaseEmit.Get(temp, "Value"));
-                                    });
-                                    temp.GetType().GetMethods().ToList().ForEach(v =>
-                                    {
-                                        if (v.Name == "Close")
-                                            v.Invoke(temp, null);
-                                    });
-                                    temp.GetType().GetMethods().ToList().ForEach(v =>
-                                    {
-                                        if (v.Name == "Dispose")
-                                            v.Invoke(temp, null);
-                                    });
-                                }
-                            });
-                        }
-                        else
-                            dic.Add(a.ToLower(), reader[a]);
-                    }
-                    else
-                        dic.Add(a.ToLower(), reader[a]);
+                        ReadOracle(reader, a, dic);
                 });
 
                 result.Add(dic);
             }
 
             return result;
+        }
+        #endregion
+
+        private static void ReadOracle(DbDataReader reader, string a, Dictionary<string, object> dic)
+        {
+            var id = reader.GetOrdinal(a.ToUpper());
+            var typeName = reader.GetDataTypeName(id).ToLower();
+            if (typeName == "clob" || typeName == "nclob")
+            {
+                var temp = BaseEmit.Invoke(reader, reader.GetType().GetMethod("GetOracleClob"), new object[] { id });
+                dic.Add(a.ToLower(), BaseEmit.Get(temp, "Value"));
+                BaseEmit.Invoke(temp, temp.GetType().GetMethod("Close"), null);
+                BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
+            }
+            else if (typeName == "blob")
+            {
+                var temp = BaseEmit.Invoke(reader, reader.GetType().GetMethod("GetOracleBlob"), new object[] { id });
+                dic.Add(a.ToLower(), BaseEmit.Get(temp, "Value"));
+                BaseEmit.Invoke(temp, temp.GetType().GetMethod("Close"), null);
+                BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
+            }
+            else
+                dic.Add(a.ToLower(), reader[a]);
+        }
+
+        #region get datareader col
+        private static List<string> GetCol(DbDataReader dr)
+        {
+            var list = new List<string>();
+            for (var i = 0; i < dr.FieldCount; i++)
+            {
+                list.Add(dr.GetName(i));
+            }
+            return list;
         }
         #endregion
     }

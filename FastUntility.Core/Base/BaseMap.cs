@@ -61,7 +61,7 @@ namespace FastUntility.Core.Base
                                 });
 
                                 var method = leafList.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
-                                method.Invoke(leafList, new object[] { leafModel });
+                                BaseEmit.Invoke(leafList, method, new object[] { leafModel });
                             }
                             BaseEmit.Set<T>(result, property.Name, leafList);
                         }
