@@ -147,7 +147,7 @@ namespace FastUntility.Core.Base
                 return null;
             try
             {
-                var dynamicMethod = new DynamicMethod("InvokeEmit", typeof(object), new Type[] { typeof(object), typeof(object[]) }, methodInfo.DeclaringType.Module);
+                var dynamicMethod = new DynamicMethod("InvokeEmit", typeof(object), new Type[] { typeof(object), typeof(object[]) }, typeof(EmitInvoke).Module);
                 var iL = dynamicMethod.GetILGenerator();
                 var info = methodInfo.GetParameters();
                 var type = new Type[info.Length];
