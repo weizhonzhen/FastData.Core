@@ -552,7 +552,7 @@ namespace FastData.Core.Base
                             }
 
                             var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
-                            method.Invoke(list, new object[] { model });
+                            BaseEmit.Invoke(list, method, new object[] { model });
                         }
 
                         infoResult.SetValue(item, list);

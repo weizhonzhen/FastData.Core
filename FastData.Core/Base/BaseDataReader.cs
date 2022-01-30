@@ -132,7 +132,7 @@ namespace FastData.Core.Base
                 list.GetType().GetMethods().ToList().ForEach(m =>
                 {
                     if (m.Name == "Add")
-                        m.Invoke(list, new object[] { item });
+                        BaseEmit.Invoke(list, m, new object[] { item });
                 });
             }
 
@@ -207,81 +207,16 @@ namespace FastData.Core.Base
         /// <param name="dr"></param>
         /// <param name="info"></param>
         /// <param name="config"></param>
-        private static T SetValue<T>(T item ,DbDataReader dr, PropertyModel info, ConfigModel config)
+        private static T SetValue<T>(T item, DbDataReader dr, PropertyModel info, ConfigModel config)
         {
             try
             {
                 var colName = config.DbType == DataDbType.Oracle ? info.Name.ToUpper() : info.Name;
                 var id = dr.GetOrdinal(colName);
                 if (DataDbType.Oracle == config.DbType)
-                {
-                    object value = null;
-                    var typeName = dr.GetDataTypeName(id).ToLower();
-                    if (typeName == "clob" || typeName == "nclob")
-                    {
-                        dr.GetType().GetMethods().ToList().ForEach(m =>
-                        {
-                            if (m.Name == "GetOracleClob")
-                            {
-                                var param = new object[1];
-                                param[0] = id;
-                                var temp = m.Invoke(dr, param);
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "get_Value" && !dr.IsDBNull(id))
-                                        value = BaseEmit.Get(temp, "Value");
-                                });
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "Close")
-                                        v.Invoke(temp, null);
-                                });
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "Dispose")
-                                        v.Invoke(temp, null);
-                                });
-                            }
-                        });
-                    }
-                    else if (typeName == "blob")
-                    {
-                        dr.GetType().GetMethods().ToList().ForEach(m =>
-                        {
-                            if (m.Name == "GetOracleBlob")
-                            {
-                                var param = new object[1];
-                                param[0] = id;
-                                var temp = m.Invoke(dr, param);
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "get_Value" && !dr.IsDBNull(id))
-                                        value = BaseEmit.Get(temp, "Value");
-                                });
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "Close")
-                                        v.Invoke(temp, null);
-                                });
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "Dispose")
-                                       v.Invoke(temp, null);
-                                });
-                            }
-                        });
-                    }
-                    else
-                        value = dr.GetValue(id);
-
-                    if (!dr.IsDBNull(id))
-                        BaseEmit.Set(item, info.Name,value);
-                }
-                else
-                {
-                    if (!dr.IsDBNull(id))
-                        BaseEmit.Set(item, info.Name, dr.GetValue(id));
-                }
+                    ReadOracle(item, dr, id, info);
+                else if (!dr.IsDBNull(id))
+                    BaseEmit.Set(item, info.Name, dr.GetValue(id));
 
                 return item;
             }
@@ -306,83 +241,49 @@ namespace FastData.Core.Base
                 var colName = config.DbType == DataDbType.Oracle ? info.Name.ToUpper() : info.Name;
                 var id = dr.GetOrdinal(colName);
                 if (DataDbType.Oracle == config.DbType)
-                {
-                    object value = null;
-                    var typeName = dr.GetDataTypeName(id).ToLower();
-                    if (typeName == "clob" || typeName == "nclob")
-                    {
-                        dr.GetType().GetMethods().ToList().ForEach(m =>
-                        {
-                            if (m.Name == "GetOracleClob")
-                            {
-                                var param = new object[1];
-                                param[0] = id;
-                                var temp = m.Invoke(dr, param);
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "get_Value" && !dr.IsDBNull(id))
-                                        value = BaseEmit.Get(temp, "Value");
-                                });
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "Close")
-                                        v.Invoke(temp, null);
-                                });
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "Dispose")
-                                        v.Invoke(temp, null);
-                                });
-                            }
-                        });
-                    }
-                    else if (typeName == "blob")
-                    {
-                        dr.GetType().GetMethods().ToList().ForEach(m =>
-                        {
-                            if (m.Name == "GetOracleBlob")
-                            {
-                                var param = new object[1];
-                                param[0] = id;
-                                var temp = m.Invoke(dr, param);
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "get_Value" && !dr.IsDBNull(id))
-                                        value = BaseEmit.Get(temp, "Value");
-                                });
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "Close")
-                                        v.Invoke(temp, null);
-                                });
-                                temp.GetType().GetMethods().ToList().ForEach(v =>
-                                {
-                                    if (v.Name == "Dispose")
-                                        v.Invoke(temp, null);
-                                });
-                            }
-                        });
-                    }
-                    else
-                        value = dr.GetValue(id);
-
-                    if (!dr.IsDBNull(id))
-                        BaseEmit.Set(item, info.Name, value);
-                }
-                else
-                {
-                    if (!dr.IsDBNull(id))
-                        BaseEmit.Set(item, info.Name, dr.GetValue(id));
-                }
+                    ReadOracle(item, dr, id, info);
+                else if (!dr.IsDBNull(id))
+                    BaseEmit.Set(item, info.Name, dr.GetValue(id));
 
                 return item;
             }
             catch
             {
-                return item; 
+                return item;
             }
         }
         #endregion
+
+        private static void ReadOracle(Object item,DbDataReader dr, int id, PropertyModel info)
+        {
+            object value = null;
+            var typeName = dr.GetDataTypeName(id).ToLower();
+            if (typeName == "clob" || typeName == "nclob")
+            {
+                var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleClob"), new object[] { id });
+                if (temp != null)
+                {
+                    value = BaseEmit.Get(temp, "Value");
+                    BaseEmit.Invoke(temp, temp.GetType().GetMethod("Close"), null);
+                    BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
+                }
+            }
+            else if (typeName == "blob")
+            {
+                var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleBlob"), new object[] { id });
+                if (temp != null)
+                {
+                    value = BaseEmit.Get(temp, "Value");
+                    BaseEmit.Invoke(temp, temp.GetType().GetMethod("Close"), null);
+                    BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
+                }
+            }
+            else
+                value = dr.GetValue(id);
+
+            if (!dr.IsDBNull(id))
+                BaseEmit.Set(item, info.Name, value);
+        }
 
         #region get datareader col
         private static List<string> GetCol(DbDataReader dr)
@@ -394,7 +295,6 @@ namespace FastData.Core.Base
             }
             return list;
         }
-
         #endregion
     }
 }
