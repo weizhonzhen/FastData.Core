@@ -251,7 +251,7 @@ namespace FastData.Core.Context
             catch (Exception ex)
             {
                 BaseAop.AopException(ex, $"to List tableName:{typeof(T).Name}", AopType.Navigate, config);
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "Navigate<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Navigate", "");
@@ -457,7 +457,7 @@ namespace FastData.Core.Context
             catch (Exception ex)
             {
                 BaseAop.AopException(ex, $"to List tableName:{typeof(T).Name}", AopType.Query_List_Lambda, config);
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "GetList<T>", "");
                 else
                     DbLog.LogException<T>(item.Config.IsOutError, item.Config.DbType, ex, "GetList<T>", result.sql);
@@ -578,7 +578,7 @@ namespace FastData.Core.Context
             catch (Exception ex)
             {
                 BaseAop.AopException(ex, $"to Page tableName:{typeof(T).Name}", AopType.Query_Page_Lambda_Model, config);
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "GetPage<T>", "");
                 else
                     DbLog.LogException<T>(item.Config.IsOutError, item.Config.DbType, ex, "GetPage<T>", result.sql);
@@ -976,7 +976,7 @@ namespace FastData.Core.Context
             catch (Exception ex)
             {
                 BaseAop.AopException(ex, $"ExecuteSql tableName:{typeof(T).Name}", AopType.Execute_Sql_Model, config);
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "ExecuteSql<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "ExecuteSql<T>", result.sql);
@@ -1212,7 +1212,7 @@ namespace FastData.Core.Context
             catch (Exception ex)
             {
                 BaseAop.AopException(ex, "to DataTable", AopType.Query_DataTable_Lambda, config);
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException(config, ex, "GetDataTable", result.Sql);
                 else
                     DbLog.LogException(item.Config.IsOutError, item.Config.DbType, ex, "GetDataTable", result.Sql);
@@ -1272,7 +1272,7 @@ namespace FastData.Core.Context
                 if (isTrans)
                     RollbackTrans();
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "Delete<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Delete<T>", result.sql);
@@ -1357,7 +1357,7 @@ namespace FastData.Core.Context
                 if (isTrans)
                     RollbackTrans();
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "Delete<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Delete<T>", result.sql);
@@ -1410,7 +1410,7 @@ namespace FastData.Core.Context
             {
                 BaseAop.AopException(ex, $"tableName: {model.GetType().Name}, NavigateDelete:{ex.Message}, MemberName:{navigate.MemberName}", AopType.Navigate_Delete, config, model);
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException(config, ex, "Delete", "");
                 else
                     DbLog.LogException(config.IsOutError, config.DbType, ex, "Delete", result.Sql);
@@ -1488,7 +1488,7 @@ namespace FastData.Core.Context
                 if (isTrans)
                     RollbackTrans();
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "Update<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Update<T>", result.sql);
@@ -1573,7 +1573,7 @@ namespace FastData.Core.Context
                 if (isTrans)
                     RollbackTrans();
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "Update<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Update<T>", result.sql);
@@ -1626,7 +1626,7 @@ namespace FastData.Core.Context
             {
                 BaseAop.AopException(ex, $"tableName: {model.GetType().Name}, NavigateUpdate:{ex.Message}, MemberName:{navigate.MemberName}", AopType.Navigate_Update, config, model);
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException(config, ex, "Update", "");
                 else
                     DbLog.LogException(config.IsOutError, config.DbType, ex, "Update", result.Sql);
@@ -1701,7 +1701,7 @@ namespace FastData.Core.Context
             {
                 BaseAop.AopException(ex, $"Update List tableName:{typeof(T).Name}", AopType.UpdateList, config, list);
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "UpdateList<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateList<T>", result.sql);
@@ -1783,7 +1783,7 @@ namespace FastData.Core.Context
                 if (isTrans)
                     RollbackTrans();
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "Add<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "Add<T>", result.sql);
@@ -1832,7 +1832,7 @@ namespace FastData.Core.Context
             {
                 BaseAop.AopException(ex, $"tableName: {model.GetType().Name}, NavigateAdd:{ex.Message}, MemberName:{navigate.MemberName}", AopType.Navigate_Add, config, model);
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException(config, ex, "Add", "");
                 else
                     DbLog.LogException(config.IsOutError, config.DbType, ex, "Add", result.Sql);
@@ -1888,7 +1888,7 @@ namespace FastData.Core.Context
                     {
                         var pValue = new List<object>();
                         var param = DbProviderFactories.GetFactory(config).CreateParameter();
-                        if (a.PropertyType.Name.ToLower() == "nullable`1")
+                        if (string.Compare( a.PropertyType.Name,"nullable`1",false)==0)
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.GetGenericArguments()[0].Name);
                         else
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.Name);
@@ -1996,7 +1996,7 @@ namespace FastData.Core.Context
                 if (IsTrans)
                     RollbackTrans();
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException<T>(config, ex, "AddList<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "AddList<T>", result.sql);
@@ -2049,7 +2049,7 @@ namespace FastData.Core.Context
                     {
                         var pValue = new List<object>();
                         var param = DbProviderFactories.GetFactory(config).CreateParameter();
-                        if (a.PropertyType.Name.ToLower() == "nullable`1")
+                        if (string.Compare( a.PropertyType.Name, "nullable`1",false)==0)
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.GetGenericArguments()[0].Name);
                         else
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.Name);
@@ -2142,7 +2142,7 @@ namespace FastData.Core.Context
             {
                 BaseAop.AopException(ex, $"Add List tableName:{navigate.PropertyType.Name}", AopType.Navigate_AddList, config, model);
 
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, false) == 0)
                     DbLogTable.LogException(config, ex, "AddList", "");
                 else
                     DbLog.LogException(config.IsOutError, config.DbType, ex, "AddList", result.Sql);
