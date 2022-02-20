@@ -43,7 +43,7 @@ namespace FastData.Core.Check
                         {
                             model.ForEach(p =>
                             {
-                                var info = table.Column.Find(a => a.Name.ToLower() == p.Name.ToLower()) ?? new ColumnModel();
+                                var info = table.Column.Find(a => string.Compare( a.Name,p.Name,false)==0) ?? new ColumnModel();
                                 var result = CheckModel.CompareTo(info, p);
                                 if (result.IsUpdate)
                                     UpdateTable(item, result, tableName);
@@ -53,7 +53,7 @@ namespace FastData.Core.Check
                         {
                             table.Column.ForEach(p =>
                             {
-                                var info = model.Find(a => a.Name.ToLower() == p.Name.ToLower()) ?? new ColumnModel();
+                                var info = model.Find(a => string.Compare( a.Name, p.Name,false)==0) ?? new ColumnModel();
                                 var result = CheckModel.CompareTo(p, info);
                                 if (result.IsUpdate)
                                     UpdateTable(item, result, tableName);
@@ -628,7 +628,7 @@ namespace FastData.Core.Check
                                      (select count(0) from INFORMATION_SCHEMA.KEY_COLUMN_USAGE a where upper(TABLE_NAME)=?name and constraint_name='PRIMARY' and c.column_name=a.column_name) iskey,
                                       is_nullable,numeric_precision,numeric_scale from information_schema.columns c where upper(table_name)=?name order by ordinal_position asc");
 
-                    var dicList = db.ExecuteSqlList(sql, param.ToArray(),item.Config.IsOutSql,false).DicList ?? new List<Dictionary<string, object>>();
+                    var dicList = db.ExecuteSqlList(sql, param.ToArray(), item.Config.IsOutSql, false).DicList ?? new List<Dictionary<string, object>>();
 
                     dicList.ForEach(a =>
                     {
@@ -690,8 +690,9 @@ namespace FastData.Core.Check
 
                 result.Column.ForEach(a =>
                 {
-                    if (a.DataType.ToLower() == "nchar" || a.DataType.ToLower() == "nvarchar" 
-                    || a.DataType.ToLower() == "nvarchar2" || a.DataType.ToLower() == "ntext" || a.DataType.ToLower() == "nclob")
+                    if (string.Compare(a.DataType, "nchar", false) == 0 || string.Compare(a.DataType, "nvarchar", false) == 0
+                    || string.Compare(a.DataType, "nvarchar2", false) == 0 || string.Compare(a.DataType, "ntext", false) == 0
+                    || string.Compare(a.DataType, "nclob", false) == 0)
                         a.Length = a.Length / 2;
                 });
 
