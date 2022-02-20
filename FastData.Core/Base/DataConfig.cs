@@ -54,7 +54,7 @@ namespace FastData.Core.Base
             if (string.IsNullOrEmpty(key))
                 item = list[0];
             else
-                item = list.Find(a => a.Key.ToLower() == key.ToLower());
+                item = list.Find(a =>string.Compare( a.Key, key,false)==0);
 
             if (item.DesignModel == "")
                 item.DesignModel = Config.DbFirst;
@@ -83,12 +83,12 @@ namespace FastData.Core.Base
             var list = DbCache.Get<List<ConfigModel>>(CacheType.Web, cacheKey);
 
             var result = new List<bool>();
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.Oracle) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.DB2) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.MySql) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.PostgreSql) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.SQLite) > 0);
-            result.Add(list.Count(a => a.DbType.ToLower() == DataDbType.SqlServer) > 0);
+            result.Add(list.Count(a => string.Compare( a.DbType, DataDbType.Oracle,false)==0) > 0);
+            result.Add(list.Count(a => string.Compare(a.DbType, DataDbType.DB2, false) == 0) > 0);
+            result.Add(list.Count(a => string.Compare(a.DbType, DataDbType.MySql, false) == 0) > 0);
+            result.Add(list.Count(a => string.Compare(a.DbType, DataDbType.PostgreSql, false) == 0) > 0);
+            result.Add(list.Count(a => string.Compare(a.DbType, DataDbType.SQLite, false) == 0) > 0);
+            result.Add(list.Count(a => string.Compare(a.DbType, DataDbType.SqlServer, false) == 0) > 0);
 
             return result.Count(a => a == true) > 1;
         }

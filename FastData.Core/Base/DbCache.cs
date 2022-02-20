@@ -14,9 +14,9 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Set(string cacheType, string key, string value, int Hours = 8640)
         {
-            if (cacheType.ToLower() == CacheType.Web)
+            if (string.Compare(cacheType, CacheType.Web, false) == 0)
                 BaseCache.Set(key, value, Hours);
-            else if (cacheType.ToLower() == CacheType.Redis)
+            else if (string.Compare( cacheType,CacheType.Redis,false)==0)
                 IRedis.SetAsy(key, value, Hours);
         }
 
@@ -25,9 +25,9 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Set<T>(string cacheType, string key, T value, int Hours = 8640) where T : class, new()
         {
-            if (cacheType.ToLower() == CacheType.Web)
+            if (string.Compare(cacheType, CacheType.Web, false) == 0)
                 BaseCache.Set<T>(key, value, Hours);
-            else if (cacheType.ToLower() == CacheType.Redis)
+            else if (string.Compare(cacheType, CacheType.Redis, false) == 0)
                 IRedis.SetAsy<T>(key, value, Hours);
         }
 
@@ -36,7 +36,7 @@ namespace FastData.Core.Base
         /// </summary>
         public static string Get(string cacheType, string key)
         {           
-            if (cacheType.ToLower() == CacheType.Web)
+            if (string.Compare(cacheType, CacheType.Web, false) == 0)
                 return BaseCache.Get(key);
             else if (cacheType.ToLower() == CacheType.Redis)
                return IRedis.GetAsy(key).Result;
@@ -49,9 +49,9 @@ namespace FastData.Core.Base
         /// </summary>
         public static T Get<T>(string cacheType, string key) where T : class, new()
         {
-            if (cacheType.ToLower() == CacheType.Web)
+            if (string.Compare(cacheType, CacheType.Web, false) == 0)
                 return BaseCache.Get<T>(key);
-            else if (cacheType.ToLower() == CacheType.Redis)
+            else if (string.Compare(cacheType, CacheType.Redis, false) == 0)
                 return IRedis.GetAsy<T>(key).Result;
             return new T();
         }
@@ -61,9 +61,9 @@ namespace FastData.Core.Base
         /// </summary>
         public static void Remove(string cacheType, string key)
         {
-            if (cacheType.ToLower() == CacheType.Web)
+            if (string.Compare(cacheType, CacheType.Web, false) == 0)
                 BaseCache.Remove(key);
-            else if (cacheType.ToLower() == CacheType.Redis)
+            else if (string.Compare(cacheType, CacheType.Redis, false) == 0)
                 IRedis.RemoveAsy(key);
         }
 
@@ -72,9 +72,9 @@ namespace FastData.Core.Base
         /// </summary>
         public static bool Exists(string cacheType, string key)
         {
-            if (cacheType.ToLower() == CacheType.Web)
+            if (string.Compare(cacheType, CacheType.Web, false) == 0)
                return  BaseCache.Exists(key);
-            else if (cacheType.ToLower() == CacheType.Redis)
+            else if (string.Compare(cacheType, CacheType.Redis, false) == 0)
                 return IRedis.ExistsAsy(key).Result;
             return false;
         }
@@ -85,7 +85,7 @@ namespace FastData.Core.Base
             {
                 var IRedis = ServiceContext.Engine.Resolve<IRedisRepository>();
                 if (IRedis == null)
-                    throw new System.Exception("ConfigureServices add ServiceContext.Init(new ServiceEngine(services.BuildServiceProvider()));");
+                    throw new System.Exception("ConfigureServices first add services.AddFastRedis;");
                 return IRedis;
             }
         }

@@ -69,7 +69,7 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db,false)==0)
                     DbLogTable.LogException<T>(config, ex, "LambdaWhere<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "LambdaWhere<T>", "");
@@ -134,7 +134,7 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    if (config.SqlErrorType.ToLower() == SqlErrorType.Db)
+                    if (string.Compare( config.SqlErrorType, SqlErrorType.Db,false)==0)
                         DbLogTable.LogException(config, ex, "LambdaWhere<T1, T2>", "");
                     else
                         DbLog.LogException(config.IsOutError, config.DbType, ex, "LambdaWhere<T1, T2>", "");
@@ -243,27 +243,27 @@ namespace FastData.Core.Base
                                 }
                             });
 
-                            if (mMethod.ToLower() == "contains")
+                            if (string.Compare( mMethod, "contains",false)==0)
                             {
                                 sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, config.Flag);
                                 leftList.Add(mName);
                                 rightList.Add(string.Format("%{0}%", mValue));
                                 i++;
                             }
-                            else if (mMethod.ToLower() == "endswith")
+                            else if (string.Compare( mMethod, "endswith",false)==0)
                             {
                                 sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, config.Flag);
                                 leftList.Add(mName);
                                 rightList.Add(string.Format("%{0}", mValue));
                             }
-                            else if (mMethod.ToLower() == "startswith")
+                            else if (string.Compare( mMethod,"startswith",false)==0)
                             {
                                 sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, config.Flag);
                                 leftList.Add(mName);
                                 rightList.Add(string.Format("{0}%", mValue));
                                 i++;
                             }
-                            else if (mMethod.ToLower() == "substring")
+                            else if (string.Compare( mMethod,"substring",false)==0)
                             {
                                 var tempType = "";
                                 if (expType == ExpressionType.Goto)
@@ -280,7 +280,7 @@ namespace FastData.Core.Base
                                 //rightList.Add(mValue.ToString());
                                 i++;
                             }
-                            else if (mMethod.ToLower() == "toupper")
+                            else if (string.Compare( mMethod, "toupper",false)==0)
                             {
                                 var tempType = "";
                                 if (expType == ExpressionType.Goto)
@@ -293,7 +293,7 @@ namespace FastData.Core.Base
                                 //rightList.Add(mValue.ToString());
                                 i++;
                             }
-                            else if (mMethod.ToLower() == "tolower")
+                            else if (string.Compare( mMethod, "tolower",false)==0)
                             {
                                 var tempType = "";
                                 if (expType == ExpressionType.Goto)
@@ -383,7 +383,9 @@ namespace FastData.Core.Base
                 {
                     var meExp = (MethodCallExpression)(left.ReduceExtensions().Reduce());
 
-                    if (meExp.Method.Name.ToLower() == "substring" || meExp.Method.Name.ToLower() == "toupper" || meExp.Method.Name.ToLower() == "tolower")
+                    if (string.Compare(meExp.Method.Name, "substring", false) == 0 ||
+                        string.Compare(meExp.Method.Name, "toupper", false) == 0 ||
+                        string.Compare(meExp.Method.Name, "tolower", false) == 0)
                     {
                         rightList.Add(rightPar);
                         i++;
@@ -416,7 +418,9 @@ namespace FastData.Core.Base
                     {
                         var meExp = (MethodCallExpression)(left.ReduceExtensions().Reduce());
 
-                        if (meExp.Method.Name.ToLower() == "substring" || meExp.Method.Name.ToLower() == "toupper" || meExp.Method.Name.ToLower() == "tolower")
+                        if (string.Compare(meExp.Method.Name, "substring", false) == 0 ||
+                        string.Compare(meExp.Method.Name, "toupper", false) == 0 ||
+                        string.Compare(meExp.Method.Name, "tolower", false) == 0)
                         {
                             rightList.Add(rightPar);
                             i++;

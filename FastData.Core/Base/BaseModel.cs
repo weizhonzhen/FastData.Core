@@ -689,10 +689,11 @@ namespace FastData.Core.Base
 
                 dr.Close();
 
-                type.GetProperties().ToList().ForEach(a => {
-                    if (list.Exists(l => l.ToLower() == a.Name.ToLower()))
+                type.GetProperties().ToList().ForEach(a =>
+                {
+                    if (list.Exists(l => string.Compare(l, a.Name, false) == 0))
                     {
-                        list.RemoveAll(r => r.ToLower() == a.Name.ToLower());
+                        list.RemoveAll(r => string.Compare(r, a.Name) == 0);
                         list.Add(a.Name);
                     }
                 });
