@@ -381,7 +381,7 @@ namespace FastUntility.Core.Base
             }
             int y = -1;
             Math.DivRem(sum, 11, out y);
-            if (arrVarifyCode[y] != input.Substring(17, 1).ToLower())
+            if (string.Compare( arrVarifyCode[y], input.Substring(17, 1),false)!=0)
             {
                 return false;
             }

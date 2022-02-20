@@ -23,10 +23,8 @@ namespace FastUntility.Core.Base
         public static T DicToModel<T>(Dictionary<string, object> dic) where T : class, new()
         {
             var result = new T();
-            //var info = new DynamicSet<T>();
             PropertyInfo<T>().ForEach(a => {
                 if (dic.ContainsKey(a.Name.ToLower()) && !string.IsNullOrEmpty(dic[a.Name.ToLower()].ToStr()))
-                    //info.SetValue(result, a.Name, Convert.ChangeType(dic[a.Name.ToLower()], a.PropertyType));
                     BaseEmit.Set(result, a.Name, dic[a.Name.ToLower()]);
             });
 
@@ -238,7 +236,7 @@ namespace System.Collections.Generic
             if (item == null)
                 return "";
 
-            key = item.Keys.ToList().Find(a => a.ToLower() == key.ToLower());
+            key = item.Keys.ToList().Find(a =>string.Compare( a, key,false)==0);
 
             if (string.IsNullOrEmpty(key))
                 return "";
@@ -254,7 +252,7 @@ namespace System.Collections.Generic
             if (item == null)
                 return item;
             
-            if (item.Keys.ToList().Exists(a => a.ToLower() == key.ToLower()))
+            if (item.Keys.ToList().Exists(a => string.Compare( a, key,false)==0))
                 item[key] = value;
             else
                 item.Add(key, value);

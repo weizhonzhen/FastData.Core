@@ -207,7 +207,7 @@ namespace FastUntility.Core.Base
                                                 
                         foreach (var temp in item)
                         {
-                            if (temp.Key.ToLower() == exclude.ToLower())
+                            if (string.Compare( temp.Key, exclude,false)==0)
                                 continue;
 
                             model.cell = model.row.CreateCell(j++);
@@ -217,18 +217,25 @@ namespace FastUntility.Core.Base
                             {
                                 var info = temp.Value as Dictionary<string, object>;
                                 model.sheet.AddMergedRegion(new CellRangeAddress(
-                                    info.GetValue("rowbegin").ToStr().ToInt(0), info.GetValue("rowend").ToStr().ToInt(0), 
-                                    info.GetValue("colbegin").ToStr().ToInt(0)-1, info.GetValue("colend").ToStr().ToInt(0)-1));
+                                    info.GetValue("rowbegin").ToStr().ToInt(0), info.GetValue("rowend").ToStr().ToInt(0),
+                                    info.GetValue("colbegin").ToStr().ToInt(0) - 1, info.GetValue("colend").ToStr().ToInt(0) - 1));
 
                                 model.cell.SetCellValue(info.GetValue("text").ToStr());
+
+                                if (info.GetValue("text").ToStr().Contains("\n"))
+                                    model.cell.CellStyle = model.style_n;
+                                else
+                                    model.cell.CellStyle = model.style;
                             }
                             else
+                            {
                                 model.cell.SetCellValue(temp.Value.ToStr());
 
-                            if (temp.Value.ToStr().Contains("\n"))
-                                model.cell.CellStyle = model.style_n;
-                            else
-                                model.cell.CellStyle = model.style;                            
+                                if (temp.Value.ToStr().Contains("\n"))
+                                    model.cell.CellStyle = model.style_n;
+                                else
+                                    model.cell.CellStyle = model.style;
+                            }
                         }
 
                         i++;
@@ -270,8 +277,8 @@ namespace FastUntility.Core.Base
                         if (currentCell != null)
                         {
                             var length = System.Text.Encoding.UTF8.GetBytes(currentCell.ToString()).Length;
-                            if ((20 * (length / 60 + 1)) > height)
-                                height = 20 * (length / 60 + 1);
+                            if ((25 * (length / 60 + 1)) > height)
+                                height = 25 * (length / 60 + 1);
                         }                            
                     }
 
@@ -291,7 +298,6 @@ namespace FastUntility.Core.Base
             }
         }
         #endregion
-
 
         #region excel工作区
         /// <summary>
