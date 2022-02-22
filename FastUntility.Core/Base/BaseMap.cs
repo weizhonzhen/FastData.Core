@@ -32,9 +32,9 @@ namespace FastUntility.Core.Base
             }
 
             BaseDic.PropertyInfo<T1>().ForEach(m => {
-                if (list.Exists(a => string.Compare( a.Name, m.Name,false)==0))
+                if (list.Exists(a => string.Compare( a.Name, m.Name, true) ==0))
                 {
-                    var property = list.Find(a =>string.Compare( a.Name, m.Name,false)==0);
+                    var property = list.Find(a =>string.Compare( a.Name, m.Name, true) ==0);
                     var isList = m.PropertyType.GetGenericArguments().Length > 0;
                     var isLeafSystemType = isList && m.PropertyType.GetGenericArguments()[0].FullName.StartsWith("System.");
                     var isSystemType = m.PropertyType.FullName.StartsWith("System.");
@@ -55,7 +55,7 @@ namespace FastUntility.Core.Base
                                 {
                                     if (propertyList.Exists(a => a.Name == p.Name))
                                     {
-                                        var tempProperty = propertyList.Find(a => string.Compare( a.Name, p.Name,false)==0);
+                                        var tempProperty = propertyList.Find(a => string.Compare( a.Name, p.Name, true) ==0);
                                         tempProperty.SetValue(leafModel, p.GetValue(temp));
                                     }
                                 });
@@ -80,7 +80,7 @@ namespace FastUntility.Core.Base
                         {
                             if (propertyList.Exists(a => a.Name == p.Name))
                             {
-                                var temp = propertyList.Find(a => string.Compare( a.Name, p.Name,false)==0);
+                                var temp = propertyList.Find(a => string.Compare( a.Name, p.Name, true) ==0);
                                 temp.SetValue(leafModel, p.GetValue(tempModel));
                             }
                         });
@@ -89,9 +89,9 @@ namespace FastUntility.Core.Base
                 }
                 else
                 {
-                    if (dic.ToList().Exists(n => string.Compare( (n.Value as MemberExpression).Member.Name, m.Name,false)==0))
+                    if (dic.ToList().Exists(n => string.Compare( (n.Value as MemberExpression).Member.Name, m.Name, true) ==0))
                     {
-                        var temp = dic.ToList().Find(n =>string.Compare( (n.Value as MemberExpression).Member.Name, m.Name,false)==0);
+                        var temp = dic.ToList().Find(n =>string.Compare( (n.Value as MemberExpression).Member.Name, m.Name, true) ==0);
                         BaseEmit.Set<T>(result, temp.Key.Name, BaseEmit.Get<T1>(model, (temp.Value as MemberExpression).Member.Name));
                     }
                 }

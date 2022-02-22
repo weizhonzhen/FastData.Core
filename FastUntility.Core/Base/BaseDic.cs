@@ -236,7 +236,7 @@ namespace System.Collections.Generic
             if (item == null)
                 return "";
 
-            key = item.Keys.ToList().Find(a =>string.Compare( a, key,false)==0);
+            key = item.Keys.ToList().Find(a =>string.Compare( a, key, true) ==0);
 
             if (string.IsNullOrEmpty(key))
                 return "";
@@ -252,7 +252,7 @@ namespace System.Collections.Generic
             if (item == null)
                 return item;
             
-            if (item.Keys.ToList().Exists(a => string.Compare( a, key,false)==0))
+            if (item.Keys.ToList().Exists(a => string.Compare( a, key, true) ==0))
                 item[key] = value;
             else
                 item.Add(key, value);
