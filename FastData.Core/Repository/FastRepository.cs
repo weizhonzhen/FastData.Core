@@ -682,7 +682,7 @@ namespace FastData.Core.Repository
         #region 获取map log
         public bool IsMapLog(string name)
         {
-            return string.Compare( DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.log", name.ToLower())).ToStr(), "true",false)==0;
+            return string.Compare( DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.log", name.ToLower())).ToStr(), "true", true) ==0;
         }
         #endregion
 
