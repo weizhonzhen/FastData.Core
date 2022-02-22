@@ -45,7 +45,7 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
-                        if (!colList.Exists(a => string.Compare(a,info.Name,false)==0))
+                        if (!colList.Exists(a => string.Compare(a,info.Name,true)==0))
                             continue;
 
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
@@ -58,12 +58,12 @@ namespace FastData.Core.Base
                 {
                     for (var i = 0; i < field.Count; i++)
                     {
-                        if (!colList.Exists(a => string.Compare(a, field[i], false) == 0))
+                        if (!colList.Exists(a => string.Compare(a, field[i], true) == 0))
                             continue;
 
-                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], false)==0))
+                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], true) ==0))
                         {
-                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], false) == 0);
+                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], true) == 0);
                             item = SetValue<T>(item, dr, info, config);
                         }
                     }
@@ -105,7 +105,7 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
-                        if (!colList.Exists(a => string.Compare(a,info.Name,false)==0))
+                        if (!colList.Exists(a => string.Compare(a,info.Name, true) ==0))
                             continue;
 
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
@@ -118,12 +118,12 @@ namespace FastData.Core.Base
                 {
                     for (var i = 0; i < field.Count; i++)
                     {
-                        if (!colList.Exists(a => string.Compare(a,field[i],false)==0))
+                        if (!colList.Exists(a => string.Compare(a,field[i], true) ==0))
                             continue;
 
-                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], false) == 0))
+                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], true) == 0))
                         {
-                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], false) == 0);
+                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], true) == 0);
                             item = SetValue(item, dr, info, config);
                         }
                     }
@@ -168,7 +168,7 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
-                        if (!colList.Exists(a => string.Compare(a,info.Name,false)==0))
+                        if (!colList.Exists(a => string.Compare(a,info.Name, true) ==0))
                             continue;
 
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
@@ -181,12 +181,12 @@ namespace FastData.Core.Base
                 {
                     for (var i = 0; i < field.Count; i++)
                     {
-                        if (!colList.Exists(a => string.Compare(a, field[i], false) == 0))
+                        if (!colList.Exists(a => string.Compare(a, field[i], true) == 0))
                             continue;
 
-                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], false) == 0))
+                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], true) == 0))
                         {
-                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], false) == 0);
+                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], true) == 0);
                             result = SetValue(result, dr, info, config);
                         }
                     }
@@ -258,7 +258,7 @@ namespace FastData.Core.Base
         {
             object value = null;
             var typeName = dr.GetDataTypeName(id);
-            if (string.Compare(typeName,"clob",false)==0 || string.Compare(typeName, "nclob", false) == 0)
+            if (string.Compare(typeName,"clob", true) ==0 || string.Compare(typeName, "nclob", true) == 0)
             {
                 var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleClob"), new object[] { id });
                 if (temp != null)
@@ -268,7 +268,7 @@ namespace FastData.Core.Base
                     BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
                 }
             }
-            else if (string.Compare(typeName, "blob", false) == 0)
+            else if (string.Compare(typeName, "blob", true) == 0)
             {
                 var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleBlob"), new object[] { id });
                 if (temp != null)

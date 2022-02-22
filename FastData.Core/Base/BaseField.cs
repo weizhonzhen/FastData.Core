@@ -55,12 +55,12 @@ namespace FastData.Core.Base
                             var ower = "";
                             var propertyName = GetPropertyMethod(a, out methodName, false, out ower);
 
-                            if (string.Compare( methodName,"distinct",false)==0)
+                            if (string.Compare( methodName,"distinct", true) ==0)
                             {
                                 queryFields.Add(string.Format("{2}{0} {3}.{1} ", methodName, propertyName, ower, predicate.Parameters[0].Name));
                                 result.AsName.Add((a as MemberExpression).Member.Name);
                             }
-                            else if (string.Compare( methodName, "sum")==0)
+                            else if (string.Compare( methodName, "sum",true)==0)
                             {
                                 if (config.DbType == DataDbType.SqlServer)
                                     propertyName = string.Format("isnull({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
@@ -99,7 +99,7 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (string.Compare( config.SqlErrorType, SqlErrorType.Db)==0)
+                if (string.Compare( config.SqlErrorType, SqlErrorType.Db,true)==0)
                     DbLogTable.LogException<T>(config, ex, "QueryField<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "QueryField<T>", "");
@@ -150,12 +150,12 @@ namespace FastData.Core.Base
                         var ower = "";
                         var propertyName = GetPropertyMethod(a, out methodName, true, out ower);
 
-                        if (string.Compare(methodName, "distinct", false) == 0)
+                        if (string.Compare(methodName, "distinct", true) == 0)
                         {
                             queryFields.Add(string.Format("{2}{0} {2}.{1}", methodName, propertyName, ower, predicate.Parameters[0].Name));
                             result.AsName.Add((a as MemberExpression).Member.Name);
                         }
-                        else if (string.Compare(methodName, "sum", false) == 0)
+                        else if (string.Compare(methodName, "sum", true) == 0)
                         {
                             if (config.DbType == DataDbType.SqlServer)
                                 propertyName = string.Format("isnull({1}.{0},0)", propertyName, predicate.Parameters[0].Name);

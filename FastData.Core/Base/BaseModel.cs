@@ -691,9 +691,9 @@ namespace FastData.Core.Base
 
                 type.GetProperties().ToList().ForEach(a =>
                 {
-                    if (list.Exists(l => string.Compare(l, a.Name, false) == 0))
+                    if (list.Exists(l => string.Compare(l, a.Name, true) == 0))
                     {
-                        list.RemoveAll(r => string.Compare(r, a.Name) == 0);
+                        list.RemoveAll(r => string.Compare(r, a.Name, true) == 0);
                         list.Add(a.Name);
                     }
                 });
