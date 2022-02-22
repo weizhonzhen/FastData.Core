@@ -43,7 +43,7 @@ namespace FastData.Core.Check
                         {
                             model.ForEach(p =>
                             {
-                                var info = table.Column.Find(a => string.Compare( a.Name,p.Name,false)==0) ?? new ColumnModel();
+                                var info = table.Column.Find(a => string.Compare( a.Name,p.Name, true) ==0) ?? new ColumnModel();
                                 var result = CheckModel.CompareTo(info, p);
                                 if (result.IsUpdate)
                                     UpdateTable(item, result, tableName);
@@ -53,7 +53,7 @@ namespace FastData.Core.Check
                         {
                             table.Column.ForEach(p =>
                             {
-                                var info = model.Find(a => string.Compare( a.Name, p.Name,false)==0) ?? new ColumnModel();
+                                var info = model.Find(a => string.Compare( a.Name, p.Name, true) ==0) ?? new ColumnModel();
                                 var result = CheckModel.CompareTo(p, info);
                                 if (result.IsUpdate)
                                     UpdateTable(item, result, tableName);
@@ -690,9 +690,9 @@ namespace FastData.Core.Check
 
                 result.Column.ForEach(a =>
                 {
-                    if (string.Compare(a.DataType, "nchar", false) == 0 || string.Compare(a.DataType, "nvarchar", false) == 0
-                    || string.Compare(a.DataType, "nvarchar2", false) == 0 || string.Compare(a.DataType, "ntext", false) == 0
-                    || string.Compare(a.DataType, "nclob", false) == 0)
+                    if (string.Compare(a.DataType, "nchar", true) == 0 || string.Compare(a.DataType, "nvarchar", true) == 0
+                    || string.Compare(a.DataType, "nvarchar2", true) == 0 || string.Compare(a.DataType, "ntext", true) == 0
+                    || string.Compare(a.DataType, "nclob", true) == 0)
                         a.Length = a.Length / 2;
                 });
 

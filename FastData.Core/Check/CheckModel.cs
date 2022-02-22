@@ -54,7 +54,7 @@ namespace FastData.Core.Check
                     result.RemoveNull.Add(GetColumnType(modelItem, type, name));
             }
 
-            if (string.Compare( modelItem.Name.ToStr(), cacheItem.Name.ToStr(),false)!=0)
+            if (string.Compare( modelItem.Name.ToStr(), cacheItem.Name.ToStr(), true) !=0)
             {
                 result.IsUpdate = true;
                 if (modelItem.Name.ToStr() == "")
@@ -63,7 +63,7 @@ namespace FastData.Core.Check
                     result.AddName.Add(GetColumnType(modelItem, type, name));
             }
 
-            if (string.Compare( modelItem.DataType.ToStr(), cacheItem.DataType.ToStr(),false)!=0)
+            if (string.Compare( modelItem.DataType.ToStr(), cacheItem.DataType.ToStr(), true) !=0)
             {
                 result.IsUpdate = true;
                 result.Type.Add(GetColumnType(modelItem, type, name));
