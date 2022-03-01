@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (DataConfig.Get(config.dbKey, Assembly.GetCallingAssembly().GetName().Name, config.dbFile).CacheType == CacheType.Redis && ServiceContext.Engine.Resolve<IRedisRepository>() == null)
                 throw new System.Exception("ConfigureServices First add services.AddFastRedis(); Second add services.AddFastData()");
 
-            serviceCollection.AddTransient<IFastRepository, FastRepository>();
+            serviceCollection.AddSingleton<IFastRepository, FastRepository>();
 
             Assembly.GetCallingAssembly().GetReferencedAssemblies().ToList().ForEach(a =>
             {
