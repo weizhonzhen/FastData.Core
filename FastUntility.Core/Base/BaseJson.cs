@@ -2,50 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Data.Common;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 using System.Linq;
 using NPOI.OpenXmlFormats.Dml.Diagram;
+using System.Text.Unicode;
+using System.Text.Encodings.Web;
+using System.Text.Json.Serialization;
 
 namespace FastUntility.Core.Base
 {
     public static class BaseJson
     {
-        #region json键是否存在或空值
-        /// <summary>
-        /// 标签：2015.7.13，魏中针
-        /// 说明：json键是否存在或空值
-        /// </summary>
-        /// <param name="Key">json键</param>
-        /// <param name="Jo">json对象</param>
-        /// <returns></returns>
-        public static bool JsonIsNull(string key, JObject jo)
-        {
-            if (jo.Property(key) == null || jo[key].ToString() == "")
-                return true;
-            else
-                return false;
-        }
-        #endregion
-
-        #region 获取json键值
-        /// <summary>
-        /// 标签：2015.7.13，魏中针
-        /// 说明：获取json键值
-        /// </summary>
-        /// <param name="Key">json键</param>
-        /// <param name="ReturnValue">json键为空时,默认值</param>
-        /// <param name="Item">json 对象</param>
-        /// <returns></returns>
-        public static string JsonValue(string key, string returnValue, JObject item)
-        {
-            if (item.Property(key) == null || item[key].ToString() == "")
-                return returnValue;
-            else
-                return item[key].ToString();
-        }
-        #endregion
-
         #region list 转json
         /// <summary>
         /// list 转json
@@ -55,7 +22,7 @@ namespace FastUntility.Core.Base
         /// <returns></returns>
         public static string ListToJson<T>(List<T> list)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             sb.Append("[");
             try
@@ -75,7 +42,6 @@ namespace FastUntility.Core.Base
 
         #region model转json
         /// <summary>
-        /// 标签：2015.7.13，魏中针
         /// 说明：model转json
         /// </summary>
         /// <param name="Model">实体</param>
@@ -84,7 +50,8 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                return JsonConvert.SerializeObject(model).ToString();
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+                return JsonSerializer.Serialize(model, jsonOption);
             }
             catch
             {
@@ -95,7 +62,6 @@ namespace FastUntility.Core.Base
 
         #region Json转model
         /// <summary>
-        /// 标签：2015.7.13，魏中针
         /// 说明：Json转model
         /// </summary>
         /// <typeparam name="T">实体</typeparam>
@@ -105,7 +71,8 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                return JsonConvert.DeserializeObject<T>(jsonValue);
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+                return JsonSerializer.Deserialize<T>(jsonValue, jsonOption);                
             }
             catch
             {
@@ -125,7 +92,8 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                return JsonConvert.DeserializeObject(jsonValue,type);
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+                return JsonSerializer.Deserialize(jsonValue, type, jsonOption);
             }
             catch
             {
@@ -150,11 +118,12 @@ namespace FastUntility.Core.Base
                 if (string.IsNullOrEmpty(jsonValue))
                     return list;
 
-                var ja = JArray.Parse(jsonValue);
-
-                foreach (var jo in ja)
+                using (var document = JsonDocument.Parse(jsonValue))
                 {
-                    list.Add(JsonToModel<T>(jo.ToString()));
+                    foreach (var element in document.RootElement.EnumerateArray())
+                    {
+                        list.Add(JsonToModel<T>(element.ToString()));
+                    }
                 }
 
                 return list;
@@ -182,11 +151,12 @@ namespace FastUntility.Core.Base
                 if (string.IsNullOrEmpty(jsonValue))
                     return list;
 
-                var ja = JArray.Parse(jsonValue);
-
-                foreach (var jo in ja)
+                using (var document = JsonDocument.Parse(jsonValue))
                 {
-                    list.Add(JsonToModel(jo.ToString(),type));
+                    foreach (var element in document.RootElement.EnumerateArray())
+                    {
+                        list.Add(JsonToModel(element.ToString(),type));
+                    }
                 }
 
                 return list;
@@ -214,11 +184,12 @@ namespace FastUntility.Core.Base
                 if (string.IsNullOrEmpty(jsonValue))
                     return item;
 
-                var jo = JObject.Parse(jsonValue);
-
-                foreach (var temp in jo)
+                using (var document = JsonDocument.Parse(jsonValue))
                 {
-                    item.Add(temp.Key, temp.Value);
+                    foreach (var element in document.RootElement.EnumerateObject())
+                    {
+                        item.Add(element.Name, element.Value.GetRawText());
+                    }
                 }
                 return item;
             }
@@ -245,11 +216,17 @@ namespace FastUntility.Core.Base
                 if (string.IsNullOrEmpty(jsonValue))
                     return item;
 
-                var ja = JArray.Parse(jsonValue);
-
-                foreach (var jo in ja)
+                using (var document = JsonDocument.Parse(jsonValue))
                 {
-                    item.Add(JsonToDic(jo.ToString()));
+                    foreach (var element in document.RootElement.EnumerateArray())
+                    {
+                        foreach(var temp in ((JsonElement)element).EnumerateObject())
+                        {
+                            var dic = new Dictionary<string, object>();
+                            dic.Add(temp.Name, temp.Value.GetRawText());
+                            item.Add(dic);
+                        }
+                    }
                 }
 
                 return item;
@@ -269,6 +246,7 @@ namespace FastUntility.Core.Base
         /// <returns></returns>
         public static string DataReaderToJson(DbDataReader reader, bool isOracle = false)
         {
+            var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
             var result = new List<Dictionary<string, object>>();
             var cols = GetCol(reader);
 
@@ -289,7 +267,7 @@ namespace FastUntility.Core.Base
                 result.Add(dic);
             }
 
-            return JsonConvert.SerializeObject(result, Formatting.None);
+            return JsonSerializer.Serialize(result, jsonOption);
         }
         #endregion
 
