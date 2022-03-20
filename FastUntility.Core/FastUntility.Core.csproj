@@ -5,11 +5,12 @@
     <AssemblyName>Fast.Untility.Core</AssemblyName>
     <RootNamespace>Fast.Untility.Core</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.3.5</Version>
+    <Version>1.5.1</Version>
     <PackageIconUrl>https://en.gravatar.com/userimage/151376774/1cba1ca23219db268cc5ed8abde11775.png</PackageIconUrl>
     <PackageId>Fast.Untility.Core</PackageId>
     <RepositoryUrl>https://en.gravatar.com/userimage/151376774/1cba1ca23219db268cc5ed8abde11775.png</RepositoryUrl>
     <Description>https://github.com/weizhonzhen/FastData.Core</Description>
+    <PackageReleaseNotes>Improve performance</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Aop\**" />
@@ -20,18 +21,20 @@
     <Compile Remove="Base\BasePdf.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DotNetCore.NPOI" Version="1.2.2" />
+    <Content Remove="C:\Users\comelyhome\.nuget\packages\dotnetcore.npoi\1.2.3\contentFiles\any\netstandard2.0\NOTICE.TXT" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
-    <PackageReference Include="System.Runtime.Caching" Version="4.5.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+    <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Validation\" />
