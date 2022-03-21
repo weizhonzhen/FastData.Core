@@ -50,7 +50,7 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
                 return JsonSerializer.Serialize(model, jsonOption);
             }
             catch
@@ -71,7 +71,7 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
                 return JsonSerializer.Deserialize<T>(jsonValue, jsonOption);                
             }
             catch
@@ -92,7 +92,7 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
                 return JsonSerializer.Deserialize(jsonValue, type, jsonOption);
             }
             catch
@@ -246,7 +246,7 @@ namespace FastUntility.Core.Base
         /// <returns></returns>
         public static string DataReaderToJson(DbDataReader reader, bool isOracle = false)
         {
-            var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+            var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             var result = new List<Dictionary<string, object>>();
             var cols = GetCol(reader);
 
