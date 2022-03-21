@@ -33,7 +33,7 @@ namespace FastData.Core.Base
                         using (var reader = new StreamReader(resource))
                         {
                             var content = reader.ReadToEnd();
-                            list = BaseJson.JsonToList<ConfigModel>(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue("DataConfig")));
+                            list = BaseJson.JsonToList<ConfigModel>(BaseJson.JsonToDic(content).GetValue("DataConfig").ToStr());
                             list.ForEach(a => { a.IsUpdateCache = false; });
                             DbCache.Set<List<ConfigModel>>(CacheType.Web, cacheKey, list);
                         }
