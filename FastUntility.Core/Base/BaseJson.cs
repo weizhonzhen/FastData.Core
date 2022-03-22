@@ -22,16 +22,10 @@ namespace FastUntility.Core.Base
         /// <returns></returns>
         public static string ListToJson<T>(List<T> list)
         {
-            var sb = new StringBuilder();
-
-            sb.Append("[");
             try
             {
-                list.ForEach(a => { sb.Append(ModelToJson(a) + ","); });
-
-                sb.Append("]").Replace(",]", "]");
-
-                return sb.ToString();
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                return JsonSerializer.Serialize<List<T>>(list, jsonOption);
             }
             catch
             {
