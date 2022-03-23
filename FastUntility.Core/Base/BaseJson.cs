@@ -107,20 +107,8 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var list = new List<T>(); ;
-
-                if (string.IsNullOrEmpty(jsonValue))
-                    return list;
-
-                using (var document = JsonDocument.Parse(jsonValue))
-                {
-                    foreach (var element in document.RootElement.EnumerateArray())
-                    {
-                        list.Add(JsonToModel<T>(element.ToString()));
-                    }
-                }
-
-                return list;
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                return JsonSerializer.Deserialize<List<T>>(jsonValue, jsonOption);
             }
             catch
             {
@@ -173,19 +161,11 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var item = new Dictionary<string, object>();
-
                 if (string.IsNullOrEmpty(jsonValue))
-                    return item;
+                    return new Dictionary<string, object>();
 
-                using (var document = JsonDocument.Parse(jsonValue))
-                {
-                    foreach (var element in document.RootElement.EnumerateObject())
-                    {
-                        item.Add(element.Name, element.Value.GetRawText());
-                    }
-                }
-                return item;
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                return JsonSerializer.Deserialize<Dictionary<string, object>>(jsonValue, jsonOption);
             }
             catch
             {
@@ -205,25 +185,11 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var item = new List<Dictionary<string, object>>();
-
                 if (string.IsNullOrEmpty(jsonValue))
-                    return item;
+                    return new List<Dictionary<string, object>>();
 
-                using (var document = JsonDocument.Parse(jsonValue))
-                {
-                    foreach (var element in document.RootElement.EnumerateArray())
-                    {
-                        foreach(var temp in ((JsonElement)element).EnumerateObject())
-                        {
-                            var dic = new Dictionary<string, object>();
-                            dic.Add(temp.Name, temp.Value.GetRawText());
-                            item.Add(dic);
-                        }
-                    }
-                }
-
-                return item;
+                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(jsonValue, jsonOption);
             }
             catch
             {
