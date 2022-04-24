@@ -823,7 +823,7 @@ namespace FastData.Core.Base
                                     }
 
                                     //foreach
-                                    if (node.Name.ToLower() == "foreach")
+                                    if (string.Compare(node.Name, "foreach",true)==0)
                                     {
                                         //type
                                         if (node.Attributes["type"] != null)
