@@ -2,17 +2,33 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Data.Common;
-using System.Text.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Linq;
 using NPOI.OpenXmlFormats.Dml.Diagram;
-using System.Text.Unicode;
-using System.Text.Encodings.Web;
-using System.Text.Json.Serialization;
 
 namespace FastUntility.Core.Base
 {
     public static class BaseJson
     {
+        #region 获取json键值
+        /// <summary>
+        /// 标签：2015.7.13，魏中针
+        /// 说明：获取json键值
+        /// </summary>
+        /// <param name="Key">json键</param>
+        /// <param name="ReturnValue">json键为空时,默认值</param>
+        /// <param name="Item">json 对象</param>
+        /// <returns></returns>
+        public static string JsonValue(string key, string returnValue, JObject item)
+        {
+            if (item.Property(key) == null || item[key].ToString() == "")
+                return returnValue;
+            else
+                return item[key].ToString();
+        }
+        #endregion
+
         #region list 转json
         /// <summary>
         /// list 转json
@@ -22,10 +38,16 @@ namespace FastUntility.Core.Base
         /// <returns></returns>
         public static string ListToJson<T>(List<T> list)
         {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("[");
             try
             {
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-                return JsonSerializer.Serialize<List<T>>(list, jsonOption);
+                list.ForEach(a => { sb.Append(ModelToJson(a) + ","); });
+
+                sb.Append("]").Replace(",]", "]");
+
+                return sb.ToString();
             }
             catch
             {
@@ -36,6 +58,7 @@ namespace FastUntility.Core.Base
 
         #region model转json
         /// <summary>
+        /// 标签：2015.7.13，魏中针
         /// 说明：model转json
         /// </summary>
         /// <param name="Model">实体</param>
@@ -44,8 +67,7 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-                return JsonSerializer.Serialize(model, jsonOption);
+                return JsonConvert.SerializeObject(model).ToString();
             }
             catch
             {
@@ -56,6 +78,7 @@ namespace FastUntility.Core.Base
 
         #region Json转model
         /// <summary>
+        /// 标签：2015.7.13，魏中针
         /// 说明：Json转model
         /// </summary>
         /// <typeparam name="T">实体</typeparam>
@@ -65,8 +88,7 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-                return JsonSerializer.Deserialize<T>(jsonValue, jsonOption);                
+                return JsonConvert.DeserializeObject<T>(jsonValue);
             }
             catch
             {
@@ -82,12 +104,11 @@ namespace FastUntility.Core.Base
         /// <param name="jsonValue"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static object JsonToModel(string jsonValue,Type type)
+        public static object JsonToModel(string jsonValue, Type type)
         {
             try
             {
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-                return JsonSerializer.Deserialize(jsonValue, type, jsonOption);
+                return JsonConvert.DeserializeObject(jsonValue, type);
             }
             catch
             {
@@ -107,8 +128,19 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-                return JsonSerializer.Deserialize<List<T>>(jsonValue, jsonOption);
+                var list = new List<T>(); ;
+
+                if (string.IsNullOrEmpty(jsonValue))
+                    return list;
+
+                var ja = JArray.Parse(jsonValue);
+
+                foreach (var jo in ja)
+                {
+                    list.Add(JsonToModel<T>(jo.ToString()));
+                }
+
+                return list;
             }
             catch
             {
@@ -124,7 +156,7 @@ namespace FastUntility.Core.Base
         /// <param name="jsonValue"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static List<object> JsonToList(string jsonValue,Type type)
+        public static List<object> JsonToList(string jsonValue, Type type)
         {
             try
             {
@@ -133,12 +165,11 @@ namespace FastUntility.Core.Base
                 if (string.IsNullOrEmpty(jsonValue))
                     return list;
 
-                using (var document = JsonDocument.Parse(jsonValue))
+                var ja = JArray.Parse(jsonValue);
+
+                foreach (var jo in ja)
                 {
-                    foreach (var element in document.RootElement.EnumerateArray())
-                    {
-                        list.Add(JsonToModel(element.ToString(),type));
-                    }
+                    list.Add(JsonToModel(jo.ToString(), type));
                 }
 
                 return list;
@@ -161,11 +192,18 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                if (string.IsNullOrEmpty(jsonValue))
-                    return new Dictionary<string, object>();
+                var item = new Dictionary<string, object>();
 
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-                return JsonSerializer.Deserialize<Dictionary<string, object>>(jsonValue, jsonOption);
+                if (string.IsNullOrEmpty(jsonValue))
+                    return item;
+
+                var jo = JObject.Parse(jsonValue);
+
+                foreach (var temp in jo)
+                {
+                    item.Add(temp.Key, temp.Value);
+                }
+                return item;
             }
             catch
             {
@@ -185,11 +223,19 @@ namespace FastUntility.Core.Base
         {
             try
             {
-                if (string.IsNullOrEmpty(jsonValue))
-                    return new List<Dictionary<string, object>>();
+                var item = new List<Dictionary<string, object>>();
 
-                var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-                return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(jsonValue, jsonOption);
+                if (string.IsNullOrEmpty(jsonValue))
+                    return item;
+
+                var ja = JArray.Parse(jsonValue);
+
+                foreach (var jo in ja)
+                {
+                    item.Add(JsonToDic(jo.ToString()));
+                }
+
+                return item;
             }
             catch
             {
@@ -206,7 +252,6 @@ namespace FastUntility.Core.Base
         /// <returns></returns>
         public static string DataReaderToJson(DbDataReader reader, bool isOracle = false)
         {
-            var jsonOption = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             var result = new List<Dictionary<string, object>>();
             var cols = GetCol(reader);
 
@@ -218,7 +263,7 @@ namespace FastUntility.Core.Base
                 {
                     if (reader[a] is DBNull)
                         dic.Add(a.ToLower(), "");
-                    else if(isOracle)
+                    else if (isOracle)
                         ReadOracle(reader, a, dic);
                     else
                         dic.Add(a.ToLower(), reader[a]);
@@ -227,7 +272,7 @@ namespace FastUntility.Core.Base
                 result.Add(dic);
             }
 
-            return JsonSerializer.Serialize(result, jsonOption);
+            return JsonConvert.SerializeObject(result, Formatting.None);
         }
         #endregion
 
