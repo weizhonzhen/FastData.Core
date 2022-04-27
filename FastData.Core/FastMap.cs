@@ -206,7 +206,7 @@ namespace FastData.Core
                         using (var reader = new StreamReader(resource))
                         {
                             var content = reader.ReadToEnd();
-                            map.Path = BaseJson.JsonToModel<List<string>>(BaseJson.JsonToDic(BaseJson.ModelToJson(BaseJson.JsonToDic(content).GetValue(AppSettingKey.Map))).GetValue("Path").ToStr());
+                            map.Path = BaseJsonSys.JsonToModel<List<string>>(BaseJsonSys.JsonToDic(BaseJsonSys.ModelToJson(BaseJsonSys.JsonToDic(content).GetValue(AppSettingKey.Map))).GetValue("Path").ToStr());
                         }
                     }
                     else
