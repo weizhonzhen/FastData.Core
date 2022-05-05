@@ -78,7 +78,7 @@ namespace FastData.Core
                 key = DbCache.Get<Microsoft.Extensions.DependencyInjection.ConfigKey>(CacheType.Web, cacheKey).dbKey;
             else if (DataConfig.DataType(key, projectName, dbFile) && key == null)
                 throw new Exception("数据库查询key不能为空,数据库类型有多个");
-
+          
             result.Config = DataConfig.Get(key, projectName, dbFile);
             result.Key = key;
 
@@ -230,9 +230,12 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<List<T>> ToListAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
+        public static Task<List<T>> ToListAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new ValueTask<List<T>>(ToList<T>(item, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToList<T>(item, db, isOutSql);
+           });
         }
         #endregion
 
@@ -256,9 +259,12 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<List<T>>> ToLazyListAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
+        public static Task<Lazy<List<T>>> ToLazyListAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new ValueTask<Lazy<List<T>>>(new Lazy<List<T>>(() => ToList<T>(item, db, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<List<T>>(() => ToList<T>(item, db, isOutSql));
+           });
         }
         #endregion
 
@@ -302,9 +308,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<string> ToJsonAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<string> ToJsonAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<string>(ToJson(item, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToJson(item, db, isOutSql);
+           });
         }
         #endregion
 
@@ -326,9 +335,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<string>> ToLazyJsonAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<Lazy<string>> ToLazyJsonAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<Lazy<string>>(new Lazy<string>(() => ToJson(item, db, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<string>(() => ToJson(item, db, isOutSql));
+           });
         }
         #endregion
 
@@ -376,9 +388,12 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<T> ToItemAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
+        public static Task<T> ToItemAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new ValueTask<T>(ToItem<T>(item, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToItem<T>(item, db, isOutSql);
+           });
         }
         #endregion
 
@@ -402,9 +417,12 @@ namespace FastData.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<T>> ToLazyItemAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
+        public static Task<Lazy<T>> ToLazyItemAsy<T>(this DataQuery item, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new ValueTask<Lazy<T>>(new Lazy<T>(() => ToItem<T>(item, db, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<T>(() => ToItem<T>(item, db, isOutSql));
+           });
         }
         #endregion
 
@@ -449,9 +467,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<int> ToCountAsy<T, T1>(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<int> ToCountAsy<T, T1>(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<int>(ToCount(item, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToCount(item, db, isOutSql);
+           });
         }
         #endregion
 
@@ -499,9 +520,12 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static ValueTask<PageResult<T>> ToPageAsy<T>(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false) where T : class, new()
+        public static Task<PageResult<T>> ToPageAsy<T>(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new ValueTask<PageResult<T>>(ToPage<T>(item, pModel, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToPage<T>(item, pModel, db, isOutSql);
+           });
         }
         #endregion
 
@@ -527,9 +551,12 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<PageResult<T>>> ToLazyPageAsy<T>(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false) where T : class, new()
+        public static Task<Lazy<PageResult<T>>> ToLazyPageAsy<T>(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false) where T : class, new()
         {
-            return new ValueTask<Lazy<PageResult<T>>>(new Lazy<PageResult<T>>(() => ToPage<T>(item, pModel, db, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<PageResult<T>>(() => ToPage<T>(item, pModel, db, isOutSql));
+           });
         }
         #endregion
 
@@ -575,9 +602,12 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static ValueTask<PageResult> ToPageAsy(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public static Task<PageResult> ToPageAsy(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<PageResult>(ToPage(item, pModel, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToPage(item, pModel, db, isOutSql);
+           });
         }
         #endregion
 
@@ -602,9 +632,12 @@ namespace FastData.Core
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<PageResult>> ToLazyPageAsy(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public static Task<Lazy<PageResult>> ToLazyPageAsy(this DataQuery item, PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<Lazy<PageResult>>(new Lazy<PageResult>(() => ToPage(item, pModel, db, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<PageResult>(() => ToPage(item, pModel, db, isOutSql));
+           });
         }
         #endregion
 
@@ -650,9 +683,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<DataTable> ToDataTableAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<DataTable> ToDataTableAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<DataTable>(ToDataTable(item, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToDataTable(item, db, isOutSql);
+           });
         }
         #endregion
 
@@ -674,9 +710,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<DataTable>> ToLazyDataTableAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<Lazy<DataTable>> ToLazyDataTableAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<Lazy<DataTable>>(new Lazy<DataTable>(() => ToDataTable(item, db, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<DataTable>(() => ToDataTable(item, db, isOutSql));
+           });
         }
         #endregion
 
@@ -701,13 +740,13 @@ namespace FastData.Core
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.ExecuteSql<T>(sql, param, isAop);
+                    result = tempDb.ExecuteSql<T>(sql, param,isAop);
                     config = tempDb.config;
                 }
             }
             else
             {
-                result = db.ExecuteSql<T>(sql, param, isAop);
+                result = db.ExecuteSql<T>(sql, param,isAop);
                 config = db.config;
             }
 
@@ -727,9 +766,12 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static ValueTask<List<T>> ExecuteSqlAsy<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
+        public static Task<List<T>> ExecuteSqlAsy<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return new ValueTask<List<T>>(ExecuteSql<T>(sql, param, db, key, isOutSql));
+            return Task.Run(() =>
+           {
+               return ExecuteSql<T>(sql, param, db, key, isOutSql);
+           });
         }
         #endregion
 
@@ -755,9 +797,12 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<List<T>>> ExecuteLazySqlAsy<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
+        public static Task<Lazy<List<T>>> ExecuteLazySqlAsy<T>(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false) where T : class, new()
         {
-            return new ValueTask<Lazy<List<T>>>(new Lazy<List<T>>(() => ExecuteSql<T>(sql, param, db, key, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<List<T>>(() => ExecuteSql<T>(sql, param, db, key, isOutSql));
+           });
         }
         #endregion
 
@@ -801,9 +846,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<List<Dictionary<string, object>>> ToDicsAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<List<Dictionary<string, object>>> ToDicsAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<List<Dictionary<string, object>>>(ToDics(item, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToDics(item, db, isOutSql);
+           });
         }
         #endregion
 
@@ -825,9 +873,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<List<Dictionary<string, object>>>> ToLazyDicsAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<Lazy<List<Dictionary<string, object>>>> ToLazyDicsAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<Lazy<List<Dictionary<string, object>>>>(new Lazy<List<Dictionary<string, object>>>(() => ToDics(item, db, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<List<Dictionary<string, object>>>(() => ToDics(item, db, isOutSql));
+           });
         }
         #endregion
 
@@ -873,9 +924,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<Dictionary<string, object>> ToDicAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<Dictionary<string, object>> ToDicAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<Dictionary<string, object>>(ToDic(item, db, isOutSql));
+            return Task.Run(() =>
+           {
+               return ToDic(item, db, isOutSql);
+           });
         }
         #endregion
 
@@ -897,9 +951,12 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<Dictionary<string, object>>> ToLazyDicAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static Task<Lazy<Dictionary<string, object>>> ToLazyDicAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
-            return new ValueTask<Lazy<Dictionary<string, object>>>(new Lazy<Dictionary<string, object>>(() => ToDic(item, db, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<Dictionary<string, object>>(() => ToDic(item, db, isOutSql));
+           });
         }
         #endregion
 
@@ -950,9 +1007,12 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static ValueTask<List<Dictionary<string, object>>> ExecuteSqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static Task<List<Dictionary<string, object>>> ExecuteSqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return new ValueTask<List<Dictionary<string, object>>>(ExecuteSql(sql, param, db, key, isOutSql));
+            return Task.Run(() =>
+           {
+               return ExecuteSql(sql, param, db, key, isOutSql);
+           });
         }
         #endregion
 
@@ -978,9 +1038,12 @@ namespace FastData.Core
         /// <param name="sql"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static ValueTask<Lazy<List<Dictionary<string, object>>>> ExecuteLazySqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
+        public static Task<Lazy<List<Dictionary<string, object>>>> ExecuteLazySqlAsy(string sql, DbParameter[] param, DataContext db = null, string key = null, bool isOutSql = false)
         {
-            return new ValueTask<Lazy<List<Dictionary<string, object>>>>(new Lazy<List<Dictionary<string, object>>>(() => ExecuteSql(sql, param, db, key, isOutSql)));
+            return Task.Run(() =>
+           {
+               return new Lazy<List<Dictionary<string, object>>>(() => ExecuteSql(sql, param, db, key, isOutSql));
+           });
         }
         #endregion
     }
