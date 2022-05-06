@@ -58,20 +58,20 @@ namespace FastRedis.Core
         /// 是否存在 asy
         /// </summary>
         /// <returns></returns>
-        public static Task<bool> ExistsAsy(string key, int db = 0)
+        public static ValueTask<bool> ExistsAsy(string key, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (string.IsNullOrEmpty(key))
-                    return Task.FromResult(false);
+                    return new ValueTask<bool>(false);
                 else
-                    return Context.GetDatabase(db).KeyExistsAsync(key);
+                    return new ValueTask<bool>(Context.GetDatabase(db).KeyExistsAsync(key));
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Exists", key);
-                return Task.FromResult(false);
+                return new ValueTask<bool>(false);
             }
         }
         #endregion
@@ -141,20 +141,20 @@ namespace FastRedis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static Task<bool> SetAsy<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
+        public static ValueTask<bool> SetAsy<T>(string key, T model, int hours = 24 * 30 * 12, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours));
+                    return new ValueTask<bool>(Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), TimeSpan.FromHours(hours)));
                 else
-                    return Task.FromResult(false);
+                    return new ValueTask<bool>(false);
             }
             catch (RedisException ex)
             {
                 SaveLog<T>(ex, "Set<T>");
-                return Task.FromResult(false);
+                return new ValueTask<bool>(false);
             }
         }
         #endregion
@@ -168,20 +168,20 @@ namespace FastRedis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static Task<bool> SetAsy<T>(string key, T model, TimeSpan timeSpan, int db = 0)
+        public static ValueTask<bool> SetAsy<T>(string key, T model, TimeSpan timeSpan, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), timeSpan);
+                    return new ValueTask<bool>(Context.GetDatabase(db).StringSetAsync(key, BaseJson.ModelToJson(model), timeSpan));
                 else
-                    return Task.FromResult(false);
+                    return new ValueTask<bool>(false);
             }
             catch (RedisException ex)
             {
                 SaveLog<T>(ex, "Set<T>");
-                return Task.FromResult(false);
+                return new ValueTask<bool>(false);
             }
         }
         #endregion
@@ -251,20 +251,20 @@ namespace FastRedis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static Task<bool> SetAsy(string key, string model, int hours = 24 * 30 * 12, int db = 0)
+        public static ValueTask<bool> SetAsy(string key, string model, int hours = 24 * 30 * 12, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromHours(hours));
+                    return new ValueTask<bool>(Context.GetDatabase(db).StringSetAsync(key, model, TimeSpan.FromHours(hours)));
                 else
-                    return Task.FromResult(false);
+                    return new ValueTask<bool>(false);
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Set", key);
-                return Task.FromResult(false);
+                return new ValueTask<bool>(false);
             }
         }
         #endregion
@@ -278,20 +278,20 @@ namespace FastRedis.Core
         /// <param name="model">值</param>
         /// <param name="hours">存期限</param>
         /// <returns></returns>
-        public static Task<bool> SetAsy(string key, string model, TimeSpan timeSpan, int db = 0)
+        public static ValueTask<bool> SetAsy(string key, string model, TimeSpan timeSpan, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).StringSetAsync(key, model, timeSpan);
+                    return new ValueTask<bool>(Context.GetDatabase(db).StringSetAsync(key, model, timeSpan));
                 else
-                    return Task.FromResult(false);
+                    return new ValueTask<bool>(false);
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Set", key);
-                return Task.FromResult(false);
+                return new ValueTask<bool>(false);
             }
         }
         #endregion
@@ -328,20 +328,20 @@ namespace FastRedis.Core
         /// </summary>
         /// <param name="command"></param>
         /// <param name="args"></param>
-        public static Task<RedisResult> ExecuteAsy(string command, int db = 0, params object[] args)
+        public static ValueTask<RedisResult> ExecuteAsy(string command, int db = 0, params object[] args)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(command))
-                    return Context.GetDatabase(db).ExecuteAsync(command, args);
+                    return new ValueTask<RedisResult>(Context.GetDatabase(db).ExecuteAsync(command, args));
                 else
-                    return Task.FromResult(RedisResult.Create(RedisValue.Null));
+                    return new ValueTask<RedisResult>(RedisResult.Create(RedisValue.Null));
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Execute", command);
-                return Task.FromResult(RedisResult.Create(RedisValue.Null));
+                return new ValueTask<RedisResult>(RedisResult.Create(RedisValue.Null));
             }
         }
         #endregion
@@ -379,7 +379,7 @@ namespace FastRedis.Core
         /// <typeparam name="T">泛型</typeparam>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static async Task<string> GetAsy(string key, int db = 0)
+        public static async ValueTask<string> GetAsy(string key, int db = 0)
         {
             try
             {
@@ -430,7 +430,7 @@ namespace FastRedis.Core
         /// <typeparam name="T">泛型</typeparam>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static async Task<T> GetAsy<T>(string key, int db = 0) where T : class, new()
+        public static async ValueTask<T> GetAsy<T>(string key, int db = 0) where T : class, new()
         {
             try
             {
@@ -479,20 +479,20 @@ namespace FastRedis.Core
         /// </summary>
         /// <param name="key">键</param>
         /// <returns></returns>
-        public static Task<bool> RemoveAsy(string key, int db = 0)
+        public static ValueTask<bool> RemoveAsy(string key, int db = 0)
         {
             try
             {
                 db = db == 0 ? _db : db;
                 if (!string.IsNullOrEmpty(key))
-                    return Context.GetDatabase(db).KeyDeleteAsync(key);
+                    return new ValueTask<bool>(Context.GetDatabase(db).KeyDeleteAsync(key));
                 else
-                    return Task.FromResult(false);
+                    return new ValueTask<bool>(false);
             }
             catch (RedisException ex)
             {
                 SaveLog(ex, "Remove", key);
-                return Task.FromResult(false);
+                return new ValueTask<bool>(false);
             }
         }
         #endregion
