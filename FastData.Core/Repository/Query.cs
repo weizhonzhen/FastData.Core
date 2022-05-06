@@ -158,7 +158,7 @@ namespace FastData.Core.Repository
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override List<T> ToList<T>(DataContext db = null , bool isOutSql=false)
+        public override List<T> ToList<T>(DataContext db = null, bool isOutSql = false)
         {
             var stopwatch = new Stopwatch();
             var result = new DataReturn<T>();
@@ -193,12 +193,9 @@ namespace FastData.Core.Repository
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<List<T>> ToListAsy<T>(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<List<T>> ToListAsy<T>(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToList<T>(db,isOutSql);
-            });
+            return new ValueTask<List<T>>(ToList<T>(db, isOutSql));
         }
         #endregion
 
@@ -211,7 +208,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public override Lazy<List<T>> ToLazyList<T>(DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<List<T>>(() => ToList<T>(db,isOutSql));
+            return new Lazy<List<T>>(() => ToList<T>(db, isOutSql));
         }
         #endregion
 
@@ -222,12 +219,9 @@ namespace FastData.Core.Repository
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<Lazy<List<T>>> ToLazyListAsy<T>(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<List<T>>> ToLazyListAsy<T>(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return new Lazy<List<T>>(() => ToList<T>(db,isOutSql));
-            });
+            return new ValueTask<Lazy<List<T>>>(new Lazy<List<T>>(() => ToList<T>(db, isOutSql)));
         }
         #endregion
 
@@ -272,12 +266,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<string> ToJsonAsy(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<string> ToJsonAsy(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToJson(db,isOutSql);
-            });
+            return new ValueTask<string>(ToJson(db, isOutSql));
         }
         #endregion
 
@@ -289,7 +280,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public override Lazy<string> ToLazyJson(DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<string>(() => ToJson(db,isOutSql));
+            return new Lazy<string>(() => ToJson(db, isOutSql));
         }
         #endregion
 
@@ -299,12 +290,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<Lazy<string>> ToLazyJsonAsy(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<string>> ToLazyJsonAsy(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return new Lazy<string>(() => ToJson(db,isOutSql));
-            });
+            return new ValueTask<Lazy<string>>(new Lazy<string>(() => ToJson(db, isOutSql)));
         }
         #endregion
 
@@ -353,12 +341,9 @@ namespace FastData.Core.Repository
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<T> ToItemAsy<T>(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<T> ToItemAsy<T>(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToItem<T>(db,isOutSql);
-            });
+            return new ValueTask<T>(ToItem<T>(db, isOutSql));
         }
         #endregion
 
@@ -371,7 +356,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public override Lazy<T> ToLazyItem<T>(DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<T>(() => ToItem<T>(db,isOutSql));
+            return new Lazy<T>(() => ToItem<T>(db, isOutSql));
         }
         #endregion
 
@@ -382,12 +367,9 @@ namespace FastData.Core.Repository
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<Lazy<T>> ToLazyItemAsy<T>(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<T>> ToLazyItemAsy<T>(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return new Lazy<T>(() => ToItem<T>(db, isOutSql));
-            });
+            return new ValueTask<Lazy<T>>(new Lazy<T>(() => ToItem<T>(db, isOutSql)));
         }
         #endregion
 
@@ -433,12 +415,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<int> ToCountAsy<T, T1>(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<int> ToCountAsy<T, T1>(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToCount(db,isOutSql);
-            });
+            return new ValueTask<int>(ToCount(db, isOutSql));
         }
         #endregion
 
@@ -487,12 +466,9 @@ namespace FastData.Core.Repository
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public override Task<PageResult<T>> ToPageAsy<T>(PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public override ValueTask<PageResult<T>> ToPageAsy<T>(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToPage<T>(pModel, db,isOutSql);
-            });
+            return new ValueTask<PageResult<T>>(ToPage<T>(pModel, db, isOutSql));
         }
         #endregion
 
@@ -506,7 +482,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public override Lazy<PageResult<T>> ToLazyPage<T>(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<PageResult<T>>(() => ToPage<T>(pModel, db,isOutSql));
+            return new Lazy<PageResult<T>>(() => ToPage<T>(pModel, db, isOutSql));
         }
         #endregion
 
@@ -518,12 +494,9 @@ namespace FastData.Core.Repository
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public override Task<Lazy<PageResult<T>>> ToLazyPageAsy<T>(PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<PageResult<T>>> ToLazyPageAsy<T>(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return new Lazy<PageResult<T>>(() => ToPage<T>(pModel, db,isOutSql));
-            });
+            return new ValueTask<Lazy<PageResult<T>>>(new Lazy<PageResult<T>>(() => ToPage<T>(pModel, db, isOutSql)));
         }
         #endregion
 
@@ -570,12 +543,9 @@ namespace FastData.Core.Repository
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public override Task<PageResult> ToPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public override ValueTask<PageResult> ToPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToPage(pModel, db,isOutSql);
-            });
+            return new ValueTask<PageResult>(ToPage(pModel, db, isOutSql));
         }
         #endregion
 
@@ -589,7 +559,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public override Lazy<PageResult> ToLazyPage(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<PageResult>(() => ToPage(pModel, db,isOutSql));
+            return new Lazy<PageResult>(() => ToPage(pModel, db, isOutSql));
         }
         #endregion
 
@@ -600,12 +570,9 @@ namespace FastData.Core.Repository
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public override Task<Lazy<PageResult>> ToLazyPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<PageResult>> ToLazyPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return new Lazy<PageResult>(() => ToPage(pModel, db,isOutSql));
-            });
+            return new ValueTask<Lazy<PageResult>>(new Lazy<PageResult>(() => ToPage(pModel, db, isOutSql)));
         }
         #endregion
 
@@ -651,12 +618,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<DataTable> ToDataTableAsy(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<DataTable> ToDataTableAsy(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToDataTable(db,isOutSql);
-            });
+            return new ValueTask<DataTable>(ToDataTable(db, isOutSql));
         }
         #endregion
 
@@ -668,7 +632,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public override Lazy<DataTable> ToLazyDataTable(DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<DataTable>(() => ToDataTable(db,isOutSql));
+            return new Lazy<DataTable>(() => ToDataTable(db, isOutSql));
         }
         #endregion
 
@@ -678,12 +642,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<Lazy<DataTable>> ToLazyDataTableAsy(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<DataTable>> ToLazyDataTableAsy(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return new Lazy<DataTable>(() => ToDataTable(db,isOutSql));
-            });
+            return new ValueTask<Lazy<DataTable>>(new Lazy<DataTable>(() => ToDataTable(db, isOutSql)));
         }
         #endregion
 
@@ -728,12 +689,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<List<Dictionary<string, object>>> ToDicsAsy(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<List<Dictionary<string, object>>> ToDicsAsy(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToDics(db,isOutSql);
-            });
+            return new ValueTask<List<Dictionary<string, object>>>(ToDics(db, isOutSql));
         }
         #endregion
 
@@ -745,7 +703,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public override Lazy<List<Dictionary<string, object>>> ToLazyDics(DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<List<Dictionary<string, object>>>(() => ToDics(db,isOutSql));
+            return new Lazy<List<Dictionary<string, object>>>(() => ToDics(db, isOutSql));
         }
         #endregion
 
@@ -755,12 +713,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<Lazy<List<Dictionary<string, object>>>> ToLazyDicsAsy(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<List<Dictionary<string, object>>>> ToLazyDicsAsy(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return new Lazy<List<Dictionary<string, object>>>(() => ToDics(db,isOutSql));
-            });
+            return new ValueTask<Lazy<List<Dictionary<string, object>>>>(new Lazy<List<Dictionary<string, object>>>(() => ToDics(db, isOutSql)));
         }
         #endregion
 
@@ -806,12 +761,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<Dictionary<string, object>> ToDicAsy(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Dictionary<string, object>> ToDicAsy(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return ToDic(db,isOutSql);
-            });
+            return new ValueTask<Dictionary<string, object>>(ToDic(db, isOutSql));
         }
         #endregion
 
@@ -823,7 +775,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public override Lazy<Dictionary<string, object>> ToLazyDic(DataContext db = null, bool isOutSql = false)
         {
-            return new Lazy<Dictionary<string, object>>(() => ToDic(db,isOutSql));
+            return new Lazy<Dictionary<string, object>>(() => ToDic(db, isOutSql));
         }
         #endregion
 
@@ -833,12 +785,9 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Task<Lazy<Dictionary<string, object>>> ToLazyDicAsy(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<Dictionary<string, object>>> ToLazyDicAsy(DataContext db = null, bool isOutSql = false)
         {
-            return Task.Run(() =>
-            {
-                return new Lazy<Dictionary<string, object>>(() => ToDic(db,isOutSql));
-            });
+            return new ValueTask<Lazy<Dictionary<string, object>>>(new Lazy<Dictionary<string, object>>(() => ToDic(db, isOutSql)));
         }
         #endregion
     }
