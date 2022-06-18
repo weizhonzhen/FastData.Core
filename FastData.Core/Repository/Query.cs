@@ -790,5 +790,68 @@ namespace FastData.Core.Repository
             return new ValueTask<Lazy<Dictionary<string, object>>>(new Lazy<Dictionary<string, object>>(() => ToDic(db, isOutSql)));
         }
         #endregion
+
+
+        public override IQuery AndIf<T>(bool condtion, Expression<Func<T, bool>> predicate)
+        {
+            if (condtion)
+            {
+                var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+                if (this.Data.Predicate.Count >= 1)
+                    this.Data.Predicate[0].Where += $" and {visitModel.Where}";
+                if (this.Data.Predicate.Count == 0)
+                {
+                    this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                    this.Data.TableName.Add(typeof(T).Name);
+                    this.Data.Predicate.Add(visitModel);
+                }
+            }
+            return this;
+        }
+
+        public override IQuery And<T>(Expression<Func<T, bool>> predicate)
+        {
+            var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+            if (this.Data.Predicate.Count >= 1)
+                this.Data.Predicate[0].Where += $" and {visitModel.Where}";
+            if (this.Data.Predicate.Count == 0)
+            {
+                this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                this.Data.TableName.Add(typeof(T).Name);
+                this.Data.Predicate.Add(visitModel);
+            }
+            return this;
+        }
+
+        public override IQuery OrIf<T>(bool condtion, Expression<Func<T, bool>> predicate)
+        {
+            if (condtion)
+            {
+                var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+                if (this.Data.Predicate.Count >= 1)
+                    this.Data.Predicate[0].Where += $" or {visitModel.Where}";
+                if (this.Data.Predicate.Count == 0)
+                {
+                    this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                    this.Data.TableName.Add(typeof(T).Name);
+                    this.Data.Predicate.Add(visitModel);
+                }
+            }
+            return this;
+        }
+
+        public override IQuery Or<T>(Expression<Func<T, bool>> predicate)
+        {
+            var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+            if (this.Data.Predicate.Count >= 1)
+                this.Data.Predicate[0].Where += $" or {visitModel.Where}";
+            if (this.Data.Predicate.Count == 0)
+            {
+                this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                this.Data.TableName.Add(typeof(T).Name);
+                this.Data.Predicate.Add(visitModel);
+            }
+            return this;
+        }
     }
 }

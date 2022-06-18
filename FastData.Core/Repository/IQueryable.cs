@@ -10,6 +10,14 @@ namespace FastData.Core.Repository
 {
     public abstract class IQueryable<T> where T : class, new()
     {
+        public abstract IQueryable<T> AndIf(bool condtion, Expression<Func<T, bool>> predicate);
+
+        public abstract IQueryable<T> And( Expression<Func<T, bool>> predicate);
+
+        public abstract IQueryable<T> OrIf(bool condtion, Expression<Func<T, bool>> predicate);
+
+        public abstract IQueryable<T> Or(Expression<Func<T, bool>> predicate);
+
         public abstract IQueryable<T> LeftJoin<T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false);
 
         public abstract IQueryable<T> RightJoin<T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false) where T1 : class, new();

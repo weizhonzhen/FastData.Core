@@ -792,7 +792,14 @@ namespace FastData.Core.Repository
         #endregion
 
 
-
+        #region 返回item
+        /// <summary>
+        ///  返回item
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override R ToItem<R>(DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturn<R>();
@@ -821,25 +828,60 @@ namespace FastData.Core.Repository
             DbLog.LogSql(this.Data.Config.IsOutSql, result.sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.item;
         }
+        #endregion
 
+        #region 返回item asy
+        /// <summary>
+        ///  返回item asy
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override ValueTask<R> ToItemAsy<R>(DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<R>(ToItem<R>(db, isOutSql));
         }
+        #endregion
 
+        #region 返回Lazy<item>
+        /// <summary>
+        /// 返回Lazy<item>
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override Lazy<R> ToLazyItem<R>(DataContext db = null, bool isOutSql = false)
         {
             return new Lazy<R>(() => ToItem<R>(db, isOutSql));
         }
+        #endregion
 
+        #region 返回Lazy<item> asy
+        /// <summary>
+        /// 返回Lazy<item> asy
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override ValueTask<Lazy<R>> ToLazyItemAsy<R>(DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<Lazy<R>>(new Lazy<R>(() => ToItem<R>(db, isOutSql)));
         }
+        #endregion
 
 
-
-
+        #region 返回分页
+        /// <summary>
+        /// 返回分页
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="pModel"></param>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override PageResult<R> ToPage<R>(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturn<R>();
@@ -866,24 +908,62 @@ namespace FastData.Core.Repository
             DbLog.LogSql(this.Data.Config.IsOutSql, result.sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.pageResult;
         }
+        #endregion
 
+        #region 返回分页 asy
+        /// <summary>
+        /// 返回分页 asy
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="pModel"></param>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override ValueTask<PageResult<R>> ToPageAsy<R>(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<PageResult<R>>(ToPage<R>(pModel, db, isOutSql));
         }
+        #endregion
 
+        #region 返回分页 lazy
+        /// <summary>
+        /// 返回分页 lazy
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="pModel"></param>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override Lazy<PageResult<R>> ToLazyPage<R>(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             return new Lazy<PageResult<R>>(() => ToPage<R>(pModel, db, isOutSql));
         }
+        #endregion
 
+        #region 返回分页 lazy asy
+        /// <summary>
+        /// 返回分页 lazy asy
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="pModel"></param>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override ValueTask<Lazy<PageResult<R>>> ToLazyPageAsy<R>(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<Lazy<PageResult<R>>>(new Lazy<PageResult<R>>(() => ToPage<R>(pModel, db, isOutSql)));
         }
+        #endregion
 
 
-
+        #region 返回list
+        /// <summary>
+        /// 返回list
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override List<R> ToList<R>(DataContext db = null, bool isOutSql = false)
         {
             var stopwatch = new Stopwatch();
@@ -910,20 +990,112 @@ namespace FastData.Core.Repository
             DbLog.LogSql(this.Data.Config.IsOutSql, result.sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
             return result.list;
         }
+        #endregion
 
+        #region  返回list asy
+        /// <summary>
+        /// 返回list asy
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override ValueTask<List<R>> ToListAsy<R>(DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<List<R>>(ToList<R>(db, isOutSql));
         }
+        #endregion
 
+        #region 返回 Lazy<list
+        /// <summary>
+        /// 返回 Lazy<list
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override Lazy<List<R>> ToLazyList<R>(DataContext db = null, bool isOutSql = false)
         {
             return new Lazy<List<R>>(() => ToList<R>(db, isOutSql));
         }
+        #endregion
 
+        #region 返回 Lazy<list> asy
+        /// <summary>
+        /// 返回 Lazy<list> asy
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="isOutSql"></param>
+        /// <returns></returns>
         public override ValueTask<Lazy<List<R>>> ToLazyListAsy<R>(DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<Lazy<List<R>>>(new Lazy<List<R>>(() => ToList<R>(db, isOutSql)));
+        }
+        #endregion
+
+
+
+        public override IQueryable<T> AndIf(bool condtion, Expression<Func<T, bool>> predicate)
+        {
+            if (condtion)
+            {
+                var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+                if (this.Data.Predicate.Count >= 1)
+                    this.Data.Predicate[0].Where += $" and {visitModel.Where}";
+                if (this.Data.Predicate.Count == 0)
+                {
+                    this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                    this.Data.TableName.Add(typeof(T).Name);
+                    this.Data.Predicate.Add(visitModel);
+                }
+            }
+            return this;
+        }
+
+        public override IQueryable<T> And(Expression<Func<T, bool>> predicate)
+        {
+            var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+            if (this.Data.Predicate.Count >= 1)
+                this.Data.Predicate[0].Where += $" and {visitModel.Where}";
+            if (this.Data.Predicate.Count == 0)
+            {
+                this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                this.Data.TableName.Add(typeof(T).Name);
+                this.Data.Predicate.Add(visitModel);
+            }
+            return this;
+        }
+
+        public override IQueryable<T> OrIf(bool condtion, Expression<Func<T, bool>> predicate)
+        {
+            if (condtion)
+            {
+                var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+                if (this.Data.Predicate.Count >= 1)
+                    this.Data.Predicate[0].Where += $" or {visitModel.Where}";
+                if (this.Data.Predicate.Count == 0)
+                {
+                    this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                    this.Data.TableName.Add(typeof(T).Name);
+                    this.Data.Predicate.Add(visitModel);
+                }
+            }
+            return this;
+        }
+
+        public override IQueryable<T> Or(Expression<Func<T, bool>> predicate)
+        {
+            var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+            if (this.Data.Predicate.Count >= 1)
+                this.Data.Predicate[0].Where += $" or {visitModel.Where}";
+            if (this.Data.Predicate.Count == 0)
+            {
+                this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                this.Data.TableName.Add(typeof(T).Name);
+                this.Data.Predicate.Add(visitModel);
+            }
+            return this;
         }
     }
 }
