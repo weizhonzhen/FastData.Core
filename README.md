@@ -68,6 +68,9 @@ in Startup.cs Startup mothod
             var data1 = IFast.Query<TestResult>(a => a.ORGID == "1",null,"test").ToPage<TestResult>(page);
             var data2 = IFast.Query<TestResult>(a => a.ORGID == "1",null,"test").Filter(false).ToPage<TestResult>(page);
             
+            var data1 = IFast.Queryable<TestResult>(a => a.ORGID == "1",null,"test").ToPage(page);
+            var data2 = IFast.Queryable<TestResult>(a => a.ORGID == "1",null,"test").Filter(false).ToPage(page);
+            
            // more db all set change
            services.AddFastDataKey(a => { a.dbKey = "Api"; });
           
