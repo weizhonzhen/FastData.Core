@@ -23,7 +23,8 @@ namespace FastData.Core.Repository
 {
     public class FastRepository : IFastRepository
     {
-        internal Query query { get; set; } = new Query();
+        internal DataQuery Data = new DataQuery();
+        internal Query query = new Query();
 
         #region maq 执行返回结果
         /// <summary>
@@ -484,10 +485,10 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public string MapDb(string name, bool isMapDb = false)
         {
-            if (string.IsNullOrEmpty(this.query.Data.Key) && isMapDb == false)
+            if (string.IsNullOrEmpty(this.Data.Key) && isMapDb == false)
                 return DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.db", name.ToLower()));
             else
-                return this.query.Data.Key;
+                return this.Data.Key;
         }
         #endregion
 
@@ -1193,13 +1194,58 @@ namespace FastData.Core.Repository
         /// <param name="field">字段</param>
         /// <param name="Key"></param>
         /// <returns></returns>
-        public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
+        public Queryable<T> Queryable<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json") where T : class, new()
         {
             var projectName = Assembly.GetCallingAssembly().GetName().Name;
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
             if(DbCache.Exists(CacheType.Web,cacheKey) && key == null)            
                 key = DbCache.Get<Microsoft.Extensions.DependencyInjection.ConfigKey>(CacheType.Web, cacheKey).dbKey;               
+            else if (DataConfig.DataType(key, projectName, dbFile) && key == null)
+                throw new Exception("数据库查询key不能为空,数据库类型有多个");
+
+            if (this.Data.Config != null && this.Data.Config.IsChangeDb)
+            {
+                key = this.Data.Key;
+                this.Data = new DataQuery();
+                this.Data.Config = DataConfig.Get(key);
+                this.Data.Key = key;
+            }
+            else
+            {
+                this.Data = new DataQuery();
+                this.Data.Config = DataConfig.Get(key);
+                this.Data.Key = key;
+            }
+
+            var queryField = BaseField.QueryField<T>(predicate, field, this.Data.Config);
+            Data.Field.Add(queryField.Field);
+            Data.AsName.AddRange(queryField.AsName);
+
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
+            this.Data.Predicate.Add(condtion);
+            this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+            this.Data.TableName.Add(typeof(T).Name);
+            return new Queryable<T>();
+        }
+        #endregion
+
+        #region 表查询
+        /// <summary>
+        /// 表查询
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="predicate">条件</param>
+        /// <param name="field">字段</param>
+        /// <param name="Key"></param>
+        /// <returns></returns>
+        public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
+        {
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+            var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
+
+            if (DbCache.Exists(CacheType.Web, cacheKey) && key == null)
+                key = DbCache.Get<Microsoft.Extensions.DependencyInjection.ConfigKey>(CacheType.Web, cacheKey).dbKey;
             else if (DataConfig.DataType(key, projectName, dbFile) && key == null)
                 throw new Exception("数据库查询key不能为空,数据库类型有多个");
 
@@ -1237,9 +1283,9 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public IFastRepository SetKey(string key)
         {
-            this.query.Data.Config = DataConfig.Get(key);
-            this.query.Data.Key = key;
-            this.query.Data.Config.IsChangeDb = true;
+            this.Data.Config = DataConfig.Get(key);
+            this.Data.Key = key;
+            this.Data.Config.IsChangeDb = true;
             return this;
         }
         #endregion

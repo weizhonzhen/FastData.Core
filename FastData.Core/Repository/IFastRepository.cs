@@ -121,6 +121,8 @@ namespace FastData.Core.Repository
 
         IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json");
 
+        Queryable<T> Queryable<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json") where T : class, new();
+
         IFastRepository SetKey(string key);
     }
 }
