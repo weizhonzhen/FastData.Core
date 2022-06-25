@@ -237,7 +237,40 @@ namespace FastData.Core.Base
             }
         }
         #endregion
-        
+
+        #region group by 2个表
+        /// <summary>
+        /// group by 2个表
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="isDesc"></param>
+        /// <returns></returns>
+        public static List<string> GroupBy<T,T1>(Expression<Func<T,T1, object>> field, ConfigModel config)
+        {
+            try
+            {
+                var result = new List<string>();
+
+                (field.Body as NewExpression).Arguments.ToList().ForEach(a =>
+                {
+                    var asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                    result.Add(string.Format("{0}.{1}", asName, (a as MemberExpression).Member.Name));
+                });
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "GroupBy<T,T1>", "");
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "GroupBy<T,T1>", "");
+
+                return new List<string>();
+            }
+        }
+        #endregion
+
         #region order by 1个表
         /// <summary>
         /// order by 1个表
@@ -267,6 +300,41 @@ namespace FastData.Core.Base
                     DbLogTable.LogException<T>(config, ex, "OrderBy<T>", "");
                 else
                     DbLog.LogException(config.IsOutError, config.DbType, ex, "OrderBy<T>", "");
+
+                return new List<string>();
+            }
+        }
+        #endregion
+
+        #region order by 2个表
+        /// <summary>
+        /// order by 1个表
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="config"></param>
+        /// <param name="isDesc"></param>
+        /// <returns></returns>
+        public static List<string> OrderBy<T,T1>(Expression<Func<T,T1, object>> field, ConfigModel config, bool isDesc = true)
+        {
+            try
+            {
+                var result = new List<string>();
+
+                (field.Body as NewExpression).Arguments.ToList().ForEach(a =>
+                {
+                    var asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                    result.Add(string.Format("{0}.{1} {2}", asName, (a as MemberExpression).Member.Name, isDesc ? "desc" : "asc"));
+                });
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(config, ex, "OrderBy<T,T1>", "");
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "OrderBy<T,T1>", "");
 
                 return new List<string>();
             }
