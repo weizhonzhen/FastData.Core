@@ -792,6 +792,14 @@ namespace FastData.Core.Repository
         #endregion
 
 
+        #region and 条件
+        /// <summary>
+        /// and 条件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="condtion"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public override IQuery AndIf<T>(bool condtion, Expression<Func<T, bool>> predicate)
         {
             if (condtion)
@@ -808,7 +816,15 @@ namespace FastData.Core.Repository
             }
             return this;
         }
+        #endregion
 
+        #region and
+        /// <summary>
+        /// and
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public override IQuery And<T>(Expression<Func<T, bool>> predicate)
         {
             var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
@@ -822,7 +838,16 @@ namespace FastData.Core.Repository
             }
             return this;
         }
+        #endregion
 
+        #region or 条件
+        /// <summary>
+        /// or 条件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="condtion"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public override IQuery OrIf<T>(bool condtion, Expression<Func<T, bool>> predicate)
         {
             if (condtion)
@@ -839,7 +864,15 @@ namespace FastData.Core.Repository
             }
             return this;
         }
+        #endregion
 
+        #region or
+        /// <summary>
+        /// or
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public override IQuery Or<T>(Expression<Func<T, bool>> predicate)
         {
             var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Data.Config);
@@ -853,5 +886,106 @@ namespace FastData.Core.Repository
             }
             return this;
         }
+        #endregion
+
+        #region and 条件
+        /// <summary>
+        /// and 条件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="condtion"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public override IQuery AndIf<T,T1>(bool condtion, Expression<Func<T, T1, bool>> predicate)
+        {
+            if (condtion)
+            {
+                var visitModel = VisitExpression.LambdaWhere<T, T1>(predicate, this.Data.Config);
+                if (this.Data.Predicate.Count >= 1)
+                    this.Data.Predicate[0].Where += $" and {visitModel.Where}";
+                if (this.Data.Predicate.Count == 0)
+                {
+                    this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                    this.Data.TableName.Add(typeof(T).Name);
+                    this.Data.Predicate.Add(visitModel);
+                }
+            }
+            return this;
+        }
+        #endregion
+
+        #region and
+        /// <summary>
+        /// and
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public override IQuery And<T, T1>(Expression<Func<T, T1, bool>> predicate)
+        {
+            var visitModel = VisitExpression.LambdaWhere<T, T1>(predicate, this.Data.Config);
+            if (this.Data.Predicate.Count >= 1)
+                this.Data.Predicate[0].Where += $" and {visitModel.Where}";
+            if (this.Data.Predicate.Count == 0)
+            {
+                this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                this.Data.TableName.Add(typeof(T).Name);
+                this.Data.Predicate.Add(visitModel);
+            }
+            return this;
+        }
+        #endregion
+
+        #region or 条件
+        /// <summary>
+        /// or 条件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="condtion"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public override IQuery OrIf<T, T1>(bool condtion, Expression<Func<T, T1, bool>> predicate)
+        {
+            if (condtion)
+            {
+                var visitModel = VisitExpression.LambdaWhere<T, T1>(predicate, this.Data.Config);
+                if (this.Data.Predicate.Count >= 1)
+                    this.Data.Predicate[0].Where += $" or {visitModel.Where}";
+                if (this.Data.Predicate.Count == 0)
+                {
+                    this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                    this.Data.TableName.Add(typeof(T).Name);
+                    this.Data.Predicate.Add(visitModel);
+                }
+            }
+            return this;
+        }
+        #endregion
+
+        #region or
+        /// <summary>
+        /// or
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public override IQuery Or<T, T1>(Expression<Func<T, T1, bool>> predicate)
+        {
+            var visitModel = VisitExpression.LambdaWhere<T, T1>(predicate, this.Data.Config);
+            if (this.Data.Predicate.Count >= 1)
+                this.Data.Predicate[0].Where += $" or {visitModel.Where}";
+            if (this.Data.Predicate.Count == 0)
+            {
+                this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                this.Data.TableName.Add(typeof(T).Name);
+                this.Data.Predicate.Add(visitModel);
+            }
+            return this;
+        }
+        #endregion
     }
 }
