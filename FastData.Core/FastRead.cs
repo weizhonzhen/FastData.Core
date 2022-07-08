@@ -94,6 +94,42 @@ namespace FastData.Core
         }
         #endregion
 
+        #region 表查询
+        /// <summary>
+        /// 表查询
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="predicate">条件</param>
+        /// <param name="field">字段</param>
+        /// <param name="Key"></param>
+        /// <returns></returns>
+        public static FastQueryable<T> Queryable<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json") where T : class, new()
+        {
+            var result = new FastQueryable<T>();
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+
+            var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
+
+            if (DbCache.Exists(CacheType.Web, cacheKey) && key == null)
+                key = DbCache.Get<Microsoft.Extensions.DependencyInjection.ConfigKey>(CacheType.Web, cacheKey).dbKey;
+            else if (DataConfig.DataType(key, projectName, dbFile) && key == null)
+                throw new Exception("数据库查询key不能为空,数据库类型有多个");
+
+            result.Query.Config = DataConfig.Get(key, projectName, dbFile);
+            result.Query.Key = key;
+
+            var queryField = BaseField.QueryField<T>(predicate, field, result.Query.Config);
+            result.Query.Field.Add(queryField.Field);
+            result.Query.AsName.AddRange(queryField.AsName);
+
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, result.Query.Config);
+            result.Query.Predicate.Add(condtion);
+            result.Query.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+            result.Query.TableName.Add(typeof(T).Name);
+            return result;
+        }
+        #endregion
+
         #region 查询left join
         /// <summary>
         /// 查询left join
@@ -188,6 +224,7 @@ namespace FastData.Core
             return item;
         }
         #endregion
+
 
         #region 返回list
         /// <summary>
@@ -449,7 +486,7 @@ namespace FastData.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ValueTask<int> ToCountAsy<T, T1>(this DataQuery item, DataContext db = null, bool isOutSql = false)
+        public static ValueTask<int> ToCountAsy(this DataQuery item, DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<int>(ToCount(item, db, isOutSql));
         }
