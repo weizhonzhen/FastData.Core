@@ -415,7 +415,7 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override ValueTask<int> ToCountAsy<T, T1>(DataContext db = null, bool isOutSql = false)
+        public override ValueTask<int> ToCountAsy(DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<int>(ToCount(db, isOutSql));
         }
