@@ -6,6 +6,35 @@ nuget url: https://www.nuget.org/packages/Fast.Data.Core/
 in Startup.cs Startup mothod
 
             Configuration = configuration;
+            //Generic aop   di Constructor param IFastRepository<XXX_Model>
+            services.AddFastDataGeneric(a =>
+            {
+                a.dbFile = "db.json";
+                a.dbKey = "key";
+                a.IsResource = true;
+                a.mapFile = "map.json";
+                a.NamespaceProperties = "XXX.DataModel";
+                a.aop = new FastDataAop();
+            },
+            a =>
+            {
+                a.Aop = new FastAopAttribute();
+                a.NameSpaceServie = string.Format("{0}.Service", Assembly.GetEntryAssembly().GetName().Name);
+                a.NameSpaceModel = string.Format("{0}.DataModel", Assembly.GetEntryAssembly().GetName().Name);
+            });
+
+            public class FastAopAttribute : FastAop.Core.FastAopAttribute
+                {
+                    public override void After(AfterContext context)
+                    {        }
+
+                    public override void Before(BeforeContext context)
+                    {         }
+
+                    public override void Exception(ExceptionContext exception)
+                    {        }
+                }
+
 
             // old pagepackages init model Properties cahce 
             FastMap.InstanceProperties("DataModel","db.json");
