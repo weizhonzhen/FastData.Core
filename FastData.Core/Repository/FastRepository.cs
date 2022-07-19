@@ -1297,7 +1297,6 @@ namespace FastData.Core.Repository
 
     public class FastRepository<T> : IFastRepository<T> where T : class, new ()
     {
-        internal Query query = new Query();
         internal DataQuery data = new DataQuery();
 
         #region 批量增加
@@ -1318,7 +1317,7 @@ namespace FastData.Core.Repository
 
             using (var tempDb = new DataContext(key))
             {
-                result = tempDb.AddList<T>(list, IsTrans, isLog);
+                result = tempDb.AddList(list, IsTrans, isLog);
                 config = tempDb.config;
             }
 
@@ -1365,13 +1364,13 @@ namespace FastData.Core.Repository
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.Add<T>(model, false);
+                    result = tempDb.Add(model, false);
                     config = tempDb.config;
                 }
             }
             else
             {
-                result = db.Add<T>(model, false);
+                result = db.Add(model, false);
                 config = db.config;
             }
 
@@ -1418,13 +1417,13 @@ namespace FastData.Core.Repository
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.Delete<T>(predicate);
+                    result = tempDb.Delete(predicate);
                     config = tempDb.config;
                 }
             }
             else
             {
-                result = db.Delete<T>(predicate);
+                result = db.Delete(predicate);
                 config = db.config;
             }
 
@@ -1520,13 +1519,13 @@ namespace FastData.Core.Repository
             {
                 using (var tempDb = new DataContext(key))
                 {
-                    result = tempDb.Update<T>(model, predicate, field);
+                    result = tempDb.Update(model, predicate, field);
                     config = tempDb.config;
                 }
             }
             else
             {
-                result = db.Update<T>(model, predicate, field);
+                result = db.Update(model, predicate, field);
                 config = db.config;
             }
 
