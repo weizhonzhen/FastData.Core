@@ -1294,4 +1294,406 @@ namespace FastData.Core.Repository
         }
         #endregion
     }
+
+    public class FastRepository<T> : IFastRepository<T> where T : class, new ()
+    {
+        internal Query query = new Query();
+        internal DataQuery data = new DataQuery();
+
+        #region 批量增加
+        /// <summary>
+        /// 批量增加
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="model">实体</param>
+        /// <param name="IsTrans">是否事务</param>
+        /// <returns></returns>
+        public WriteReturn AddList(List<T> list, string key = null, bool IsTrans = false, bool isLog = true)
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            using (var tempDb = new DataContext(key))
+            {
+                result = tempDb.AddList<T>(list, IsTrans, isLog);
+                config = tempDb.config;
+            }
+
+            stopwatch.Stop();
+
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 批量增加 asy
+        /// <summary>
+        /// 批量增加 asy
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="model">实体</param>
+        /// <param name="IsTrans">是否事务</param>
+        /// <returns></returns>
+        public ValueTask<WriteReturn> AddListAsy(List<T> list, string key = null, bool IsTrans = false, bool isLog = true)
+        {
+            return new ValueTask<WriteReturn>(AddList(list, key, IsTrans, isLog));
+        }
+        #endregion
+
+        #region 增加
+        /// <summary>
+        /// 增加
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="model">实体</param>
+        /// <param name="IsTrans">是否事务</param>
+        /// <param name="notAddField">不需要增加的字段</param>
+        /// <returns></returns>
+        public WriteReturn Add(T model, DataContext db = null, string key = null, bool isOutSql = false)
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Add<T>(model, false);
+                    config = tempDb.config;
+                }
+            }
+            else
+            {
+                result = db.Add<T>(model, false);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 增加 asy
+        /// <summary>
+        /// 增加 asy
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="model">实体</param>
+        /// <param name="IsTrans">是否事务</param>
+        /// <param name="notAddField">不需要增加的字段</param>
+        /// <returns></returns>
+        public ValueTask<WriteReturn> AddAsy(T model, DataContext db = null, string key = null, bool isOutSql = false)
+        {
+            return new ValueTask<WriteReturn>(Add(model, db, key, isOutSql));
+        }
+        #endregion
+
+        #region 删除(Lambda表达式)
+        /// <summary>
+        /// 删除(Lambda表达式)
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="predicate">表达式</param>
+        /// <param name="IsTrans">是否事务</param>
+        /// <returns></returns>
+        public WriteReturn Delete(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null, bool isOutSql = false)
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Delete<T>(predicate);
+                    config = tempDb.config;
+                }
+            }
+            else
+            {
+                result = db.Delete<T>(predicate);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 删除(Lambda表达式)asy
+        /// <summary>
+        /// 删除(Lambda表达式)asy
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="predicate">表达式</param>
+        /// <param name="IsTrans">是否事务</param>
+        /// <returns></returns>
+        public ValueTask<WriteReturn> DeleteAsy(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null, bool isOutSql = false)
+        {
+            return new ValueTask<WriteReturn>(Delete(predicate, db, key, isOutSql));
+        }
+        #endregion
+
+        #region 删除
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public WriteReturn Delete(T model, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false)
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Delete(model, isTrans);
+                    config = tempDb.config;
+                }
+            }
+            else
+            {
+                result = db.Delete(model, isTrans);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 删除asy
+        /// <summary>
+        /// 删除asy
+        /// </summary>
+        /// <returns></returns>
+        public ValueTask<WriteReturn> UpdateAsy(T model, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false)
+        {
+            return new ValueTask<WriteReturn>(Delete(model, db, key, isOutSql));
+        }
+        #endregion
+
+        #region 修改(Lambda表达式)
+        /// <summary>
+        /// 修改(Lambda表达式)
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="model">实体</param>
+        /// <param name="predicate">表达式</param>
+        /// <param name="IsTrans">是否事务</param>
+        /// <param name="field">需要修改的字段</param>
+        /// <returns></returns>
+        public WriteReturn Update(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false)
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Update<T>(model, predicate, field);
+                    config = tempDb.config;
+                }
+            }
+            else
+            {
+                result = db.Update<T>(model, predicate, field);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 修改(Lambda表达式)asy
+        /// <summary>
+        /// 修改(Lambda表达式)asy
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="model">实体</param>
+        /// <param name="predicate">表达式</param>
+        /// <param name="IsTrans">是否事务</param>
+        /// <param name="field">需要修改的字段</param>
+        /// <returns></returns>
+        public ValueTask<WriteReturn> UpdateAsy(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false)
+        {
+            return new ValueTask<WriteReturn>(Update(model, predicate, field, db, key, isOutSql));
+        }
+        #endregion
+
+        #region 修改
+        /// <summary>
+        /// 修改
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public WriteReturn Update(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false)
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.Update(model, field, isTrans);
+                    config = tempDb.config;
+                }
+            }
+            else
+            {
+                result = db.Update(model, field, isTrans);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 修改asy
+        /// <summary>
+        /// 修改asy
+        /// </summary>
+        /// <returns></returns>
+        public ValueTask<WriteReturn> UpdateAsy(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false)
+        {
+            return new ValueTask<WriteReturn>(Update(model, field, db, key, isTrans, isOutSql));
+        }
+        #endregion
+
+        #region 修改list
+        /// <summary>
+        /// 修改list
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public WriteReturn UpdateList(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false)
+        {
+            ConfigModel config = null;
+            var result = new DataReturn<T>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(key))
+                {
+                    result = tempDb.UpdateList(list, field);
+                    config = tempDb.config;
+                }
+            }
+            else
+            {
+                result = db.UpdateList(list, field);
+                config = db.config;
+            }
+
+            stopwatch.Stop();
+
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+
+            return result.writeReturn;
+        }
+        #endregion
+
+        #region 修改list asy
+        /// <summary>
+        /// 修改list asy
+        /// </summary>
+        /// <returns></returns>
+        public ValueTask<WriteReturn> UpdateListAsy(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false)
+        {
+            return new ValueTask<WriteReturn>(UpdateList(list, field, db, key, isOutSql));
+        }
+        #endregion
+
+        #region 表查询
+        /// <summary>
+        /// 表查询
+        /// </summary>
+        /// <typeparam name="T">泛型</typeparam>
+        /// <param name="predicate">条件</param>
+        /// <param name="field">字段</param>
+        /// <param name="Key"></param>
+        /// <returns></returns>
+        public Queryable<T> Queryable(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
+        {
+            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+            var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
+
+            if (DbCache.Exists(CacheType.Web, cacheKey) && key == null)
+                key = DbCache.Get<Microsoft.Extensions.DependencyInjection.ConfigKey>(CacheType.Web, cacheKey).dbKey;
+            else if (DataConfig.DataType(key, projectName, dbFile) && key == null)
+                throw new Exception("数据库查询key不能为空,数据库类型有多个");
+
+            if (this.data.Config != null && this.data.Config.IsChangeDb)
+            {
+                this.data = new DataQuery();
+                key = this.data.Key;
+                this.data.Config = DataConfig.Get(key);
+                this.data.Key = key;
+            }
+            else
+            {
+                this.data = new DataQuery();
+                this.data.Config = DataConfig.Get(key);
+                this.data.Key = key;
+            }
+
+            var queryField = BaseField.QueryField<T>(predicate, field, this.data.Config);
+            this.data.Field.Add(queryField.Field);
+            this.data.AsName.AddRange(queryField.AsName);
+
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, this.data.Config);
+            this.data.Predicate.Add(condtion);
+            this.data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+            this.data.TableName.Add(typeof(T).Name);
+            return new Queryable<T>() { Data = this.data };
+        }
+        #endregion
+    }
 }

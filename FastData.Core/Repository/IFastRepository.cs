@@ -125,4 +125,37 @@ namespace FastData.Core.Repository
 
         IFastRepository SetKey(string key);
     }
+
+    public interface IFastRepository<T> where T : class, new()
+    {
+        WriteReturn AddList(List<T> list, string key = null, bool IsTrans = false, bool isLog = true) ;
+
+        ValueTask<WriteReturn> AddListAsy(List<T> list, string key = null, bool IsTrans = false, bool isLog = true) ;
+
+        WriteReturn Add(T model, DataContext db = null, string key = null, bool isOutSql = false) ;
+
+        ValueTask<WriteReturn> AddAsy(T model, DataContext db = null, string key = null, bool isOutSql = false) ;
+
+        WriteReturn Delete(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null, bool isOutSql = false) ;
+
+        ValueTask<WriteReturn> DeleteAsy(Expression<Func<T, bool>> predicate, DataContext db = null, string key = null, bool isOutSql = false) ;
+
+        WriteReturn Delete(T model, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false) ;
+
+        ValueTask<WriteReturn> UpdateAsy(T model, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false) ;
+
+        WriteReturn Update(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false) ;
+
+        ValueTask<WriteReturn> UpdateAsy(T model, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false) ;
+
+        WriteReturn Update(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false) ;
+
+        ValueTask<WriteReturn> UpdateAsy(T model, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isTrans = false, bool isOutSql = false) ;
+
+        WriteReturn UpdateList(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false) ;
+
+        ValueTask<WriteReturn> UpdateListAsy(List<T> list, Expression<Func<T, object>> field = null, DataContext db = null, string key = null, bool isOutSql = false) ;
+
+        Queryable<T> Queryable(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json") ;
+    }
 }
