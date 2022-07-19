@@ -108,18 +108,24 @@ namespace Microsoft.Extensions.DependencyInjection
             return serviceCollection;
         }
 
-        public static IServiceCollection AddFastDataGeneric(this IServiceCollection serviceCollection, Action<ConfigData> action)
+        public static IServiceCollection AddFastDataGeneric(this IServiceCollection serviceCollection, Action<ConfigData> action, Action<ConfigRepository> repository)
         {
             config = new ConfigData();
             action(config);
 
+            var configRepository = new ConfigRepository();
+            repository(configRepository);
+
             AddFastData(serviceCollection, action);
 
-            if (!string.IsNullOrEmpty(config.RepositoryNameSpaceModel) && config.RepositoryAop!=null)
-                serviceCollection.AddFastAopGeneric("", config.RepositoryNameSpaceModel, config.RepositoryAop.GetType());
+            if (!string.IsNullOrEmpty(configRepository.NameSpaceModel))
+                serviceCollection.AddFastAopGeneric("FastData.Core.Repository", configRepository.NameSpaceModel);
 
-            if (!string.IsNullOrEmpty(config.RepositoryNameSpaceModel) && config.RepositoryAop == null)
-                serviceCollection.AddFastAopGeneric("", config.RepositoryNameSpaceModel);
+            if (!string.IsNullOrEmpty(configRepository.NameSpaceServie) && configRepository.Aop != null)
+                serviceCollection.AddFastAop(configRepository.NameSpaceServie, configRepository.Aop.GetType());
+
+            if (!string.IsNullOrEmpty(configRepository.NameSpaceServie) && configRepository.Aop == null)
+                serviceCollection.AddFastAop(configRepository.NameSpaceServie);
 
             return serviceCollection;
         }

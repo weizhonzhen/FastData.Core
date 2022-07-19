@@ -1,6 +1,4 @@
-﻿using FastAop.Core;
-using FastData.Core.Aop;
-using System;
+﻿using FastData.Core.Aop;
 
 namespace FastData.Core
 {
@@ -23,9 +21,5 @@ namespace FastData.Core
         public string NamespaceService { get; set; }
 
         public IFastAop aop { get; set; }
-
-        public FastAopAttribute RepositoryAop { get; set; }
-
-        public string RepositoryNameSpaceModel { get; set; }
     }
 }
