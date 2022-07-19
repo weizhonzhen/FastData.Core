@@ -35,6 +35,18 @@ in Startup.cs Startup mothod
                     {        }
                 }
 
+    public class ContentService : IContent
+    {
+        private readonly IFastRepository<Editor_Content> fastRepository;
+        private readonly IFastRepository IFast;
+
+        public ContentService(IFastRepository IFast, IFastRepository<Editor_Content> fastRepository)
+        {
+            this.IFast = IFast;
+            this.fastRepository = fastRepository;
+        }
+    }
+
 
             // old pagepackages init model Properties cahce 
             FastMap.InstanceProperties("DataModel","db.json");
