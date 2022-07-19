@@ -10,6 +10,7 @@ using System.Linq;
 using FastData.Core.Property;
 using FastData.Core.Model;
 using FastUntility.Core.Page;
+using DbProviderFactories = FastData.Core.Base.DbProviderFactories;
 
 namespace FastData.Core.Proxy
 {
