@@ -107,6 +107,22 @@ namespace Microsoft.Extensions.DependencyInjection
             DbCache.Set<ConfigKey>(CacheType.Web, key, model);
             return serviceCollection;
         }
+
+        public static IServiceCollection AddFastDataGeneric(this IServiceCollection serviceCollection, Action<ConfigData> action)
+        {
+            config = new ConfigData();
+            action(config);
+
+            AddFastData(serviceCollection, action);
+
+            if (!string.IsNullOrEmpty(config.RepositoryNameSpaceModel) && config.RepositoryAop!=null)
+                serviceCollection.AddFastAopGeneric("", config.RepositoryNameSpaceModel, config.RepositoryAop.GetType());
+
+            if (!string.IsNullOrEmpty(config.RepositoryNameSpaceModel) && config.RepositoryAop == null)
+                serviceCollection.AddFastAopGeneric("", config.RepositoryNameSpaceModel);
+
+            return serviceCollection;
+        }
     }
 
     public class ConfigKey
