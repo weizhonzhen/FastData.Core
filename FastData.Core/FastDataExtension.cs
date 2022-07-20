@@ -57,7 +57,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile, projectName);
                 FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
             }
-            
+
             if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst) && !config.IsResource)
             {
                 FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile);
@@ -69,7 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties) && !config.IsResource)
                 FastMap.InstanceProperties(config.NamespaceProperties, config.dbFile);
-                       
+
             return serviceCollection;
         }
 
@@ -98,7 +98,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return serviceCollection;
         }
 
-        public static IServiceCollection AddFastDataKey(this IServiceCollection serviceCollection,Action<ConfigKey> action)
+        public static IServiceCollection AddFastDataKey(this IServiceCollection serviceCollection, Action<ConfigKey> action)
         {
             var model = new ConfigKey();
             action(model);
@@ -118,14 +118,25 @@ namespace Microsoft.Extensions.DependencyInjection
 
             AddFastData(serviceCollection, action);
 
-            if (!string.IsNullOrEmpty(configRepository.NameSpaceModel))
-                serviceCollection.AddFastAopGeneric("FastData.Core.Repository", configRepository.NameSpaceModel);
+            if (string.IsNullOrEmpty(configRepository.NameSpaceServie))
+                return serviceCollection;
 
-            if (!string.IsNullOrEmpty(configRepository.NameSpaceServie) && configRepository.Aop != null)
+            if (string.IsNullOrEmpty(configRepository.NameSpaceModel))
+                return serviceCollection;
+
+            serviceCollection.AddFastAopGeneric("FastData.Core.Repository", configRepository.NameSpaceModel);
+
+            if (configRepository.Aop != null)
+            {
+                serviceCollection.AddFastAopGeneric(configRepository.NameSpaceServie, configRepository.NameSpaceModel, configRepository.Aop.GetType());
                 serviceCollection.AddFastAop(configRepository.NameSpaceServie, configRepository.Aop.GetType());
+            }
 
-            if (!string.IsNullOrEmpty(configRepository.NameSpaceServie) && configRepository.Aop == null)
+            if (configRepository.Aop == null)
+            {
+                serviceCollection.AddFastAopGeneric(configRepository.NameSpaceServie, configRepository.NameSpaceModel);
                 serviceCollection.AddFastAop(configRepository.NameSpaceServie);
+            }
 
             return serviceCollection;
         }
