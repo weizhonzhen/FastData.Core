@@ -1218,14 +1218,16 @@ namespace FastData.Core.Repository
                 this.data.Key = key;
             }
 
-            var queryField = BaseField.QueryField<T>(predicate, field, this.data.Config);
+            this.data.TableName.Add(typeof(T).Name);
+            this.data.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+
+            var queryField = BaseField.QueryField<T>(predicate, field, this.data);
             this.data.Field.Add(queryField.Field);
             this.data.AsName.AddRange(queryField.AsName);
 
-            var condtion = VisitExpression.LambdaWhere<T>(predicate, this.data.Config);
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, this.data);
             this.data.Predicate.Add(condtion);
             this.data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
-            this.data.TableName.Add(typeof(T).Name);
             return new Queryable<T>() { Data = this.data };
         }
         #endregion
@@ -1263,14 +1265,16 @@ namespace FastData.Core.Repository
                 this.query.Data.Key = key;
             }
 
-            var queryField = BaseField.QueryField<T>(predicate, field, this.query.Data.Config);
+            this.query.Data.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+            this.query.Data.TableName.Add(typeof(T).Name);
+
+            var queryField = BaseField.QueryField<T>(predicate, field, this.query.Data);
             query.Data.Field.Add(queryField.Field);
             query.Data.AsName.AddRange(queryField.AsName);
 
-            var condtion = VisitExpression.LambdaWhere<T>(predicate, this.query.Data.Config);
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, this.query.Data);
             this.query.Data.Predicate.Add(condtion);
             this.query.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
-            this.query.Data.TableName.Add(typeof(T).Name);
             return this.query;
         }
         #endregion
@@ -1683,13 +1687,14 @@ namespace FastData.Core.Repository
                 this.data.Key = key;
             }
 
-            var queryField = BaseField.QueryField<T>(predicate, field, this.data.Config);
+            var queryField = BaseField.QueryField<T>(predicate, field, this.data);
             this.data.Field.Add(queryField.Field);
             this.data.AsName.AddRange(queryField.AsName);
 
-            var condtion = VisitExpression.LambdaWhere<T>(predicate, this.data.Config);
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, this.data);
             this.data.Predicate.Add(condtion);
             this.data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+            this.data.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
             this.data.TableName.Add(typeof(T).Name);
             return new Queryable<T>() { Data = this.data };
         }
