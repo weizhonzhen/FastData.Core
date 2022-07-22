@@ -235,13 +235,15 @@ namespace FastData.Core.Context
                                 result = BaseDataReader.ToModel(instance, dr, config);
 
                             dr.Close();
+                            dr.Dispose();
+                            dr = null;
                             BaseAop.AopAfter(table, cmd.CommandText, paramList, config, true, AopType.Navigate, result);
                             if (result != null)
                             {
                                 d.GetType().GetProperties().ToList().ForEach(p =>
                                 {
                                     if (p.Name == a.MemberName)
-                                        p.SetValue(d, Convert.ChangeType(result, a.MemberType));
+                                        BaseEmit.Set<T>(d, p.Name, result);
                                 });
                             }
                         });
@@ -296,6 +298,8 @@ namespace FastData.Core.Context
                     else
                         result = BaseDataReader.ToModel(instance, dr, config);
                     dr.Close();
+                    dr.Dispose();
+                    dr = null;
                     BaseAop.AopAfter(null, cmd.CommandText, param, config, true, AopType.FastRead, result);
                 }
 
@@ -342,6 +346,12 @@ namespace FastData.Core.Context
         /// </summary>
         public void Dispose()
         {
+            if (trans != null)
+            {
+                trans.Rollback();
+                trans.Dispose();
+                trans = null;
+            }
             Dispose(cmd);
             conn.Close();
             cmd.Dispose();
@@ -499,7 +509,7 @@ namespace FastData.Core.Context
 
                     result.GetType().GetFields().ToList().ForEach(a =>
                     {
-                        if (a.Name == "pModel")
+                        if (a.Name == "pModel")                    
                             a.SetValue(result, pModel);
                         if (a.Name == "list")
                             a.SetValue(result, list);
@@ -1240,7 +1250,11 @@ namespace FastData.Core.Context
                 if (isTrans)
                     BeginTrans();
 
-                visitModel = VisitExpression.LambdaWhere<T>(predicate, config);
+                var query = new DataQuery();
+                query.Table.Add(typeof(T).Name);
+                query.Config = config;
+                query.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+                visitModel = VisitExpression.LambdaWhere<T>(predicate, query);
 
                 sql.AppendFormat("delete from {0} {1}", typeof(T).Name
                     , string.IsNullOrEmpty(visitModel.Where) ? "" : string.Format("where {0}", visitModel.Where.Replace(string.Format("{0}.", predicate.Parameters[0].Name), "")));
@@ -1446,7 +1460,11 @@ namespace FastData.Core.Context
                     BeginTrans();
 
                 update = BaseModel.UpdateToSql<T>(model, config, field, cmd);
-                visitModel = VisitExpression.LambdaWhere<T>(predicate, config);
+                var query = new DataQuery();
+                query.Table.Add(typeof(T).Name);
+                query.Config = config;
+                query.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+                visitModel = VisitExpression.LambdaWhere<T>(predicate, query);
 
                 tableName.Add(typeof(T).Name);
                 BaseAop.AopBefore(tableName, sql, Parameter.ParamMerge(update.Param, visitModel.Param), config, false, AopType.Update_Lambda, model);
@@ -2287,6 +2305,8 @@ namespace FastData.Core.Context
         #region 开始事务
         public void BeginTrans()
         {
+            if (this.trans != null)
+                this.trans.Rollback();
             this.trans = this.conn.BeginTransaction();
             this.cmd.Transaction = trans;
         }
@@ -2296,6 +2316,8 @@ namespace FastData.Core.Context
         public void SubmitTrans()
         {
             this.trans.Commit();
+            this.trans.Dispose();
+            this.trans = null;
         }
         #endregion
 
@@ -2303,6 +2325,8 @@ namespace FastData.Core.Context
         public void RollbackTrans()
         {
             this.trans.Rollback();
+            this.trans.Dispose();
+            this.trans = null;
         }
         #endregion
     }
