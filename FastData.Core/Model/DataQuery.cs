@@ -49,6 +49,11 @@ namespace FastData.Core.Model
         internal List<string> Table { set; get; } = new List<string>();
 
         /// <summary>
+        /// 表别名
+        /// </summary>
+        internal Dictionary<string,object> TableAsName { get; set; } = new Dictionary<string, object>();
+
+        /// <summary>
         /// 连接配置
         /// </summary>
         internal ConfigModel Config { get; set; }
