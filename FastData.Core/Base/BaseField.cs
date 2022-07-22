@@ -21,8 +21,9 @@ namespace FastData.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static FieldModel QueryField<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field, ConfigModel config)
+        public static FieldModel QueryField<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field, DataQuery query)
         {
+            var asName = query.TableAsName.GetValue(typeof(T).Name).ToString();
             try
             {
                 var result = new FieldModel();
@@ -32,11 +33,10 @@ namespace FastData.Core.Base
                 if (field == null)
                 {
                     #region 无返回列
-                    var list = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
-
+                    var list = PropertyCache.GetPropertyInfo<T>(query.Config.IsPropertyCache);               
                     list.ForEach(a =>
                     {
-                        queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[0].Name, a.Name));
+                        queryFields.Add(string.Format("{0}.{1}", asName, a.Name));
                         result.AsName.Add(a.Name);
                     });
 
@@ -57,35 +57,35 @@ namespace FastData.Core.Base
 
                             if (string.Compare( methodName,"distinct", true) ==0)
                             {
-                                queryFields.Add(string.Format("{2}{0} {3}.{1} ", methodName, propertyName, ower, predicate.Parameters[0].Name));
+                                queryFields.Add(string.Format("{2}{0} {3}.{1} ", methodName, propertyName, ower, asName));
                                 result.AsName.Add((a as MemberExpression).Member.Name);
                             }
                             else if (string.Compare( methodName, "sum",true)==0)
                             {
-                                if (config.DbType == DataDbType.SqlServer)
-                                    propertyName = string.Format("isnull({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
+                                if (query.Config.DbType == DataDbType.SqlServer)
+                                    propertyName = string.Format("isnull({1}.{0},0)", propertyName, asName);
 
-                                if (config.DbType == DataDbType.MySql || config.DbType == DataDbType.SQLite)
-                                    propertyName = string.Format("ifnull({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
+                                if (query.Config.DbType == DataDbType.MySql || query.Config.DbType == DataDbType.SQLite)
+                                    propertyName = string.Format("ifnull({1}.{0},0)", propertyName, asName);
 
-                                if (config.DbType == DataDbType.Oracle)
-                                    propertyName = string.Format("nvl({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
+                                if (query.Config.DbType == DataDbType.Oracle)
+                                    propertyName = string.Format("nvl({1}.{0},0)", propertyName, asName);
 
-                                if (config.DbType == DataDbType.DB2)
-                                    propertyName = string.Format("coalesce({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
+                                if (query.Config.DbType == DataDbType.DB2)
+                                    propertyName = string.Format("coalesce({1}.{0},0)", propertyName, asName);
 
-                                queryFields.Add(string.Format("{0}({2}.{1})", methodName, propertyName, predicate.Parameters[0].Name));
+                                queryFields.Add(string.Format("{0}({2}.{1})", methodName, propertyName, asName));
                                 result.AsName.Add((field.Body as NewExpression).Members[i].Name);
                             }
                             else
                             {
-                                queryFields.Add(string.Format("{2}{0}({3}.{1})", methodName, propertyName, ower, predicate.Parameters[0].Name));
+                                queryFields.Add(string.Format("{2}{0}({3}.{1})", methodName, propertyName, ower, asName));
                                 result.AsName.Add((field.Body as NewExpression).Members[i].Name);
                             }
                         }
                         else
                         {
-                            queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[0].Name, (a as MemberExpression).Member.Name));
+                            queryFields.Add(string.Format("{0}.{1}", asName, (a as MemberExpression).Member.Name));
                             result.AsName.Add((a as MemberExpression).Member.Name);
                         }
                         i++;
@@ -99,15 +99,14 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (string.Compare( config.SqlErrorType, SqlErrorType.Db,true)==0)
-                    DbLogTable.LogException<T>(config, ex, "QueryField<T>", "");
+                if (string.Compare(query.Config.SqlErrorType, SqlErrorType.Db,true)==0)
+                    DbLogTable.LogException<T>(query.Config, ex, "QueryField<T>", "");
                 else
-                    DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "QueryField<T>", "");
-
+                    DbLog.LogException<T>(query.Config.IsOutError, query.Config.DbType, ex, "QueryField<T>", "");
                 return new FieldModel
                 {
-                    Field = string.Format("{0}.*", predicate.Parameters[0].Name),
-                    AsName = new List<string> { predicate.Parameters[0].Name }
+                    Field = string.Format("{0}.*", asName),
+                    AsName = new List<string> { asName }
                 };
             }
         }
@@ -120,20 +119,21 @@ namespace FastData.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static FieldModel QueryField<T, T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field, ConfigModel config)
+        public static FieldModel QueryField<T, T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field, DataQuery query)
         {
             try
             {
                 var result = new FieldModel();
                 var queryFields = new List<string>();
+                var asName = "";
 
                 if (field == null)
                 {
-                    var list = PropertyCache.GetPropertyInfo<T1>(config.IsPropertyCache);
-
+                    var list = PropertyCache.GetPropertyInfo<T1>(query.Config.IsPropertyCache);
+                    asName = query.TableAsName.GetValue(predicate.Parameters[1].Type.Name).ToString();
                     list.ForEach(a =>
                     {
-                        queryFields.Add(string.Format("{0}.{1}", predicate.Parameters[1].Name, a.Name));
+                        queryFields.Add(string.Format("{0}.{1}", asName, a.Name));
                         result.AsName.Add(a.Name);
                     });
 
@@ -142,6 +142,7 @@ namespace FastData.Core.Base
                 }
 
                 var i = 0;
+                asName = query.TableAsName.GetValue(predicate.Parameters[0].Type.Name).ToString();
                 (field.Body as NewExpression).Arguments.ToList().ForEach(a =>
                 {
                     if (a is MethodCallExpression)
@@ -152,29 +153,29 @@ namespace FastData.Core.Base
 
                         if (string.Compare(methodName, "distinct", true) == 0)
                         {
-                            queryFields.Add(string.Format("{2}{0} {2}.{1}", methodName, propertyName, ower, predicate.Parameters[0].Name));
+                            queryFields.Add(string.Format("{2}{0} {2}.{1}", methodName, propertyName, ower, asName));
                             result.AsName.Add((a as MemberExpression).Member.Name);
                         }
                         else if (string.Compare(methodName, "sum", true) == 0)
                         {
-                            if (config.DbType == DataDbType.SqlServer)
-                                propertyName = string.Format("isnull({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
+                            if (query.Config.DbType == DataDbType.SqlServer)
+                                propertyName = string.Format("isnull({1}.{0},0)", propertyName, asName);
 
-                            if (config.DbType == DataDbType.MySql || config.DbType == DataDbType.SQLite)
-                                propertyName = string.Format("ifnull({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
+                            if (query.Config.DbType == DataDbType.MySql || query.Config.DbType == DataDbType.SQLite)
+                                propertyName = string.Format("ifnull({1}.{0},0)", propertyName, asName);
 
-                            if (config.DbType == DataDbType.Oracle)
-                                propertyName = string.Format("nvl({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
+                            if (query.Config.DbType == DataDbType.Oracle)
+                                propertyName = string.Format("nvl({1}.{0},0)", propertyName, asName);
 
-                            if (config.DbType == DataDbType.DB2)
-                                propertyName = string.Format("coalesce({1}.{0},0)", propertyName, predicate.Parameters[0].Name);
+                            if (query.Config.DbType == DataDbType.DB2)
+                                propertyName = string.Format("coalesce({1}.{0},0)", propertyName, asName);
 
-                            queryFields.Add(string.Format("{0}({2}.{1})", methodName, propertyName, predicate.Parameters[0].Name));
+                            queryFields.Add(string.Format("{0}({2}.{1})", methodName, propertyName, asName));
                             result.AsName.Add((field.Body as NewExpression).Members[i].Name);
                         }
                         else
                         {
-                            queryFields.Add(string.Format("{2}{0}({3}.{1})", methodName, propertyName, ower, predicate.Parameters[0].Name));
+                            queryFields.Add(string.Format("{2}{0}({3}.{1})", methodName, propertyName, ower, asName));
                             result.AsName.Add((field.Body as NewExpression).Members[i].Name);
                         }
                     }
@@ -182,7 +183,9 @@ namespace FastData.Core.Base
                     {
                         if (a is MemberExpression)
                         {
-                            queryFields.Add(string.Format("{0}.{1}", ((a as MemberExpression).Expression as ParameterExpression).Name, (a as MemberExpression).Member.Name));
+                            var express = (a as MemberExpression).Expression;
+                            asName = query.TableAsName.GetValue(express.Type.Name).ToString();
+                            queryFields.Add(string.Format("{0}.{1}", asName, (a as MemberExpression).Member.Name));
                             result.AsName.Add((a as MemberExpression).Member.Name);
                         }
                     }
@@ -195,10 +198,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (config.SqlErrorType == SqlErrorType.Db)
-                    DbLogTable.LogException<T>(config, ex, "QueryField<T1,T2,T>", "");
+                if (query.Config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(query.Config, ex, "QueryField<T1,T2,T>", "");
                 else
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "QueryField<T1,T2,T>", "");
+                    DbLog.LogException(query.Config.IsOutError, query.Config.DbType, ex, "QueryField<T1,T2,T>", "");
 
                 return new FieldModel { Field = "*" };
             }
@@ -212,7 +215,7 @@ namespace FastData.Core.Base
         /// <param name="field"></param>
         /// <param name="isDesc"></param>
         /// <returns></returns>
-        public static List<string> GroupBy<T>(Expression<Func<T, object>> field,ConfigModel config)
+        public static List<string> GroupBy<T>(Expression<Func<T, object>> field,DataQuery query)
         {
             try
             {
@@ -220,7 +223,8 @@ namespace FastData.Core.Base
 
                 (field.Body as NewExpression).Arguments.ToList().ForEach(a =>
                 {
-                    var asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                    var express = (a as MemberExpression).Expression;
+                    var asName = query.TableAsName.GetValue(express.Type.Name).ToString();
                     result.Add(string.Format("{0}.{1}", asName, (a as MemberExpression).Member.Name));
                 });
 
@@ -228,10 +232,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (config.SqlErrorType == SqlErrorType.Db)
-                    DbLogTable.LogException<T>(config, ex, "GroupBy<T>", "");
+                if (query.Config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(query.Config, ex, "GroupBy<T>", "");
                 else
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "GroupBy<T>", "");
+                    DbLog.LogException(query.Config.IsOutError, query.Config.DbType, ex, "GroupBy<T>", "");
 
                 return new List<string>();
             }
@@ -245,7 +249,7 @@ namespace FastData.Core.Base
         /// <param name="field"></param>
         /// <param name="isDesc"></param>
         /// <returns></returns>
-        public static List<string> GroupBy<T,T1>(Expression<Func<T,T1, object>> field, ConfigModel config)
+        public static List<string> GroupBy<T,T1>(Expression<Func<T,T1, object>> field,DataQuery query)
         {
             try
             {
@@ -253,7 +257,8 @@ namespace FastData.Core.Base
 
                 (field.Body as NewExpression).Arguments.ToList().ForEach(a =>
                 {
-                    var asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                    var express = (a as MemberExpression).Expression;
+                    var asName = query.TableAsName.GetValue(express.Type.Name).ToString();
                     result.Add(string.Format("{0}.{1}", asName, (a as MemberExpression).Member.Name));
                 });
 
@@ -261,10 +266,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (config.SqlErrorType == SqlErrorType.Db)
-                    DbLogTable.LogException<T>(config, ex, "GroupBy<T,T1>", "");
+                if (query.Config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(query.Config, ex, "GroupBy<T,T1>", "");
                 else
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "GroupBy<T,T1>", "");
+                    DbLog.LogException(query.Config.IsOutError, query.Config.DbType, ex, "GroupBy<T,T1>", "");
 
                 return new List<string>();
             }
@@ -280,7 +285,7 @@ namespace FastData.Core.Base
         /// <param name="config"></param>
         /// <param name="isDesc"></param>
         /// <returns></returns>
-        public static List<string> OrderBy<T>(Expression<Func<T, object>> field, ConfigModel config, bool isDesc = true)
+        public static List<string> OrderBy<T>(Expression<Func<T, object>> field,DataQuery query, bool isDesc = true)
         {
             try
             {
@@ -288,7 +293,8 @@ namespace FastData.Core.Base
 
                 (field.Body as NewExpression).Arguments.ToList().ForEach(a =>
                 {
-                    var asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                    var express = (a as MemberExpression).Expression;
+                    var asName = query.TableAsName.GetValue(express.Type.Name).ToString();
                     result.Add(string.Format("{0}.{1} {2}", asName, (a as MemberExpression).Member.Name, isDesc ? "desc" : "asc"));
                 });
 
@@ -296,10 +302,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (config.SqlErrorType == SqlErrorType.Db)
-                    DbLogTable.LogException<T>(config, ex, "OrderBy<T>", "");
+                if (query.Config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(query.Config, ex, "OrderBy<T>", "");
                 else
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "OrderBy<T>", "");
+                    DbLog.LogException(query.Config.IsOutError, query.Config.DbType, ex, "OrderBy<T>", "");
 
                 return new List<string>();
             }
@@ -315,7 +321,7 @@ namespace FastData.Core.Base
         /// <param name="config"></param>
         /// <param name="isDesc"></param>
         /// <returns></returns>
-        public static List<string> OrderBy<T,T1>(Expression<Func<T,T1, object>> field, ConfigModel config, bool isDesc = true)
+        public static List<string> OrderBy<T,T1>(Expression<Func<T,T1, object>> field, DataQuery query, bool isDesc = true)
         {
             try
             {
@@ -323,7 +329,8 @@ namespace FastData.Core.Base
 
                 (field.Body as NewExpression).Arguments.ToList().ForEach(a =>
                 {
-                    var asName = ((a as MemberExpression).Expression as ParameterExpression).Name;
+                    var express = (a as MemberExpression).Expression;
+                    var asName = query.TableAsName.GetValue(express.Type.Name).ToString();
                     result.Add(string.Format("{0}.{1} {2}", asName, (a as MemberExpression).Member.Name, isDesc ? "desc" : "asc"));
                 });
 
@@ -331,10 +338,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (config.SqlErrorType == SqlErrorType.Db)
-                    DbLogTable.LogException<T>(config, ex, "OrderBy<T,T1>", "");
+                if (query.Config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException<T>(query.Config, ex, "OrderBy<T,T1>", "");
                 else
-                    DbLog.LogException(config.IsOutError, config.DbType, ex, "OrderBy<T,T1>", "");
+                    DbLog.LogException(query.Config.IsOutError, query.Config.DbType, ex, "OrderBy<T,T1>", "");
 
                 return new List<string>();
             }

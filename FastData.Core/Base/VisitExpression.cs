@@ -25,7 +25,7 @@ namespace FastData.Core.Base
         /// <param name="item"></param>
         /// <param name="Param"></param>
         /// <returns></returns>
-        public static VisitModel LambdaWhere<T>(Expression<Func<T, bool>> item, ConfigModel config)
+        public static VisitModel LambdaWhere<T>(Expression<Func<T, bool>> item, DataQuery query)
         {
             var result = new VisitModel();
             var strType = "";
@@ -41,19 +41,19 @@ namespace FastData.Core.Base
                 if (item == null)
                     return result;
 
-                result.Where = RouteExpressionHandler(config, item.Body, ExpressionType.Goto, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i);
+                result.Where = RouteExpressionHandler(query, item.Body, ExpressionType.Goto, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i);
 
                 result.Where = Remove(result.Where);
 
                 for (i = 0; i < leftList.Count; i++)
                 {
-                    var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                    var temp = DbProviderFactories.GetFactory(query.Config).CreateParameter();
                     temp.ParameterName = leftList[i] + i.ToString();
                     temp.Value = rightList[i];
 
                     if (typeList.Count >= i + 1 && typeList[i].Name == "DateTime")
                     {
-                        if (config.DbType == DataDbType.Oracle)
+                        if (query.Config.DbType == DataDbType.Oracle)
                             temp.DbType = DbType.Date;
                         else
                             temp.DbType = DbType.DateTime;
@@ -69,10 +69,10 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, true) ==0)
-                    DbLogTable.LogException<T>(config, ex, "LambdaWhere<T>", "");
+                if (string.Compare(query.Config.SqlErrorType, SqlErrorType.Db, true) ==0)
+                    DbLogTable.LogException<T>(query.Config, ex, "LambdaWhere<T>", "");
                 else
-                    DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "LambdaWhere<T>", "");
+                    DbLog.LogException<T>(query.Config.IsOutError, query.Config.DbType, ex, "LambdaWhere<T>", "");
 
                 result.IsSuccess = false;
                 return result;
@@ -87,7 +87,7 @@ namespace FastData.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static VisitModel LambdaWhere<T1, T2>(Expression<Func<T1, T2, bool>> item, ConfigModel config, bool isPage = false)
+        public static VisitModel LambdaWhere<T1, T2>(Expression<Func<T1, T2, bool>> item, DataQuery query, bool isPage = false)
         {
             var result = new VisitModel();
             int i = 0;
@@ -104,19 +104,19 @@ namespace FastData.Core.Base
                 if (item == null)
                     return result;
 
-                result.Where = RouteExpressionHandler(config, item.Body, ExpressionType.Goto, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i);
+                result.Where = RouteExpressionHandler(query, item.Body, ExpressionType.Goto, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i);
 
                 result.Where = Remove(result.Where);
 
                 for (i = 0; i < leftList.Count; i++)
                 {
-                    var temp = DbProviderFactories.GetFactory(config).CreateParameter();
+                    var temp = DbProviderFactories.GetFactory(query.Config).CreateParameter();
                     temp.ParameterName = leftList[i] + i.ToString();
                     temp.Value = rightList[i];
 
                     if (typeList.Count >= i + 1 && typeList[i].Name == "DateTime")
                     {
-                        if (config.DbType == DataDbType.Oracle)
+                        if (query.Config.DbType == DataDbType.Oracle)
                             temp.DbType = DbType.Date;
                         else
                             temp.DbType = DbType.DateTime;
@@ -134,10 +134,10 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    if (string.Compare( config.SqlErrorType, SqlErrorType.Db, true) ==0)
-                        DbLogTable.LogException(config, ex, "LambdaWhere<T1, T2>", "");
+                    if (string.Compare(query.Config.SqlErrorType, SqlErrorType.Db, true) ==0)
+                        DbLogTable.LogException(query.Config, ex, "LambdaWhere<T1, T2>", "");
                     else
-                        DbLog.LogException(config.IsOutError, config.DbType, ex, "LambdaWhere<T1, T2>", "");
+                        DbLog.LogException(query.Config.IsOutError, query.Config.DbType, ex, "LambdaWhere<T1, T2>", "");
                 });
                 result.IsSuccess = false;
                 return result;
@@ -152,14 +152,14 @@ namespace FastData.Core.Base
         /// <param name="exp"></param>
         /// <param name="isRight"></param>
         /// <returns></returns>
-        private static string RouteExpressionHandler(ConfigModel config, Expression exp, ExpressionType expType, ref List<string> leftList, ref List<string> rightList, ref List<System.Type> typeList, ref StringBuilder sb, ref string strType, ref int i, bool isRight = false)
+        private static string RouteExpressionHandler(DataQuery query, Expression exp, ExpressionType expType, ref List<string> leftList, ref List<string> rightList, ref List<System.Type> typeList, ref StringBuilder sb, ref string strType, ref int i, bool isRight = false)
         {
             var isReturnNull = false;
             if (exp is BinaryExpression)
             {
                 BinaryExpression be = (BinaryExpression)exp;
 
-                return BinaryExpressionHandler(config, be.Left, be.Right, be.NodeType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight);
+                return BinaryExpressionHandler(query, be.Left, be.Right, be.NodeType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight);
             }
             else if (exp is MemberExpression)
             {
@@ -180,7 +180,7 @@ namespace FastData.Core.Base
                 StringBuilder sbArray = new StringBuilder();
                 foreach (Expression expression in naExp.Expressions)
                 {
-                    sbArray.AppendFormat(",{0}", RouteExpressionHandler(config, expression, expType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight));
+                    sbArray.AppendFormat(",{0}", RouteExpressionHandler(query, expression, expType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight));
                 }
 
                 return sbArray.Length == 0 ? "" : sbArray.Remove(0, 1).ToString();
@@ -202,11 +202,11 @@ namespace FastData.Core.Base
 
                         #region 表别名
                         if (meExp.Object != null)
-                        {
+                        {                            
                             if (meExp.Object is MemberExpression && (meExp.Object as MemberExpression).Expression is ParameterExpression)
-                                asName = string.Format("{0}.", ((meExp.Object as MemberExpression).Expression as ParameterExpression).Name);
+                                asName = string.Format("{0}.", query.TableAsName.GetValue((meExp.Object as MemberExpression).Expression.Type.Name));
                             else if (meExp.Object is UnaryExpression)
-                                asName = string.Format("{0}.", (((meExp.Object as UnaryExpression).Operand as MemberExpression).Expression as ParameterExpression).Name);
+                                asName = string.Format("{0}.", query.TableAsName.GetValue(((meExp.Object as UnaryExpression).Operand as MemberExpression).Expression.Type.Name));
                         }
                         #endregion
 
@@ -237,20 +237,20 @@ namespace FastData.Core.Base
 
                             if (string.Compare(mMethod, "contains", true) == 0)
                             {
-                                sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, config.Flag);
+                                sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, query.Config.Flag);
                                 leftList.Add(mName);
                                 rightList.Add(string.Format("%{0}%", mValue));
                                 i++;
                             }
                             else if (string.Compare(mMethod, "endswith", true) == 0)
                             {
-                                sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, config.Flag);
+                                sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, query.Config.Flag);
                                 leftList.Add(mName);
                                 rightList.Add(string.Format("%{0}", mValue));
                             }
                             else if (string.Compare(mMethod, "startswith", true) == 0)
                             {
-                                sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, config.Flag);
+                                sb.AppendFormat(" {2}{0} like {3}{0}{1}", mName, i, asName, query.Config.Flag);
                                 leftList.Add(mName);
                                 rightList.Add(string.Format("{0}%", mValue));
                                 i++;
@@ -263,10 +263,10 @@ namespace FastData.Core.Base
                                 else
                                     tempType = ExpressionTypeCast(expType);
 
-                                if (config.DbType == DataDbType.SqlServer)
-                                    sb.AppendFormat(" substring({4}{0},{2},{3}) {6} {5}{0}{1}", mName, i, mStar, mLength, asName, config.Flag, tempType);
-                                else if (config.DbType == DataDbType.Oracle || config.DbType == DataDbType.MySql || config.DbType == DataDbType.DB2)
-                                    sb.AppendFormat(" substr({4}{0},{2},{3}) {6} {5}{0}{1}", mName, i, mStar, mLength, asName, config.Flag, tempType);
+                                if (query.Config.DbType == DataDbType.SqlServer)
+                                    sb.AppendFormat(" substring({4}{0},{2},{3}) {6} {5}{0}{1}", mName, i, mStar, mLength, asName, query.Config.Flag, tempType);
+                                else if (query.Config.DbType == DataDbType.Oracle || query.Config.DbType == DataDbType.MySql || query.Config.DbType == DataDbType.DB2)
+                                    sb.AppendFormat(" substr({4}{0},{2},{3}) {6} {5}{0}{1}", mName, i, mStar, mLength, asName, query.Config.Flag, tempType);
 
                                 leftList.Add(mName);
                                 i++;
@@ -278,7 +278,7 @@ namespace FastData.Core.Base
                                     tempType = "=";
                                 else
                                     tempType = ExpressionTypeCast(expType);
-                                sb.AppendFormat(" upper({0}{1}) {4} {2}{1}{3}", asName, mName, config.Flag, i, tempType);
+                                sb.AppendFormat(" upper({0}{1}) {4} {2}{1}{3}", asName, mName, query.Config.Flag, i, tempType);
 
                                 leftList.Add(mName);
                                 i++;
@@ -290,7 +290,7 @@ namespace FastData.Core.Base
                                     tempType = "=";
                                 else
                                     tempType = ExpressionTypeCast(expType);
-                                sb.AppendFormat(" upper({0}{1}) {4} upper({2}{1}{3})", asName, mName, config.Flag, i, tempType);
+                                sb.AppendFormat(" upper({0}{1}) {4} upper({2}{1}{3})", asName, mName, query.Config.Flag, i, tempType);
 
                                 leftList.Add(mName);
                                 rightList.Add(mValue.ToString());
@@ -303,7 +303,7 @@ namespace FastData.Core.Base
                                     tempType = "=";
                                 else
                                     tempType = ExpressionTypeCast(expType);
-                                sb.AppendFormat(" lower({0}{1}) {4} {2}{1}{3}", asName, mName, config.Flag, i, tempType);
+                                sb.AppendFormat(" lower({0}{1}) {4} {2}{1}{3}", asName, mName, query.Config.Flag, i, tempType);
 
                                 leftList.Add(mName);
                                 i++;
@@ -315,13 +315,12 @@ namespace FastData.Core.Base
                         {
                             #region array.Contains
                             var array = Expression.Lambda(meExp.Arguments[0]).Compile().DynamicInvoke() as Array;
-                            var mName = (meExp.Arguments[1] as MemberExpression).Member.Name;
-                            asName = string.Format("{0}.", ((meExp.Arguments[1] as MemberExpression).Expression as ParameterExpression).Name);
-
+                            var mName = (meExp.Arguments[1] as MemberExpression).Member.Name;                           
+                            asName = string.Format("{0}.", query.TableAsName.GetValue((meExp.Arguments[1] as MemberExpression).Expression.Type.Name));
                             sb.AppendFormat(" {0}{1} in (", asName, mName);
                             for (int ary = 0; ary < array.Length; ary++)
                             {
-                                sb.AppendFormat("{0}{1}{2},", config.Flag, mName, i);
+                                sb.AppendFormat("{0}{1}{2},", query.Config.Flag, mName, i);
                                 leftList.Add(mName);
                                 rightList.Add(array.GetValue(ary).ToStr());
                                 i++;
@@ -334,15 +333,15 @@ namespace FastData.Core.Base
                         if (string.IsNullOrEmpty(asName) && meExp.Method.Name == "Contains" && meExp.Arguments.Count == 1)
                         {
                             #region list.Contains
-                            var mName = (meExp.Arguments[0] as MemberExpression).Member.Name;
-                            asName = string.Format("{0}.", ((meExp.Arguments[0] as MemberExpression).Expression as ParameterExpression).Name);
+                            var mName = (meExp.Arguments[0] as MemberExpression).Member.Name;                            
+                            asName = string.Format("{0}.", query.TableAsName.GetValue((meExp.Arguments[0] as MemberExpression).Expression.Type.Name));
                             var model = Expression.Lambda(meExp.Object).Compile().DynamicInvoke();
                             var count = (int)BaseEmit.Invoke(model, model.GetType().GetMethod("get_Count"), null);
 
                             sb.AppendFormat(" {0}{1} in (", asName, mName);
                             for (var j = 0; j < count; j++)
                             {
-                                sb.AppendFormat("{0}{1}{2},", config.Flag, mName, i);
+                                sb.AppendFormat("{0}{1}{2},", query.Config.Flag, mName, i);
                                 leftList.Add(mName);
                                 rightList.Add(BaseEmit.Invoke(model, model.GetType().GetMethod("get_Item"), new object[] { j }).ToStr());
                                 i++;
@@ -375,7 +374,7 @@ namespace FastData.Core.Base
             else if (exp is UnaryExpression)
             {
                 var ue = ((UnaryExpression)exp);
-                return RouteExpressionHandler(config, ue.Operand, expType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight);
+                return RouteExpressionHandler(query, ue.Operand, expType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight);
             }
 
             return null;
@@ -390,11 +389,11 @@ namespace FastData.Core.Base
         /// <param name="right"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        private static string BinaryExpressionHandler(ConfigModel config, Expression left, Expression right, ExpressionType expType, ref List<string> leftList, ref List<string> rightList, ref List<System.Type> typeList, ref StringBuilder sb, ref string strType, ref int i, bool isRight = false)
+        private static string BinaryExpressionHandler(DataQuery query, Expression left, Expression right, ExpressionType expType, ref List<string> leftList, ref List<string> rightList, ref List<System.Type> typeList, ref StringBuilder sb, ref string strType, ref int i, bool isRight = false)
         {
             string needParKey = "=,>,<,>=,<=,<>";
 
-            string leftPar = RouteExpressionHandler(config, left, expType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight);
+            string leftPar = RouteExpressionHandler(query, left, expType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight);
 
             string typeStr = ExpressionTypeCast(expType);
 
@@ -407,9 +406,9 @@ namespace FastData.Core.Base
                 sb.Append(string.Format(" {0} ", strType));
             }
 
-            string rightPar = RouteExpressionHandler(config, right, expType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight);
+            string rightPar = RouteExpressionHandler(query, right, expType, ref leftList, ref rightList, ref typeList, ref sb, ref strType, ref i, isRight);
 
-            if (string.Compare(rightPar, "NULL", true) == 0 || (config.DbType == DataDbType.Oracle && string.IsNullOrEmpty(rightPar)))
+            if (string.Compare(rightPar, "NULL", true) == 0 || (query.Config.DbType == DataDbType.Oracle && string.IsNullOrEmpty(rightPar)))
             {
                 if (typeStr == "=")
                     rightPar = "IS NULL";
@@ -420,7 +419,7 @@ namespace FastData.Core.Base
                     left = (left as UnaryExpression).Operand;
 
                 if (left is MemberExpression)
-                    sb.AppendFormat("{2}.{0} {1} ", leftPar, rightPar, ((left as MemberExpression).Expression as ParameterExpression).Name);
+                    sb.AppendFormat("{2}.{0} {1} ", leftPar, rightPar, query.TableAsName.GetValue((left as MemberExpression).Expression.Type.Name));
 
                 if (left is MethodCallExpression)
                 {
@@ -445,14 +444,14 @@ namespace FastData.Core.Base
                     if (left is MemberExpression && right is MemberExpression && ((right as MemberExpression).Expression as ParameterExpression) != null)
                     {
                         sb.AppendFormat("{0}.{1}{2}{3}.{4} "
-                                        , ((left as MemberExpression).Expression as ParameterExpression).Name, leftPar
+                                        , query.TableAsName.GetValue((left as MemberExpression).Expression.Type.Name), leftPar
                                         , typeStr
-                                        , ((right as MemberExpression).Expression as ParameterExpression).Name, rightPar);
+                                        , query.TableAsName.GetValue((right as MemberExpression).Expression.Type.Name), rightPar);
                     }
                     else if (!(left is MethodCallExpression))
-                    {
-                        sb.AppendFormat("{0}.{1}{2}{5}{3}{4} ", ((left as MemberExpression).Expression as ParameterExpression).Name, leftPar
-                                                            , typeStr, leftPar, i.ToString(), config.Flag);
+                    {                        
+                        sb.AppendFormat("{0}.{1}{2}{5}{3}{4} ", query.TableAsName.GetValue((left as MemberExpression).Expression.Type.Name), leftPar
+                                                            , typeStr, leftPar, i.ToString(), query.Config.Flag);
                         rightList.Add(rightPar);
                         leftList.Add(leftPar);
                         i++;
