@@ -30,11 +30,11 @@ namespace FastData.Core
         /// <returns></returns>
         private FastQueryable<T> JoinType<T1>(string joinType, Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false) where T1 : class, new()
         {
-            var queryField = BaseField.QueryField<T, T1>(predicate, field, Query.Config);
+            var queryField = BaseField.QueryField<T, T1>(predicate, field, Query);
             Query.Field.Add(queryField.Field);
             Query.AsName.AddRange(queryField.AsName);
 
-            var condtion = VisitExpression.LambdaWhere<T, T1>(predicate, Query.Config);
+            var condtion = VisitExpression.LambdaWhere<T, T1>(predicate, Query);
             Query.Predicate.Add(condtion);
             Query.Table.Add(string.Format("{2} {0}{3} {1}", typeof(T1).Name, predicate.Parameters[1].Name
             , joinType, isDblink && !string.IsNullOrEmpty(Query.Config.DbLinkName) ? string.Format("@", Query.Config.DbLinkName) : ""));
@@ -102,7 +102,7 @@ namespace FastData.Core
         /// <returns></returns>
         public FastQueryable<T> OrderBy(Expression<Func<T, object>> field, bool isDesc = true)
         {
-            var orderBy = BaseField.OrderBy(field, Query.Config, isDesc);
+            var orderBy = BaseField.OrderBy(field, Query, isDesc);
             Query.OrderBy.AddRange(orderBy);
             return this;
         }
@@ -118,7 +118,7 @@ namespace FastData.Core
         /// <returns></returns>
         public FastQueryable<T> GroupBy(Expression<Func<T, object>> field)
         {
-            var groupBy = BaseField.GroupBy(field, Query.Config);
+            var groupBy = BaseField.GroupBy(field, Query);
             Query.GroupBy.AddRange(groupBy);
             return this;
         }
@@ -992,6 +992,103 @@ namespace FastData.Core
         public ValueTask<Lazy<Dictionary<string, object>>> ToLazyDicAsy(DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<Lazy<Dictionary<string, object>>>(new Lazy<Dictionary<string, object>>(() => ToDic(db, isOutSql)));
+        }
+        #endregion
+
+
+        #region and 条件
+        /// <summary>
+        /// and 条件
+        /// </summary>
+        /// <param name="condtion"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public FastQueryable<T> AndIf(bool condtion, Expression<Func<T, bool>> predicate)
+        {
+            if (condtion)
+            {
+                var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Query);
+                if (this.Query.Predicate.Count >= 1)
+                    this.Query.Predicate[0].Where += $" and {visitModel.Where}";
+                if (this.Query.Predicate.Count == 0)
+                {
+                    this.Query.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                    this.Query.TableName.Add(typeof(T).Name);
+                    this.Query.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+                    this.Query.Predicate.Add(visitModel);
+                }
+            }
+            return this;
+        }
+        #endregion
+
+        #region and
+        /// <summary>
+        /// and
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public FastQueryable<T> And(Expression<Func<T, bool>> predicate)
+        {
+            var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Query);
+            if (this.Query.Predicate.Count >= 1)
+                this.Query.Predicate[0].Where += $" and {visitModel.Where}";
+            if (this.Query.Predicate.Count == 0)
+            {
+                this.Query.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                this.Query.TableName.Add(typeof(T).Name);
+                this.Query.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+                this.Query.Predicate.Add(visitModel);
+            }
+            return this;
+        }
+        #endregion
+
+        #region or条件
+        /// <summary>
+        /// or条件
+        /// </summary>
+        /// <param name="condtion"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public FastQueryable<T> OrIf(bool condtion, Expression<Func<T, bool>> predicate)
+        {
+            if (condtion)
+            {
+                var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Query);
+                if (this.Query.Predicate.Count >= 1)
+                    this.Query.Predicate[0].Where += $" or {visitModel.Where}";
+                if (this.Query.Predicate.Count == 0)
+                {
+                    this.Query.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                    this.Query.TableName.Add(typeof(T).Name);
+                    this.Query.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+                    this.Query.Predicate.Add(visitModel);
+                }
+            }
+            return this;
+        }
+        #endregion
+
+        #region or
+        /// <summary>
+        /// or
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public FastQueryable<T> Or(Expression<Func<T, bool>> predicate)
+        {
+            var visitModel = VisitExpression.LambdaWhere<T>(predicate, this.Query);
+            if (this.Query.Predicate.Count >= 1)
+                this.Query.Predicate[0].Where += $" or {visitModel.Where}";
+            if (this.Query.Predicate.Count == 0)
+            {
+                this.Query.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
+                this.Query.TableName.Add(typeof(T).Name);
+                this.Query.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+                this.Query.Predicate.Add(visitModel);
+            }
+            return this;
         }
         #endregion
     }

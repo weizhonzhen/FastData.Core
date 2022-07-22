@@ -83,7 +83,11 @@ namespace Microsoft.Extensions.DependencyInjection
                     projectName = Assembly.GetCallingAssembly().GetName().Name;
 
                 item = DataConfig.Get(config.dbKey, projectName, config.dbFile);
-                var model = VisitExpression.LambdaWhere<T>(predicate, item);
+                var query = new DataQuery();
+                query.Table.Add(typeof(T).Name);
+                query.Config = item;
+                query.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+                var model = VisitExpression.LambdaWhere<T>(predicate, query);
 
                 if (predicate.Parameters.Count > 0)
                 {

@@ -31,16 +31,18 @@ namespace FastData.Core
         /// <returns></returns>
         private static DataQuery JoinType<T, T1>(string joinType, DataQuery item, Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false)
         {
-            var queryField = BaseField.QueryField<T, T1>(predicate, field, item.Config);
+            item.TableName.Add(typeof(T1).Name);
+            item.TableAsName.Add(typeof(T1).Name, predicate.Parameters[1].Name);
+            item.TableAsName.SetValue(typeof(T1).Name, predicate.Parameters[1].Name);
+            var queryField = BaseField.QueryField<T, T1>(predicate, field, item);
             item.Field.Add(queryField.Field);
             item.AsName.AddRange(queryField.AsName);
 
-            var condtion = VisitExpression.LambdaWhere<T, T1>(predicate, item.Config);
+            var condtion = VisitExpression.LambdaWhere<T, T1>(predicate, item);
             item.Predicate.Add(condtion);
             item.Table.Add(string.Format("{2} {0}{3} {1}", typeof(T1).Name, predicate.Parameters[1].Name
             , joinType, isDblink && !string.IsNullOrEmpty(item.Config.DbLinkName) ? string.Format("@", item.Config.DbLinkName) : ""));
 
-            item.TableName.Add(typeof(T1).Name);
             return item;
         }
         #endregion
@@ -82,14 +84,16 @@ namespace FastData.Core
             result.Config = DataConfig.Get(key, projectName, dbFile);
             result.Key = key;
 
-            var queryField = BaseField.QueryField<T>(predicate, field, result.Config);
+            result.TableName.Add(typeof(T).Name);
+            result.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+
+            var queryField = BaseField.QueryField<T>(predicate, field, result);
             result.Field.Add(queryField.Field);
             result.AsName.AddRange(queryField.AsName);
 
-            var condtion = VisitExpression.LambdaWhere<T>(predicate, result.Config);
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, result);
             result.Predicate.Add(condtion);
             result.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
-            result.TableName.Add(typeof(T).Name);
             return result;
         }
         #endregion
@@ -118,11 +122,14 @@ namespace FastData.Core
             result.Query.Config = DataConfig.Get(key, projectName, dbFile);
             result.Query.Key = key;
 
-            var queryField = BaseField.QueryField<T>(predicate, field, result.Query.Config);
+            result.Query.TableName.Add(typeof(T).Name);
+            result.Query.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+
+            var queryField = BaseField.QueryField<T>(predicate, field, result.Query);
             result.Query.Field.Add(queryField.Field);
             result.Query.AsName.AddRange(queryField.AsName);
 
-            var condtion = VisitExpression.LambdaWhere<T>(predicate, result.Query.Config);
+            var condtion = VisitExpression.LambdaWhere<T>(predicate, result.Query);
             result.Query.Predicate.Add(condtion);
             result.Query.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
             result.Query.TableName.Add(typeof(T).Name);
@@ -188,7 +195,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static DataQuery OrderBy<T>(this DataQuery item, Expression<Func<T, object>> field, bool isDesc = true)
         {
-            var orderBy = BaseField.OrderBy<T>(field, item.Config, isDesc);
+            var orderBy = BaseField.OrderBy<T>(field, item, isDesc);
             item.OrderBy.AddRange(orderBy);
             return item;
         }
@@ -204,7 +211,7 @@ namespace FastData.Core
         /// <returns></returns>
         public static DataQuery GroupBy<T>(this DataQuery item, Expression<Func<T, object>> field)
         {
-            var groupBy = BaseField.GroupBy<T>(field, item.Config);
+            var groupBy = BaseField.GroupBy<T>(field, item);
             item.GroupBy.AddRange(groupBy);
             return item;
         }
