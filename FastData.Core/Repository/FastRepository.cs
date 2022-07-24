@@ -1687,6 +1687,9 @@ namespace FastData.Core.Repository
                 this.data.Key = key;
             }
 
+            this.data.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
+            this.data.TableName.Add(typeof(T).Name);
+
             var queryField = BaseField.QueryField<T>(predicate, field, this.data);
             this.data.Field.Add(queryField.Field);
             this.data.AsName.AddRange(queryField.AsName);
@@ -1694,8 +1697,6 @@ namespace FastData.Core.Repository
             var condtion = VisitExpression.LambdaWhere<T>(predicate, this.data);
             this.data.Predicate.Add(condtion);
             this.data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
-            this.data.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
-            this.data.TableName.Add(typeof(T).Name);
             return new Queryable<T>() { Data = this.data };
         }
         #endregion
