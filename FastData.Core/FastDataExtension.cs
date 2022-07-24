@@ -142,6 +142,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 serviceCollection.AddFastAop(configRepository.NameSpaceServie);
             }
 
+            ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
             return serviceCollection;
         }
     }
