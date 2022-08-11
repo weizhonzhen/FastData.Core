@@ -180,7 +180,10 @@ namespace FastData.Core
                     {
                         var typeInfo = (a as TypeInfo);
                         if (typeInfo.Namespace != null && typeInfo.Namespace == nameSpace && typeInfo.GetCustomAttribute<TableAttribute>() != null)
-                            BaseTable.Check(query, a.Name, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
+                        {
+                            var tableName = typeInfo.GetCustomAttribute<TableAttribute>().Name ?? a.Name;
+                            BaseTable.Check(query, tableName, typeInfo.DeclaredProperties.ToList(), typeInfo.GetCustomAttributes().ToList());
+                        }
                     });
                 }
                 catch (Exception ex) { }
