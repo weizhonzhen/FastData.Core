@@ -12,5 +12,10 @@ namespace FastData.Core.Property
         /// 备注
         /// </summary>
         public string Comments { get; set; }
+
+        /// <summary>
+        /// 表名
+        /// </summary>
+        public string Name { get; set; }
     }
 }

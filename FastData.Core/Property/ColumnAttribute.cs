@@ -9,6 +9,11 @@ namespace FastData.Core.Property
     public class ColumnAttribute : Attribute
     {
         /// <summary>
+        /// 列名
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// 主键
         /// </summary>
         public bool IsKey { get; set; }

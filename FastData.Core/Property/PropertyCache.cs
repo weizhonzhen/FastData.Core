@@ -13,9 +13,9 @@ namespace FastData.Core.Property
     /// </summary>
     internal static class PropertyCache
     {
-        #region 泛型缓存属性成员
+        #region 泛型成员
         /// <summary>
-        /// 泛型缓存属性成员
+        /// 泛型成员
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -63,7 +63,7 @@ namespace FastData.Core.Property
         }
         #endregion
 
-        #region 缓存发属性成员
+        #region 对象成员
         public static List<PropertyModel> GetPropertyInfo(object model,bool IsCache=true)
         {
             var config = DataConfig.Get();
@@ -108,9 +108,9 @@ namespace FastData.Core.Property
         }
         #endregion
 
-        #region 泛型特性成员
+        #region 特性列
         /// <summary>
-        /// 泛型特性成员
+        /// 特性列
         /// </summary>
         public static List<ColumnModel> GetAttributesColumnInfo(string tableName, List<PropertyInfo> ListInfo)
         {
@@ -125,6 +125,9 @@ namespace FastData.Core.Property
                     if (b.AttributeType.Name == typeof(ColumnAttribute).Name)
                     {
                         b.NamedArguments.ToList().ForEach(c => {
+                            if (c.MemberName == "Name" && c.TypedValue.Value != null)
+                                temp.Name = c.TypedValue.Value.ToStr();
+
                             if (paramList.Exists(p => string.Compare( p.Name, c.MemberName, true) ==0))
                                 BaseEmit.Set(temp, c.MemberName, c.TypedValue.Value);
                         });
@@ -141,17 +144,17 @@ namespace FastData.Core.Property
         }
         #endregion
 
-        #region 泛型缓存特性成员
+        #region 特性表
         /// <summary>
-        /// 泛型缓存特性成员
+        /// 特性表
         /// </summary>
-        public static string GetAttributesTableInfo(List<Attribute> listAttribute)
+        public static TableAttribute GetAttributesTableInfo(List<Attribute> listAttribute)
         {
-            var result = "";
+            var result = new TableAttribute();
 
             listAttribute.ForEach(a => {
                 if (a is TableAttribute)
-                    result = (a as TableAttribute).Comments;
+                    result = a as TableAttribute;
             });
 
             return result;
