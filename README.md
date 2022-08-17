@@ -39,6 +39,10 @@ in Startup.cs Startup mothod
     {
         private readonly IFastRepository<Editor_Content> fastRepository;
         private readonly IFastRepository IFast;
+        [Autowired]
+        private readonly IFastRepository<Editor_Content> fastRepository1;
+        [Autowired]
+        private readonly IFastRepository IFast1;
 
         public ContentService(IFastRepository IFast, IFastRepository<Editor_Content> fastRepository)
         {
