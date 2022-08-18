@@ -44,11 +44,11 @@ in Startup.cs Startup mothod
         [Autowired]
         private readonly IFastRepository IFast1;
 
-        public ContentService(IFastRepository IFast, IFastRepository<Editor_Content> fastRepository)
-        {
-            this.IFast = IFast;
-            this.fastRepository = fastRepository;
-        }
+        //public ContentService(IFastRepository IFast, IFastRepository<Editor_Content> fastRepository)
+        //{
+            //this.IFast = IFast;
+            //this.fastRepository = fastRepository;
+        //}
     }
 
 
