@@ -8,6 +8,7 @@ using FastData.Core.Repository;
 using FastRedis.Core.Repository;
 using FastUntility.Core;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -128,7 +129,10 @@ namespace Microsoft.Extensions.DependencyInjection
             if (string.IsNullOrEmpty(configRepository.NameSpaceModel))
                 return serviceCollection;
 
-            serviceCollection.AddFastAopGeneric("FastData.Core.Repository", configRepository.NameSpaceModel);
+            InitModelType(configRepository.NameSpaceModel).ForEach(m => {
+                serviceCollection.AddScoped(typeof(IFastRepository<>).MakeGenericType(new Type[1] { m }),
+                     s => { return Activator.CreateInstance(typeof(FastRepository<>).MakeGenericType(new Type[1] { m })); });
+            });
 
             if (configRepository.Aop != null)
             {
@@ -144,6 +148,27 @@ namespace Microsoft.Extensions.DependencyInjection
 
             ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
             return serviceCollection;
+        }
+
+        private static List<Type> InitModelType(string nameSpaceModel)
+        {
+            var list = new List<Type>();
+            if (string.IsNullOrEmpty(nameSpaceModel))
+                return list;
+
+            AppDomain.CurrentDomain.GetAssemblies().ToList().ForEach(assembly =>
+            {
+                if (assembly.IsDynamic)
+                    return;
+
+                assembly.ExportedTypes.Where(a => a.Namespace != null && a.Namespace.Contains(nameSpaceModel)).ToList().ForEach(b =>
+                {
+                    if (b.IsPublic && b.IsClass && !b.IsAbstract && !b.IsGenericType)
+                        list.Add(b);
+                });
+            });
+
+            return list;
         }
     }
 
