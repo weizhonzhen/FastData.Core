@@ -113,12 +113,10 @@ namespace Microsoft.Extensions.DependencyInjection
             return serviceCollection;
         }
 
-        public static IServiceCollection AddFastDataGeneric(this IServiceCollection serviceCollection, Action<ConfigData> action, Action<ConfigRepository> repository)
+        public static IServiceCollection AddFastDataGeneric(this IServiceCollection serviceCollection, Action<ConfigRepository> repository)
         {
             var configRepository = new ConfigRepository();
             repository(configRepository);
-
-            AddFastData(serviceCollection, action);
 
             if (string.IsNullOrEmpty(configRepository.NameSpaceServie))
                 return serviceCollection;
