@@ -115,9 +115,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddFastDataGeneric(this IServiceCollection serviceCollection, Action<ConfigData> action, Action<ConfigRepository> repository)
         {
-            config = new ConfigData();
-            action(config);
-
             var configRepository = new ConfigRepository();
             repository(configRepository);
 
