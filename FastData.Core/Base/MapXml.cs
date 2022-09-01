@@ -555,7 +555,7 @@ namespace FastData.Core.Base
                             BaseEmit.Invoke(list, method, new object[] { model });
                         }
 
-                        infoResult.SetValue(item, list);
+                        BaseEmit.Set(item, infoResult.Name, list);
                         result.Add(item);
                     }
                     return result;
