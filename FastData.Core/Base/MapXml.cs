@@ -515,7 +515,7 @@ namespace FastData.Core.Base
                     {
                         var model = Activator.CreateInstance(assembly.GetType(type.Split(',')[0]));
                         var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(assembly.GetType(type.Split(',')[0])));
-                        var infoResult = BaseDic.PropertyInfo<T>().Find(a => a.PropertyType.FullName == list.GetType().FullName);
+                        var infoResult = BaseDic.PropertyInfo<T>().Find(a => a.PropertyType == list.GetType());
                    
                         //param
                         param.Clear();
@@ -535,12 +535,13 @@ namespace FastData.Core.Base
                             var infoField = BaseDic.PropertyInfo<T>().Find(a =>string.Compare( a.Name, field, true) ==0);
                             var tempParam = DbProviderFactories.GetFactory(config).CreateParameter();
                             tempParam.ParameterName = field;
-                            tempParam.Value = infoField.GetValue(item, null);
+                            tempParam.Value = BaseEmit.Get(item, infoField.Name);
                             param.Add(tempParam);
                         }
 
                         var tempData = db.ExecuteSqlList(sql, param.ToArray(), false,false);
 
+                        var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
                         foreach (var temp in tempData.DicList)
                         {
                             foreach (var info in model.GetType().GetProperties())
@@ -550,8 +551,6 @@ namespace FastData.Core.Base
 
                                 BaseEmit.Set(model, info.Name, temp.GetValue(info.Name));  
                             }
-
-                            var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
                             BaseEmit.Invoke(list, method, new object[] { model });
                         }
 
