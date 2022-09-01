@@ -117,13 +117,15 @@ namespace FastData.Core.Property
             var list = new List<ColumnModel>();
 
             ListInfo.ForEach(a => {
+                var isColumn = false;
                 var temp = new ColumnModel();
                 temp.Name = a.Name;
                 var paramList = GetPropertyInfo<ColumnModel>(true);
 
                 a.CustomAttributes.ToList().ForEach(b => {
-                    if (b.AttributeType.Name == typeof(ColumnAttribute).Name)
+                    if (b.AttributeType == typeof(ColumnAttribute))
                     {
+                        isColumn = true;
                         b.NamedArguments.ToList().ForEach(c => {
                             if (c.MemberName == "Name" && c.TypedValue.Value != null)
                                 temp.Name = c.TypedValue.Value.ToStr();
@@ -133,6 +135,9 @@ namespace FastData.Core.Property
                         });
                     }
                 });
+
+                if (!isColumn)
+                    return;
 
                 if (temp.IsKey && temp.IsNull)
                     temp.IsNull = false;
