@@ -56,7 +56,7 @@ namespace FastUntility.Core.Base
                                     if (propertyList.Exists(a => a.Name == p.Name))
                                     {
                                         var tempProperty = propertyList.Find(a => string.Compare( a.Name, p.Name, true) ==0);
-                                        tempProperty.SetValue(leafModel, p.GetValue(temp));
+                                        BaseEmit.Set(leafModel, p.Name, BaseEmit.Get(temp, p.Name));
                                     }
                                 });
 
@@ -81,7 +81,7 @@ namespace FastUntility.Core.Base
                             if (propertyList.Exists(a => a.Name == p.Name))
                             {
                                 var temp = propertyList.Find(a => string.Compare( a.Name, p.Name, true) ==0);
-                                temp.SetValue(leafModel, p.GetValue(tempModel));
+                                BaseEmit.Set(leafModel, p.Name, BaseEmit.Get(tempModel,p.Name));
                             }
                         });
                         BaseEmit.Set<T>(result, property.Name, leafModel);
