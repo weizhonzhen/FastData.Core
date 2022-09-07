@@ -31,7 +31,14 @@ namespace Microsoft.Extensions.DependencyInjection
             if (DataConfig.Get(config.dbKey, Assembly.GetCallingAssembly().GetName().Name, config.dbFile).CacheType == CacheType.Redis && ServiceContext.Engine.Resolve<IRedisRepository>() == null)
                 throw new System.Exception("ConfigureServices First add services.AddFastRedis(); Second add services.AddFastData()");
 
-            serviceCollection.AddSingleton<IFastRepository, FastRepository>();
+            if (config.ServiceLifetime == ServiceLifetime.Scoped)
+                serviceCollection.AddScoped<IFastRepository, FastRepository>();
+
+            if (config.ServiceLifetime == ServiceLifetime.Transient)
+                serviceCollection.AddTransient<IFastRepository, FastRepository>();
+
+            if (config.ServiceLifetime == ServiceLifetime.Singleton)
+                serviceCollection.AddSingleton<IFastRepository, FastRepository>();
 
             Assembly.GetCallingAssembly().GetReferencedAssemblies().ToList().ForEach(a =>
             {
@@ -124,22 +131,24 @@ namespace Microsoft.Extensions.DependencyInjection
             if (string.IsNullOrEmpty(configRepository.NameSpaceModel))
                 return serviceCollection;
 
-            InitModelType(configRepository.NameSpaceModel).ForEach(m => {
-                serviceCollection.AddScoped(typeof(IFastRepository<>).MakeGenericType(new Type[1] { m }),
-                     s => { return Activator.CreateInstance(typeof(FastRepository<>).MakeGenericType(new Type[1] { m })); });
+            InitModelType(configRepository.NameSpaceModel).ForEach(m =>
+            {
+                var type = typeof(IFastRepository<>).MakeGenericType(new Type[1] { m });
+                var obj = Activator.CreateInstance(type);
+
+                if (configRepository.ServiceLifetime == ServiceLifetime.Scoped)
+                    serviceCollection.AddScoped(type, s => { return obj; });
+
+                if (configRepository.ServiceLifetime == ServiceLifetime.Transient)
+                    serviceCollection.AddTransient(type, s => { return obj; });
+
+                if (configRepository.ServiceLifetime == ServiceLifetime.Singleton)
+                    serviceCollection.AddSingleton(type, s => { return obj; });
             });
 
-            if (configRepository.Aop != null)
-            {
-                serviceCollection.AddFastAopGeneric(configRepository.NameSpaceServie, configRepository.NameSpaceModel, configRepository.Aop.GetType());
-                serviceCollection.AddFastAop(configRepository.NameSpaceServie, configRepository.Aop.GetType());
-            }
-
-            if (configRepository.Aop == null)
-            {
-                serviceCollection.AddFastAopGeneric(configRepository.NameSpaceServie, configRepository.NameSpaceModel);
-                serviceCollection.AddFastAop(configRepository.NameSpaceServie);
-            }
+            var aopType = configRepository.Aop != null ? configRepository.Aop.GetType() : null;
+            serviceCollection.AddFastAopGeneric(configRepository.NameSpaceServie, configRepository.NameSpaceModel, aopType, configRepository.ServiceLifetime);
+            serviceCollection.AddFastAop(configRepository.NameSpaceServie, aopType, configRepository.ServiceLifetime);
 
             ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
             return serviceCollection;
