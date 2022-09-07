@@ -7,7 +7,7 @@ in Startup.cs Startup mothod
 
             Configuration = configuration;
             //Generic aop   di Constructor param IFastRepository<XXX_Model>
-            services.AddFastDataGeneric(a =>
+            services.AddFastData(a =>
             {
                 a.dbFile = "db.json";
                 a.dbKey = "key";
@@ -15,7 +15,9 @@ in Startup.cs Startup mothod
                 a.mapFile = "map.json";
                 a.NamespaceProperties = "XXX.DataModel";
                 a.aop = new FastDataAop();
-            },
+            });
+            
+            services.AddFastDataGeneric(
             a =>
             {
                 a.Aop = new FastAopAttribute();
