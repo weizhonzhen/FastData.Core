@@ -92,7 +92,7 @@ namespace FastData.Core.Proxy
                 using (var db = new DataContext(config.Key))
                 {
                     if (model.isWrite)
-                        return db.ExecuteSql(model.sql, param.ToArray(), Aop.AopType.FaseWrite).writeReturn;
+                        return db.ExecuteSql(model.sql, param.ToArray(), Aop.AopType.FaseWrite).WriteReturn;
                     else
                         return db.FastReadAttribute(model, param, pModel);
                 }
