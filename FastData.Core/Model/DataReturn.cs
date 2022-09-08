@@ -12,32 +12,32 @@ namespace FastData.Core.Model
         /// <summary>
         /// 条数
         /// </summary>
-        public int count { get; set; }
+        public int Count { get; set; }
 
         /// <summary>
         /// 实体
         /// </summary>
-        public T item { set; get; } = new T();
+        public T Item { set; get; } = new T();
 
         /// <summary>
         /// 列表
         /// </summary>
-        public List<T> list { set; get; } = new List<T>();
+        public List<T> List { set; get; } = new List<T>();
 
         /// <summary>
         /// sql
         /// </summary>
-        public string sql { get; set; }
+        public string Sql { get; set; }
 
         /// <summary>
         /// 分页
         /// </summary>
-        public PageResult<T> pageResult { set; get; } = new PageResult<T>();
+        public PageResult<T> PageResult { set; get; } = new PageResult<T>();
 
         /// <summary>
         /// 写返回结果
         /// </summary>
-        public WriteReturn writeReturn { set; get; } = new WriteReturn();
+        public WriteReturn WriteReturn { set; get; } = new WriteReturn();
     }
 
      /// <summary>
@@ -83,7 +83,7 @@ namespace FastData.Core.Model
         /// <summary>
         /// 写返回结果
         /// </summary>
-        public WriteReturn writeReturn = new WriteReturn();
+        public WriteReturn WriteReturn = new WriteReturn();
     }
 
     /// <summary>

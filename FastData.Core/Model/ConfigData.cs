@@ -1,4 +1,6 @@
 ﻿using FastData.Core.Aop;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace FastData.Core.Model
 {
@@ -12,14 +14,16 @@ namespace FastData.Core.Model
 
         public string NamespaceProperties { get; set; }
 
-        public string dbKey { get; set; }
+        public string DbKey { get; set; }
 
-        public string dbFile { get; set; } = "db.json";
+        public string DbFile { get; set; } = "db.json";
 
-        public string mapFile { get; set; } = "map.json";
+        public string MapFile { get; set; } = "map.json";
 
         public string NamespaceService { get; set; }
 
-        public IFastAop aop { get; set; }
+        public IFastAop Aop { get; set; }
+
+        public Assembly Current { get; set; }
     }
 }

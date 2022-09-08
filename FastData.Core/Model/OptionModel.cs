@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 
@@ -38,6 +38,6 @@ namespace FastData.Core.Model
         /// <summary>
         /// 数据表
         /// </summary>
-        public DataTable table { get; set; }
+        public DataTable Table { get; set; }
     }
 }
