@@ -604,10 +604,10 @@ namespace FastData.Core.Base
                         model.LastTime = info.LastWriteTime;
                         model.EnFileContent = enContent;
                         model.DeFileContent = deContent;
-                        return db.Add(model).writeReturn.IsSuccess;
+                        return db.Add(model).WriteReturn.IsSuccess;
                     }
                     else
-                        return db.Update<DataModel.MySql.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                        return db.Update<DataModel.MySql.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).WriteReturn.IsSuccess;
                 }
 
                 if (config.DbType == DataDbType.Oracle)
@@ -623,10 +623,10 @@ namespace FastData.Core.Base
                         model.LastTime = info.LastWriteTime;
                         model.EnFileContent = enContent;
                         model.DeFileContent = deContent;
-                        return db.Add(model).writeReturn.IsSuccess;
+                        return db.Add(model).WriteReturn.IsSuccess;
                     }
                     else
-                        return db.Update<DataModel.Oracle.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                        return db.Update<DataModel.Oracle.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).WriteReturn.IsSuccess;
                 }
 
                 if (config.DbType == DataDbType.SqlServer)
@@ -642,10 +642,10 @@ namespace FastData.Core.Base
                         model.LastTime = info.LastWriteTime;
                         model.EnFileContent = enContent;
                         model.DeFileContent = deContent;
-                        return db.Add(model).writeReturn.IsSuccess;
+                        return db.Add(model).WriteReturn.IsSuccess;
                     }
                     else
-                        return db.Update<DataModel.SqlServer.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).writeReturn.IsSuccess;
+                        return db.Update<DataModel.SqlServer.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).WriteReturn.IsSuccess;
                 }
             }
 
@@ -662,13 +662,13 @@ namespace FastData.Core.Base
             var map = DbCache.Get<Dictionary<string, object>>(DataConfig.Get().CacheType, "FastMap.Api") ?? new Dictionary<string, object>();
             var result = GetXmlList(path, "sqlMap", config, xml);
 
-            for (var i = 0; i < result.key.Count; i++)
+            for (var i = 0; i < result.Key.Count; i++)
             {
-                DbCache.Set(config.CacheType, result.key[i].ToLower(), result.sql[i]);
+                DbCache.Set(config.CacheType, result.Key[i].ToLower(), result.Sql[i]);
             }
 
             var apilist = new List<string>();
-            result.db.ToList().ForEach(a => {
+            result.Db.ToList().ForEach(a => {
                 DbCache.Set(config.CacheType, string.Format("{0}.db", a.Key.ToLower()), a.Value.ToStr());
                 apilist.Add(a.Key.ToLower());
             });
@@ -677,36 +677,36 @@ namespace FastData.Core.Base
             map.Add(fileName, apilist);
             DbCache.Set<Dictionary<string, object>>(config.CacheType, "FastMap.Api", map);
 
-            result.type.ToList().ForEach(a => {
+            result.Type.ToList().ForEach(a => {
                 DbCache.Set(config.CacheType, string.Format("{0}.type", a.Key.ToLower()), a.Value.ToStr());
-                result.key.Add(string.Format("{0}.type", a.Key.ToLower()));
+                result.Key.Add(string.Format("{0}.type", a.Key.ToLower()));
             });
 
-            result.view.ToList().ForEach(a => {
+            result.View.ToList().ForEach(a => {
                 DbCache.Set(config.CacheType, string.Format("{0}.view", a.Key.ToLower()), a.Value.ToStr());
-                result.key.Add(string.Format("{0}.view", a.Key.ToLower()));
+                result.Key.Add(string.Format("{0}.view", a.Key.ToLower()));
             });
 
-            result.param.ToList().ForEach(a => {
+            result.Param.ToList().ForEach(a => {
                 DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", a.Key.ToLower()), a.Value as List<string>);
-                result.key.Add(string.Format("{0}.param", a.Key.ToLower()));
+                result.Key.Add(string.Format("{0}.param", a.Key.ToLower()));
             });
 
-            result.check.ToList().ForEach(a => {
+            result.Check.ToList().ForEach(a => {
                 DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
-                result.key.Add(a.Key);
+                result.Key.Add(a.Key);
             });
 
-            result.name.ToList().ForEach(a => {
+            result.Name.ToList().ForEach(a => {
                 DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
-                result.key.Add(a.Key);
+                result.Key.Add(a.Key);
             });
 
-            result.parameName.ToList().ForEach(a => {
+            result.ParameName.ToList().ForEach(a => {
                 DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
-                result.key.Add(a.Key);
+                result.Key.Add(a.Key);
             });
-            return result.key;
+            return result.Key;
         }
         #endregion
 
@@ -721,14 +721,14 @@ namespace FastData.Core.Base
             var key = string.Format("{0}.{1}", methodInfo.DeclaringType.FullName, methodInfo.Name).ToLower();
             var result = GetXmlList(null, "sqlMap", config, string.Format("<sqlMap>{0}</sqlMap>", xml),key);
 
-            for (var i = 0; i < result.key.Count; i++)
+            for (var i = 0; i < result.Key.Count; i++)
             {
-                DbCache.Set(config.CacheType, result.key[i].ToLower(), result.sql[i]);
+                DbCache.Set(config.CacheType, result.Key[i].ToLower(), result.Sql[i]);
             }
 
-            result.param.ToList().ForEach(a => {
+            result.Param.ToList().ForEach(a => {
                 DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", a.Key.ToLower()), a.Value as List<string>);
-                result.key.Add(string.Format("{0}.param", a.Key.ToLower()));
+                result.Key.Add(string.Format("{0}.param", a.Key.ToLower()));
             });
         }
         #endregion
@@ -743,7 +743,7 @@ namespace FastData.Core.Base
         internal static XmlModel GetXmlList(string path, string xmlNode, ConfigModel config,string xml=null,string id =null)
         {
             var result = new XmlModel();
-            result.isSuccess = true;
+            result.IsSuccess = true;
             try
             {
                 var tempKey = "";
@@ -786,29 +786,29 @@ namespace FastData.Core.Base
                                 tempKey = id;
 
                             //节点数
-                            if (Array.Exists(result.key.ToArray(), element => element == tempKey))
+                            if (Array.Exists(result.Key.ToArray(), element => element == tempKey))
                             {
-                                result.isSuccess = false;
+                                result.IsSuccess = false;
                                 Task.Run(() => { BaseLog.SaveLog(string.Format("xml文件:{0},存在相同键:{1}", path, tempKey), "MapKeyExists"); }).ConfigureAwait(false);
                             }
-                            result.key.Add(tempKey);
-                            result.sql.Add(temp.ChildNodes.Count.ToString());
+                            result.Key.Add(tempKey);
+                            result.Sql.Add(temp.ChildNodes.Count.ToString());
 
                             //name
                             if (temp.Attributes["name"] != null)
-                                result.name.Add(string.Format("{0}.remark", tempKey), temp.Attributes["name"].Value);
+                                result.Name.Add(string.Format("{0}.remark", tempKey), temp.Attributes["name"].Value);
 
                             //log
                             if (temp.Attributes["log"] != null)
-                                result.name.Add(string.Format("{0}.log", tempKey), temp.Attributes["log"].Value);
+                                result.Name.Add(string.Format("{0}.log", tempKey), temp.Attributes["log"].Value);
 
                             foreach (XmlNode node in temp.ChildNodes)
                             {
                                 #region XmlText
                                 if (node is XmlText)
                                 {
-                                    result.key.Add(string.Format("{0}.{1}", tempKey, i));
-                                    result.sql.Add(node.InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
+                                    result.Key.Add(string.Format("{0}.{1}", tempKey, i));
+                                    result.Sql.Add(node.InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
                                 }
                                 #endregion
 
@@ -817,8 +817,8 @@ namespace FastData.Core.Base
                                 {
                                     if (node.Attributes["prepend"] != null)
                                     {
-                                        result.key.Add(string.Format("{0}.format.{1}", tempKey, i));
-                                        result.sql.Add(node.Attributes["prepend"].Value.ToLower());
+                                        result.Key.Add(string.Format("{0}.format.{1}", tempKey, i));
+                                        result.Sql.Add(node.Attributes["prepend"].Value.ToLower());
                                     }
 
                                     //foreach
@@ -827,29 +827,29 @@ namespace FastData.Core.Base
                                         //type
                                         if (node.Attributes["type"] != null)
                                         {
-                                            result.key.Add(string.Format("{0}.foreach.type.{1}", tempKey, foreachCount));
-                                            result.sql.Add(node.Attributes["type"].Value);
+                                            result.Key.Add(string.Format("{0}.foreach.type.{1}", tempKey, foreachCount));
+                                            result.Sql.Add(node.Attributes["type"].Value);
                                         }
 
                                         //result name
-                                        result.key.Add(string.Format("{0}.foreach.name.{1}", tempKey, foreachCount));
+                                        result.Key.Add(string.Format("{0}.foreach.name.{1}", tempKey, foreachCount));
                                         if (node.Attributes["name"] != null)
-                                            result.sql.Add(node.Attributes["name"].Value.ToLower());
+                                            result.Sql.Add(node.Attributes["name"].Value.ToLower());
                                         else
-                                            result.sql.Add("data");
+                                            result.Sql.Add("data");
 
                                         //field
                                         if (node.Attributes["field"] != null)
                                         {
-                                            result.key.Add(string.Format("{0}.foreach.field.{1}", tempKey, foreachCount));
-                                            result.sql.Add(node.Attributes["field"].Value.ToLower());
+                                            result.Key.Add(string.Format("{0}.foreach.field.{1}", tempKey, foreachCount));
+                                            result.Sql.Add(node.Attributes["field"].Value.ToLower());
                                         }
 
                                         //sql
                                         if (node.ChildNodes[0] is XmlText)
                                         {
-                                            result.key.Add(string.Format("{0}.foreach.sql.{1}", tempKey, foreachCount));
-                                            result.sql.Add(node.ChildNodes[0].InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
+                                            result.Key.Add(string.Format("{0}.foreach.sql.{1}", tempKey, foreachCount));
+                                            result.Sql.Add(node.ChildNodes[0].InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
                                         }
                                         foreachCount++;
                                     }
@@ -861,105 +861,105 @@ namespace FastData.Core.Base
 
                                         //check required
                                         if (dyn.Attributes["required"] != null)
-                                            result.check.Add(string.Format("{0}.{1}.required", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["required"].Value.ToStr());
+                                            result.Check.Add(string.Format("{0}.{1}.required", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["required"].Value.ToStr());
 
                                         //check maxlength
                                         if (dyn.Attributes["maxlength"] != null)
-                                            result.check.Add(string.Format("{0}.{1}.maxlength", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["maxlength"].Value.ToStr());
+                                            result.Check.Add(string.Format("{0}.{1}.maxlength", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["maxlength"].Value.ToStr());
 
                                         //check existsmap
                                         if (dyn.Attributes["existsmap"] != null)
-                                            result.check.Add(string.Format("{0}.{1}.existsmap", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["existsmap"].Value.ToStr());
+                                            result.Check.Add(string.Format("{0}.{1}.existsmap", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["existsmap"].Value.ToStr());
 
                                         //check checkmap
                                         if (dyn.Attributes["checkmap"] != null)
-                                            result.check.Add(string.Format("{0}.{1}.checkmap", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["checkmap"].Value.ToStr());
+                                            result.Check.Add(string.Format("{0}.{1}.checkmap", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["checkmap"].Value.ToStr());
 
                                         //check date
                                         if (dyn.Attributes["date"] != null)
-                                            result.check.Add(string.Format("{0}.{1}.date", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["date"].Value.ToStr());
+                                            result.Check.Add(string.Format("{0}.{1}.date", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["date"].Value.ToStr());
 
                                         //参数
                                         tempParam.Add(dyn.Attributes["property"].Value);
 
                                         //param name
                                         if (dyn.Attributes["name"] != null)
-                                            result.parameName.Add(string.Format("{0}.{1}.remark", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["name"].Value);
+                                            result.ParameName.Add(string.Format("{0}.{1}.remark", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["name"].Value);
 
                                         if (string.Compare( dyn.Name, "ispropertyavailable", true) ==0)
                                         {
                                             //属性和值
-                                            result.key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                            result.sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
+                                            result.Key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            result.Sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
                                         }
                                         else if (string.Compare( dyn.Name, "choose", true) !=0)
                                         {
                                             //属性和值
-                                            result.key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                            result.sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
+                                            result.Key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            result.Sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
 
                                             //条件类型
-                                            result.key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                            result.sql.Add(dyn.Name);
+                                            result.Key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            result.Sql.Add(dyn.Name);
 
                                             //判断条件内容
                                             if (dyn.Attributes["condition"] != null)
                                             {
-                                                result.key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                result.sql.Add(dyn.Attributes["condition"].Value);
+                                                result.Key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                result.Sql.Add(dyn.Attributes["condition"].Value);
                                             }
 
                                             //比较条件值
                                             if (dyn.Attributes["compareValue"] != null)
                                             {
-                                                result.key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                result.sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
+                                                result.Key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                result.Sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
                                             }
 
                                             //引用dll
                                             if (dyn.Attributes["references"] != null)
                                             {
-                                                result.key.Add(string.Format("{0}.{1}.references.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                result.sql.Add(dyn.Attributes["references"].Value);
+                                                result.Key.Add(string.Format("{0}.{1}.references.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                result.Sql.Add(dyn.Attributes["references"].Value);
                                             }
                                         }
                                         else
                                         {
                                             //条件类型
-                                            result.key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                            result.sql.Add(dyn.Name);
+                                            result.Key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                            result.Sql.Add(dyn.Name);
 
                                             if (dyn is XmlElement)
                                             {
                                                 var count = 0;
-                                                result.key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                result.sql.Add(dyn.ChildNodes.Count.ToStr());
+                                                result.Key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
+                                                result.Sql.Add(dyn.ChildNodes.Count.ToStr());
                                                 foreach (XmlNode child in dyn.ChildNodes)
                                                 {
                                                     //other
                                                     if (child.Name == "other")
                                                     {
-                                                        result.key.Add(string.Format("{0}.{1}.{2}.choose.other.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                        result.sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
+                                                        result.Key.Add(string.Format("{0}.{1}.{2}.choose.other.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                        result.Sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
                                                     }
                                                     else
                                                     {
                                                         //条件
                                                         if (child.Attributes["property"] != null)
                                                         {
-                                                            result.key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                            result.sql.Add(child.Attributes["property"].Value);
+                                                            result.Key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                            result.Sql.Add(child.Attributes["property"].Value);
                                                         }
 
                                                         //内容
-                                                        result.key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                        result.sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
+                                                        result.Key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                        result.Sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
 
                                                         //引用dll
                                                         if (child.Attributes["references"] != null)
                                                         {
-                                                            result.key.Add(string.Format("{0}.{1}.{2}.choose.references.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                            result.sql.Add(child.Attributes["references"].Value);
+                                                            result.Key.Add(string.Format("{0}.{1}.{2}.choose.references.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
+                                                            result.Sql.Add(child.Attributes["references"].Value);
                                                         }
                                                     }
                                                     count++;
@@ -975,38 +975,38 @@ namespace FastData.Core.Base
 
                             //db
                             if (temp.Attributes["db"] != null)
-                                result.db.Add(tempKey, temp.Attributes["db"].Value.ToStr());
+                                result.Db.Add(tempKey, temp.Attributes["db"].Value.ToStr());
 
                             //type
                             if (temp.Attributes["type"] != null)
-                                result.type.Add(tempKey, temp.Attributes["type"].Value.ToStr());
+                                result.Type.Add(tempKey, temp.Attributes["type"].Value.ToStr());
 
                             //view
                             if (temp.Attributes["view"] != null)
-                                result.view.Add(tempKey, temp.Attributes["view"].Value.ToStr());
+                                result.View.Add(tempKey, temp.Attributes["view"].Value.ToStr());
 
                             //foreach count
-                            result.key.Add(string.Format("{0}.foreach", tempKey));
-                            result.sql.Add((foreachCount - 1).ToStr());
+                            result.Key.Add(string.Format("{0}.foreach", tempKey));
+                            result.Sql.Add((foreachCount - 1).ToStr());
 
-                            result.param.Add(tempKey, tempParam);
+                            result.Param.Add(tempKey, tempParam);
                             #endregion
                         }
                         else if (temp is XmlText)
                         {
                             #region XmlText
                             if (id == null)
-                                result.key.Add(string.Format("{0}.{1}", item.Attributes["id"].Value.ToLower(), i));
+                                result.Key.Add(string.Format("{0}.{1}", item.Attributes["id"].Value.ToLower(), i));
                             else
-                                result.key.Add(string.Format("{0}.{1}", id.ToLower(), i));
+                                result.Key.Add(string.Format("{0}.{1}", id.ToLower(), i));
 
-                            result.sql.Add(temp.InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
+                            result.Sql.Add(temp.InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
 
                             if (id == null)
-                                result.key.Add(item.Attributes["id"].Value.ToLower());
+                                result.Key.Add(item.Attributes["id"].Value.ToLower());
                             else
-                                result.key.Add(id);
-                            result.sql.Add("0");
+                                result.Key.Add(id);
+                            result.Sql.Add("0");
                             #endregion
                         }
                     }
@@ -1022,7 +1022,7 @@ namespace FastData.Core.Base
                 else
                     DbLog.LogException(true, "InstanceMap", ex, "GetXmlList", "");
                 BaseAop.AopException(ex, "Parsing xml", AopType.ParsingXml, config);
-                result.isSuccess = false;
+                result.IsSuccess = false;
                 return result;
             }
         }

@@ -421,7 +421,7 @@ namespace FastData.Core.Base
 
             try
             {
-                result.table = BaseExecute.ToDataTable<T>(cmd, config, where, field);
+                result.Table = BaseExecute.ToDataTable<T>(cmd, config, where, field);
 
                 result.Sql = string.Format("update {0} set", typeof(T).Name);
                 var pInfo = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
@@ -478,7 +478,7 @@ namespace FastData.Core.Base
 
                 list.ForEach(p =>
                 {
-                    var row = result.table.NewRow();
+                    var row = result.Table.NewRow();
                     where.ForEach(a =>
                     {
                         row[a] = BaseEmit.Get<T>(p, a);
@@ -498,7 +498,7 @@ namespace FastData.Core.Base
                             row[a.Name] = BaseEmit.Get<T>(p, a.Name);
                         });
                     }
-                    result.table.Rows.Add(row);
+                    result.Table.Rows.Add(row);
 
                 });
 
