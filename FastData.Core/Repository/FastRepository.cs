@@ -18,6 +18,7 @@ using System.Linq.Expressions;
 using FastData.Core.Aop;
 using FastData.Core.Filter;
 using FastUntility.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FastData.Core.Repository
 {
@@ -389,9 +390,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.pageResult;
+            return result.PageResult;
         }
         #endregion
 
@@ -591,7 +592,7 @@ namespace FastData.Core.Repository
         {
             var config = DataConfig.Get(dbKey);
             var info = new FileInfo(xml);
-            return MapXml.GetXmlList(info.FullName, "sqlMap", config).isSuccess;
+            return MapXml.GetXmlList(info.FullName, "sqlMap", config).IsSuccess;
         }
         #endregion
 
@@ -754,9 +755,9 @@ namespace FastData.Core.Repository
 
             stopwatch.Stop();
 
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -808,8 +809,8 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.writeReturn;
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.WriteReturn;
         }
         #endregion
 
@@ -861,8 +862,8 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.writeReturn;
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.WriteReturn;
         }
         #endregion
 
@@ -911,9 +912,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -963,9 +964,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1016,9 +1017,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1064,9 +1065,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1116,7 +1117,7 @@ namespace FastData.Core.Repository
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1168,7 +1169,7 @@ namespace FastData.Core.Repository
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1196,7 +1197,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public Queryable<T> Queryable<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json") where T : class, new()
         {
-            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+            var projectName = FastDataExtension.config.Current.GetName().Name;
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
             if(DbCache.Exists(CacheType.Web,cacheKey) && key == null)            
@@ -1243,7 +1244,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
-            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+            var projectName = FastDataExtension.config.Current.GetName().Name;
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
             if (DbCache.Exists(CacheType.Web, cacheKey) && key == null)
@@ -1327,9 +1328,9 @@ namespace FastData.Core.Repository
 
             stopwatch.Stop();
 
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1381,8 +1382,8 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.writeReturn;
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1434,8 +1435,8 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.writeReturn;
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1484,9 +1485,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1536,9 +1537,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1589,9 +1590,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1637,9 +1638,9 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.writeReturn;
+            return result.WriteReturn;
         }
         #endregion
 
@@ -1665,7 +1666,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public Queryable<T> Queryable(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
-            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+            var projectName = FastDataExtension.config.Current.GetName().Name;
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
             if (DbCache.Exists(CacheType.Web, cacheKey) && key == null)

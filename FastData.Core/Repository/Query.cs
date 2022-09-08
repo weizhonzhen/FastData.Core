@@ -165,7 +165,7 @@ namespace FastData.Core.Repository
             var result = new DataReturn<T>();
 
             if (this.Data.Predicate.Exists(a => a.IsSuccess == false))
-                return result.list;
+                return result.List;
 
             stopwatch.Start();
 
@@ -182,8 +182,8 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             this.Data.Config.IsOutSql = this.Data.Config.IsOutSql ? this.Data.Config.IsOutSql : isOutSql;
-            DbLog.LogSql(this.Data.Config.IsOutSql, result.sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.list;
+            DbLog.LogSql(this.Data.Config.IsOutSql, result.Sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.List;
         }
         #endregion
 
@@ -311,7 +311,7 @@ namespace FastData.Core.Repository
             var stopwatch = new Stopwatch();
 
             if (this.Data.Predicate.Exists(a => a.IsSuccess == false))
-                return result.item;
+                return result.Item;
 
             stopwatch.Start();
 
@@ -330,8 +330,8 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             this.Data.Config.IsOutSql = this.Data.Config.IsOutSql ? this.Data.Config.IsOutSql : isOutSql;
-            DbLog.LogSql(this.Data.Config.IsOutSql, result.sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.item;
+            DbLog.LogSql(this.Data.Config.IsOutSql, result.Sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.Item;
         }
         #endregion
 
@@ -437,7 +437,7 @@ namespace FastData.Core.Repository
             var stopwatch = new Stopwatch();
 
             if (this.Data.Predicate.Exists(a => a.IsSuccess == false))
-                return result.pageResult;
+                return result.PageResult;
 
             stopwatch.Start();
 
@@ -454,8 +454,8 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             this.Data.Config.IsOutSql = this.Data.Config.IsOutSql ? this.Data.Config.IsOutSql : isOutSql;
-            DbLog.LogSql(this.Data.Config.IsOutSql, result.sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.pageResult;
+            DbLog.LogSql(this.Data.Config.IsOutSql, result.Sql, this.Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.PageResult;
         }
         #endregion
 
