@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using FastUntility.Core.Page;
 using System.Data;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FastData.Core
 {
@@ -72,7 +73,8 @@ namespace FastData.Core
         public static DataQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
             var result = new DataQuery();
-            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+
+            var projectName = FastDataExtension.config.Current.GetName().Name;
 
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
@@ -110,7 +112,7 @@ namespace FastData.Core
         public static FastQueryable<T> Queryable<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json") where T : class, new()
         {
             var result = new FastQueryable<T>();
-            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+            var projectName = FastDataExtension.config.Current.GetName().Name;
 
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
@@ -246,7 +248,7 @@ namespace FastData.Core
             var result = new DataReturn<T>();
 
             if (item.Predicate.Exists(a => a.IsSuccess == false))
-                return result.list;
+                return result.List;
 
             stopwatch.Start();
 
@@ -262,8 +264,8 @@ namespace FastData.Core
 
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
-            DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.list;
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.List;
         }
         #endregion
 
@@ -390,7 +392,7 @@ namespace FastData.Core
             var stopwatch = new Stopwatch();
 
             if (item.Predicate.Exists(a => a.IsSuccess == false))
-                return result.item;
+                return result.Item;
 
             stopwatch.Start();
 
@@ -408,8 +410,8 @@ namespace FastData.Core
 
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
-            DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.item;
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.Item;
         }
         #endregion
 
@@ -514,7 +516,7 @@ namespace FastData.Core
             var stopwatch = new Stopwatch();
 
             if (item.Predicate.Exists(a => a.IsSuccess == false))
-                return result.pageResult;
+                return result.PageResult;
 
             stopwatch.Start();
 
@@ -530,8 +532,8 @@ namespace FastData.Core
 
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
-            DbLog.LogSql(item.Config.IsOutSql, result.sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
-            return result.pageResult;
+            DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            return result.PageResult;
         }
         #endregion
 
@@ -757,9 +759,9 @@ namespace FastData.Core
 
             stopwatch.Stop();
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.list;
+            return result.List;
         }
         #endregion
 

@@ -57,7 +57,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceProperties(string nameSpace, string dbFile = "db.json", string projectName = null)
+        internal static void InstanceProperties(string nameSpace, string dbFile = "db.json", string projectName = null)
         {
             var config = DataConfig.Get("", projectName, dbFile);
 
@@ -165,7 +165,7 @@ namespace FastData.Core
         /// <param name="list"></param>
         /// <param name="nameSpace">命名空间</param>
         /// <param name="dll">dll名称</param>
-        public static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json", string projectName = null)
+        internal static void InstanceTable(string nameSpace, string dbKey = null, string dbFile = "db.json", string projectName = null)
         {
             var query = new DataQuery();
             query.Config = DataConfig.Get(dbKey, projectName, dbFile);
@@ -192,10 +192,10 @@ namespace FastData.Core
         #endregion
 
         #region 初始化map 3  by Resource
-        public static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
+        internal static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
         {
             if (projectName == null)
-                projectName = Assembly.GetCallingAssembly().GetName().Name;
+                projectName = FastDataExtension.config.Current.GetName().Name;
 
             var config = DataConfig.Get(dbKey, projectName, dbFile);
             using (var db = new DataContext(dbKey))
@@ -330,7 +330,7 @@ namespace FastData.Core
         #endregion
 
         #region 初始化 interface service
-        public static void InstanceService(IServiceCollection serviceCollection, string nameSpace)
+        internal static void InstanceService(IServiceCollection serviceCollection, string nameSpace)
         {
             var handler = new ProxyHandler();
 
@@ -859,9 +859,9 @@ namespace FastData.Core
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-            DbLog.LogSql(config.IsOutSql, result.sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
-            return result.pageResult;
+            return result.PageResult;
         }
         #endregion
 
@@ -952,7 +952,7 @@ namespace FastData.Core
         {
             var config = DataConfig.Get(dbKey);
             var info = new FileInfo(xml);
-            return MapXml.GetXmlList(info.FullName, "sqlMap", config).isSuccess;
+            return MapXml.GetXmlList(info.FullName, "sqlMap", config).IsSuccess;
         }
         #endregion
 

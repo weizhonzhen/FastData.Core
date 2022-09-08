@@ -19,57 +19,60 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class FastDataExtension
     {
-        private static ConfigData config;
+        internal static ConfigData config;
         public static IServiceCollection AddFastData(this IServiceCollection serviceCollection, Action<ConfigData> action)
         {
             config = new ConfigData();
             action(config);
 
-            if (!config.IsResource && DataConfig.Get(config.dbKey, null, config.dbFile).CacheType == CacheType.Redis && ServiceContext.Engine.Resolve<IRedisRepository>() == null)
+            if (config.Current == null)
+                config.Current = Assembly.GetCallingAssembly();
+
+            if (!config.IsResource && DataConfig.Get(config.DbKey, null, config.DbFile).CacheType == CacheType.Redis && ServiceContext.Engine.Resolve<IRedisRepository>() == null)
                 throw new System.Exception("ConfigureServices First add services.AddFastRedis(); Second add services.AddFastData()");
 
-            if (DataConfig.Get(config.dbKey, Assembly.GetCallingAssembly().GetName().Name, config.dbFile).CacheType == CacheType.Redis && ServiceContext.Engine.Resolve<IRedisRepository>() == null)
+            if (DataConfig.Get(config.DbKey, config.Current.GetName().Name, config.DbFile).CacheType == CacheType.Redis && ServiceContext.Engine.Resolve<IRedisRepository>() == null)
                 throw new System.Exception("ConfigureServices First add services.AddFastRedis(); Second add services.AddFastData()");
 
             serviceCollection.AddSingleton<IFastRepository, FastRepository>();
 
-            Assembly.GetCallingAssembly().GetReferencedAssemblies().ToList().ForEach(a =>
+            config.Current.GetReferencedAssemblies().ToList().ForEach(a =>
             {
                 if (!AppDomain.CurrentDomain.GetAssemblies().ToList().Exists(b => b.GetName().Name == a.Name))
                     try { Assembly.Load(a.Name); } catch (Exception ex) { }
             });
 
-            if (config.aop != null)
-                serviceCollection.AddSingleton<IFastAop>(config.aop);
+            if (config.Aop != null)
+                serviceCollection.AddSingleton<IFastAop>(config.Aop);
 
             if (!string.IsNullOrEmpty(config.NamespaceService))
                 FastMap.InstanceService(serviceCollection, config.NamespaceService);
 
             ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
 
-            var projectName = Assembly.GetCallingAssembly().GetName().Name;
+            var projectName = config.Current.GetName().Name;
             if (config.IsResource)
-                FastMap.InstanceMapResource(config.dbKey, config.dbFile, config.mapFile, projectName);
+                FastMap.InstanceMapResource(config.DbKey, config.DbFile, config.MapFile, projectName);
             else
-                FastMap.InstanceMap(config.dbKey, config.dbFile, config.mapFile);
+                FastMap.InstanceMap(config.DbKey, config.DbFile, config.MapFile);
 
             if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst) && config.IsResource)
             {
-                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile, projectName);
-                FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile, projectName);
+                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.DbFile, projectName);
+                FastMap.InstanceTable(config.NamespaceCodeFirst, config.DbKey, config.DbFile, projectName);
             }
 
             if (config.IsCodeFirst && !string.IsNullOrEmpty(config.NamespaceCodeFirst) && !config.IsResource)
             {
-                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.dbFile);
-                FastMap.InstanceTable(config.NamespaceCodeFirst, config.dbKey, config.dbFile);
+                FastMap.InstanceProperties(config.NamespaceCodeFirst, config.DbFile);
+                FastMap.InstanceTable(config.NamespaceCodeFirst, config.DbKey, config.DbFile);
             }
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties) && config.IsResource)
-                FastMap.InstanceProperties(config.NamespaceProperties, config.dbFile, projectName);
+                FastMap.InstanceProperties(config.NamespaceProperties, config.DbFile, projectName);
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties) && !config.IsResource)
-                FastMap.InstanceProperties(config.NamespaceProperties, config.dbFile);
+                FastMap.InstanceProperties(config.NamespaceProperties, config.DbFile);
 
             return serviceCollection;
         }
@@ -81,9 +84,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 ConfigModel item;
                 string projectName = null;
                 if (config.IsResource)
-                    projectName = Assembly.GetCallingAssembly().GetName().Name;
+                    projectName = config.Current.GetName().Name;
 
-                item = DataConfig.Get(config.dbKey, projectName, config.dbFile);
+                item = DataConfig.Get(config.DbKey, projectName, config.DbFile);
                 var query = new DataQuery();
                 query.Table.Add(typeof(T).Name);
                 query.Config = item;
