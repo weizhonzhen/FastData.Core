@@ -7,17 +7,12 @@ namespace FastData.Core.Proxy
 {
     public static class FastProxy
     {
-        private static readonly string AssemblyName = "ProxyAssembly_{0}";
-        private static readonly string ModuleName = "ProxyModule_{0}";
-        private static readonly string TypeName = "Proxy_{0}";
-
         private static TypeBuilder CreateDynamicTypeBuilder(System.Type type)
         {
-            var assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(string.Format(AssemblyName, type.Name)), AssemblyBuilderAccess.Run);
-
-            var module = assembly.DefineDynamicModule(string.Format(ModuleName, type.Name));
-
-            return module.DefineType(string.Format(TypeName, type.Name), TypeAttributes.Public | TypeAttributes.Class, null, new[] { type });
+            var assemblyName =new AssemblyName(type.FullName);
+            var assembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            var module = assembly.DefineDynamicModule(assemblyName.Name);
+            return module.DefineType(assemblyName.Name, TypeAttributes.Public | TypeAttributes.Class, null, new[] { type });
         }
 
         private static void Proxy(System.Type type, TypeBuilder typeBuilder,MethodInfo[] methods)
@@ -97,7 +92,5 @@ namespace FastData.Core.Proxy
 
             return Activator.CreateInstance(typeBuilder.CreateTypeInfo(), handler, methods);
         }
-
-
     }
 }
