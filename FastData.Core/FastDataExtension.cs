@@ -129,17 +129,17 @@ namespace Microsoft.Extensions.DependencyInjection
 
             InitModelType(configRepository.NameSpaceModel).ForEach(m =>
             {
-                var type = typeof(IFastRepository<>).MakeGenericType(new Type[1] { m });
+                var type = typeof(FastRepository<>).MakeGenericType(new Type[1] { m });
                 var obj = Activator.CreateInstance(type);
 
                 if (configRepository.ServiceLifetime == ServiceLifetime.Scoped)
-                    serviceCollection.AddScoped(type, s => { return obj; });
+                    serviceCollection.AddScoped(type.GetInterfaces().First(), s => { return obj; });
 
                 if (configRepository.ServiceLifetime == ServiceLifetime.Transient)
-                    serviceCollection.AddTransient(type, s => { return obj; });
+                    serviceCollection.AddTransient(type.GetInterfaces().First(), s => { return obj; });
 
                 if (configRepository.ServiceLifetime == ServiceLifetime.Singleton)
-                    serviceCollection.AddSingleton(type, s => { return obj; });
+                    serviceCollection.AddSingleton(type.GetInterfaces().First(), s => { return obj; });
             });
 
             var aopType = configRepository.Aop != null ? configRepository.Aop.GetType() : null;
