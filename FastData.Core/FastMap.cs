@@ -338,7 +338,7 @@ namespace FastData.Core
             {
                 try
                 {
-                    assembly.ExportedTypes.ToList().ForEach(a =>
+                    foreach(var a in  assembly.ExportedTypes.ToList())
                     {
                         if (a.Namespace == nameSpace)
                         {
@@ -401,9 +401,12 @@ namespace FastData.Core
                                 serviceCollection.AddSingleton(a, service);
                             }
                         }
-                    });
+                    }
                 }
-                catch (Exception ex) { }
+                catch (Exception ex) {
+                    if (ex is ProxyException)
+                        throw ex;
+                }
             });
         }
         #endregion
@@ -417,29 +420,29 @@ namespace FastData.Core
         private static void ServiceParam(MethodInfo info, ServiceModel model, ConfigModel config)
         {
             if (info.ReturnType != typeof(WriteReturn) && model.isWrite)
-                throw new Exception($"[return type only WriteReturn, service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
+                throw new ProxyException($"[return type only WriteReturn, service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
 
             if (string.IsNullOrEmpty(model.dbKey))
-                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, dbkey is not null]");
+                throw new ProxyException($"[service:{info.DeclaringType.Name}, method:{info.Name}, dbkey is not null]");
 
             if (info.ReturnType.isSysType())
-                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
+                throw new ProxyException($"[service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
 
             if (string.IsNullOrEmpty(model.sql) && !model.isXml)
-                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, sql is not null]");
+                throw new ProxyException($"[service:{info.DeclaringType.Name}, method:{info.Name}, sql is not null]");
 
             if (model.isPage && !info.GetParameters().ToList().Exists(a => a.ParameterType == typeof(PageModel)))
-                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, read data by page , parameter type:{typeof(PageModel).FullName} not exists]");
+                throw new ProxyException($"[service:{info.DeclaringType.Name}, method:{info.Name}, read data by page , parameter type:{typeof(PageModel).FullName} not exists]");
 
             if (info.GetParameters().Length == 1 && info.GetParameters()[0].ParameterType.IsGenericType)
-                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, parameter type:{info.GetParameters()[0].ParameterType} is not support]");
+                throw new ProxyException($"[service:{info.DeclaringType.Name}, method:{info.Name}, parameter type:{info.GetParameters()[0].ParameterType} is not support]");
 
             if (model.isPage && info.ReturnType.GetGenericArguments().Length > 0 && info.ReturnType == typeof(PageResult<>).MakeGenericType(new System.Type[] { info.ReturnType.GetGenericArguments()[0] }))
                 model.type = info.ReturnType.GetGenericArguments()[0];
             else if (model.isPage && info.ReturnType == typeof(PageResult))
                 model.type = null;
             else if (model.isPage)
-                throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, read data by page , return type:{info.ReturnType} is not support]");
+                throw new ProxyException($"[service:{info.DeclaringType.Name}, method:{info.Name}, read data by page , return type:{info.ReturnType} is not support]");
 
             if (info.ReturnType == typeof(Dictionary<string, object>) && (!model.isWrite || model.isXml))
                 model.isList = false;
@@ -456,7 +459,7 @@ namespace FastData.Core
                     argType = info.ReturnType;
 
                 if (argType.isSysType())
-                    throw new Exception($"[service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
+                    throw new ProxyException($"[service:{info.DeclaringType.Name}, method:{info.Name}, return type:{info.ReturnType} is not support]");
             }
 
             var dic = new Dictionary<int, string>();
