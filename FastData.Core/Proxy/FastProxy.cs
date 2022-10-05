@@ -66,7 +66,7 @@ namespace FastData.Core.Proxy
 
                 pIL.Emit(OpCodes.Callvirt, handler);
                 if (methods[i].ReturnType == typeof(void))
-                    throw new Exception(string.Format("method：{0}, ReturnType void Not available", methods[i].Name));
+                    throw new ProxyException(string.Format("method：{0}, ReturnType void Not available", methods[i].Name));
 
                 pIL.Emit(OpCodes.Unbox_Any, methods[i].ReturnType);
                 pIL.Emit(OpCodes.Ret);
@@ -78,13 +78,13 @@ namespace FastData.Core.Proxy
             if (typeof(T).IsInterface)
                 return (T)Invoke(typeof(T), handler);
             else
-                throw new Exception(string.Format("Type：{0} is not Interface ", typeof(T).Name));
+                throw new ProxyException(string.Format("Type：{0} is not Interface ", typeof(T).Name));
         }
 
-        internal static object Invoke(System.Type type, IProxyHandler handler)
+        public static object Invoke(System.Type type, IProxyHandler handler)
         {
             if (!typeof(IProxyHandler).GetMethods().ToList().Exists(a => a.Name == "Invoke"))
-                throw new Exception(string.Format("Type：{0}, not exists Invoke Method", type.Name));
+                throw new ProxyException(string.Format("Type：{0}, not exists Invoke Method", type.Name));
 
             var methods = type.GetMethods();
             var typeBuilder = CreateDynamicTypeBuilder(type);

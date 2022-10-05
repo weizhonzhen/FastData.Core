@@ -48,7 +48,7 @@ namespace FastData.Core.Proxy
                 else if (model.isDic)
                 {
                     if (!args.ToList().Exists(a => a.GetType() == typeof(Dictionary<string, object>)))
-                        throw new Exception($"error: service {method.DeclaringType.Name} , method {method.Name} , param type {args[0].GetType().Name} is not support");
+                        throw new ProxyException($"error: service {method.DeclaringType.Name} , method {method.Name} , param type {args[0].GetType().Name} is not support");
 
                     var dic = (Dictionary<string, object>)args.ToList().Find(a => a.GetType() == typeof(Dictionary<string, object>));
                     var tempDic = new Dictionary<int, string>();
@@ -98,7 +98,7 @@ namespace FastData.Core.Proxy
                 }
             }
 
-            throw new Exception($"error: service {method.DeclaringType.Name} , method {method.Name} not exists");
+            throw new ProxyException($"error: service {method.DeclaringType.Name} , method {method.Name} not exists");
         }
     }
 }
