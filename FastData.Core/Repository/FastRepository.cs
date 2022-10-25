@@ -277,6 +277,7 @@ namespace FastData.Core.Repository
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.PageResult;
         }
@@ -390,6 +391,7 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            stopwatch = null;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
 
             return result.PageResult;
@@ -756,6 +758,7 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -810,6 +813,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.WriteReturn;
         }
         #endregion
@@ -863,6 +867,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.WriteReturn;
         }
         #endregion
@@ -913,6 +918,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -965,6 +971,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -1018,6 +1025,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -1066,6 +1074,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -1116,6 +1125,7 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -1168,6 +1178,7 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -1329,6 +1340,7 @@ namespace FastData.Core.Repository
             stopwatch.Stop();
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -1383,6 +1395,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.WriteReturn;
         }
         #endregion
@@ -1436,6 +1449,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.WriteReturn;
         }
         #endregion
@@ -1486,6 +1500,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -1538,6 +1553,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
@@ -1591,6 +1607,7 @@ namespace FastData.Core.Repository
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.WriteReturn;
         }
