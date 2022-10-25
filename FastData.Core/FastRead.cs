@@ -265,6 +265,7 @@ namespace FastData.Core
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.List;
         }
         #endregion
@@ -338,6 +339,7 @@ namespace FastData.Core
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.Json;
         }
         #endregion
@@ -411,6 +413,7 @@ namespace FastData.Core
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.Item;
         }
         #endregion
@@ -484,6 +487,7 @@ namespace FastData.Core
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.Count;
         }
@@ -533,6 +537,7 @@ namespace FastData.Core
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.PageResult;
         }
         #endregion
@@ -610,6 +615,7 @@ namespace FastData.Core
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.PageResult;
         }
         #endregion
@@ -686,6 +692,7 @@ namespace FastData.Core
 
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.Table;
         }
         #endregion
@@ -760,6 +767,7 @@ namespace FastData.Core
             stopwatch.Stop();
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.List;
         }
@@ -837,6 +845,7 @@ namespace FastData.Core
             stopwatch.Stop();
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.DicList;
         }
         #endregion
@@ -909,6 +918,7 @@ namespace FastData.Core
 
             item.Config.IsOutSql = item.Config.IsOutSql ? item.Config.IsOutSql : isOutSql;
             DbLog.LogSql(item.Config.IsOutSql, result.Sql, item.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
             return result.Dic;
         }
         #endregion
@@ -983,6 +993,7 @@ namespace FastData.Core
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
 
             return result.DicList;
         }
