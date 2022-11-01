@@ -34,4 +34,20 @@ namespace FastUntility.Core.Page
         /// </summary>
         public List<Dictionary<string, object>> list { get; set; }
     }
+
+    /// <summary>
+    /// 分页返回实体
+    /// </summary>
+    public class PageResultDyn
+    {
+        /// <summary>
+        /// 分页model
+        /// </summary>
+        public PageModel pModel = new PageModel();
+
+        /// <summary>
+        /// 分页列表
+        /// </summary>
+        public List<dynamic> list { get; set; }
+    }
 }
