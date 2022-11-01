@@ -1,4 +1,5 @@
 ﻿using FastData.Core.Context;
+using FastData.Core.Model;
 using FastUntility.Core.Page;
 using System;
 using System.Collections.Generic;
@@ -108,6 +109,28 @@ namespace FastData.Core.Repository
 
         public abstract ValueTask<Lazy<List<T>>> ToLazyListAsy<T>(DataContext db = null, bool isOutSql = false) where T : class, new();
 
+        public abstract dynamic ToDyn(DataContext db = null, bool isOutSql = false);
 
+        public abstract ValueTask<dynamic> ToDynAsy(DataContext db = null, bool isOutSql = false);
+
+        public abstract Lazy<dynamic> ToLazyDyn(DataContext db = null, bool isOutSql = false);
+
+        public abstract ValueTask<Lazy<dynamic>> ToLazyDynAsy(DataContext db = null, bool isOutSql = false);
+
+        public abstract List<dynamic> ToDyns(DataContext db = null, bool isOutSql = false);
+
+        public abstract ValueTask<List<dynamic>> ToDynsAsy(DataContext db = null, bool isOutSql = false);
+
+        public abstract Lazy<List<dynamic>> ToLazyDyns(DataContext db = null, bool isOutSql = false);
+
+        public abstract ValueTask<Lazy<List<dynamic>>> ToLazyDynsAsy(DataContext db = null, bool isOutSql = false);
+
+        public abstract  PageResultDyn ToDynPage( PageModel pModel, DataContext db = null, bool isOutSql = false);
+
+        public abstract ValueTask<PageResultDyn> ToDynPageAsy( PageModel pModel, DataContext db = null, bool isOutSql = false);
+
+        public abstract Lazy<PageResultDyn> ToLazyDynPage( PageModel pModel, DataContext db = null, bool isOutSql = false);
+
+        public abstract ValueTask<Lazy<PageResultDyn>> ToLazyDynPageAsy( PageModel pModel, DataContext db = null, bool isOutSql = false);
     }
 }

@@ -997,5 +997,225 @@ namespace FastData.Core.Repository
             return this;
         }
         #endregion
+
+
+        #region dynamic
+        /// <summary>
+        /// dynamic
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override dynamic ToDyn(DataContext db = null, bool isOutSql = false)
+        {
+            var result = new DataReturnDyn();
+            var stopwatch = new Stopwatch();
+
+            if (Data.Predicate.Exists(a => a.IsSuccess == false))
+                return result.Item;
+
+            stopwatch.Start();
+            Data.Take = 1;
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(Data.Key))
+                {
+                    result = tempDb.GetDyns(Data);
+                }
+            }
+            else
+                result = db.GetDyns(Data);
+
+            stopwatch.Stop();
+
+            Data.Config.IsOutSql = Data.Config.IsOutSql ? Data.Config.IsOutSql : isOutSql;
+            DbLog.LogSql(Data.Config.IsOutSql, result.Sql, Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
+            return result.Item;
+        }
+        #endregion
+
+        #region dynamic asy
+        /// <summary>
+        /// dynamic asy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override ValueTask<dynamic> ToDynAsy(DataContext db = null, bool isOutSql = false)
+        {
+            return new ValueTask<dynamic>(ToDyn(db, isOutSql));
+        }
+        #endregion
+
+        #region dynamic lazy
+        /// <summary>
+        /// dynamic
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override Lazy<dynamic> ToLazyDyn(DataContext db = null, bool isOutSql = false)
+        {
+            return new Lazy<dynamic>(() => ToDyn(db, isOutSql));
+        }
+        #endregion
+
+        #region dynamic asy lazy
+        /// <summary>
+        /// dynamic asy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override ValueTask<Lazy<dynamic>> ToLazyDynAsy(DataContext db = null, bool isOutSql = false)
+        {
+            return new ValueTask<Lazy<dynamic>>(new Lazy<dynamic>(() => ToDyn(db, isOutSql)));
+        }
+        #endregion throw new NotImplementedException();
+
+
+        #region dynamics
+        /// <summary>
+        /// dynamics
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override List<dynamic> ToDyns( DataContext db = null, bool isOutSql = false)
+        {
+            var result = new DataReturnDyn();
+            var stopwatch = new Stopwatch();
+
+            if (Data.Predicate.Exists(a => a.IsSuccess == false))
+                return result.List;
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(Data.Key))
+                {
+                    result = tempDb.GetDyns(Data);
+                }
+            }
+            else
+                result = db.GetDyns(Data);
+
+            stopwatch.Stop();
+
+            Data.Config.IsOutSql = Data.Config.IsOutSql ? Data.Config.IsOutSql : isOutSql;
+            DbLog.LogSql(Data.Config.IsOutSql, result.Sql, Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
+            return result.List;
+        }
+        #endregion
+
+        #region dynamics asy
+        /// <summary>
+        /// dynamics asy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override ValueTask<List<dynamic>> ToDynsAsy( DataContext db = null, bool isOutSql = false)
+        {
+            return new ValueTask<List<dynamic>>(ToDyns(db, isOutSql));
+        }
+        #endregion
+
+        #region dynamics lazy
+        /// <summary>
+        /// dynamics
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override Lazy<List<dynamic>> ToLazyDyns( DataContext db = null, bool isOutSql = false)
+        {
+            return new Lazy<List<dynamic>>(() => ToDyns(db, isOutSql));
+        }
+        #endregion
+
+        #region dynamics asy lazy
+        /// <summary>
+        /// dynamics asy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public override ValueTask<Lazy<List<dynamic>>> ToLazyDynsAsy( DataContext db = null, bool isOutSql = false)
+        {
+            return new ValueTask<Lazy<List<dynamic>>>(new Lazy<List<dynamic>>(() => ToDyns(db, isOutSql)));
+        }
+        #endregion
+
+
+        #region 返回分页dyn
+        /// <summary>
+        /// 返回分页dyn
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="pModel"></param>
+        /// <returns></returns>
+        public override PageResultDyn ToDynPage( PageModel pModel, DataContext db = null, bool isOutSql = false)
+        {
+            var result = new DataReturnDyn();
+            var stopwatch = new Stopwatch();
+
+            if (Data.Predicate.Exists(a => a.IsSuccess == false))
+                return result.PageResult;
+
+            stopwatch.Start();
+
+            if (db == null)
+            {
+                using (var tempDb = new DataContext(Data.Key))
+                {
+                    result = tempDb.GetDynPage(Data, pModel);
+                }
+            }
+            else
+                result = db.GetDynPage(Data, pModel);
+
+            stopwatch.Stop();
+            Data.Config.IsOutSql = Data.Config.IsOutSql ? Data.Config.IsOutSql : isOutSql;
+            DbLog.LogSql(Data.Config.IsOutSql, result.Sql, Data.Config.DbType, stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch = null;
+            return result.PageResult;
+        }
+        #endregion
+
+        #region 返回分页dyn asy
+        /// <summary>
+        /// 返回分页dyn asy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="pModel"></param>
+        /// <returns></returns>
+        public override ValueTask<PageResultDyn> ToDynPageAsy( PageModel pModel, DataContext db = null, bool isOutSql = false)
+        {
+            return new ValueTask<PageResultDyn>(ToDynPage(pModel, db, isOutSql));
+        }
+        #endregion
+
+        #region 返回分页dyn lazy
+        /// <summary>
+        /// 返回分页dyn lazy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="pModel"></param>
+        /// <returns></returns>
+        public override Lazy<PageResultDyn> ToLazyDynPage( PageModel pModel, DataContext db = null, bool isOutSql = false)
+        {
+            return new Lazy<PageResultDyn>(() => ToDynPage(pModel, db, isOutSql));
+        }
+        #endregion
+
+        #region 返回分页dyn lazy asy
+        /// <summary>
+        /// 返回分页dyn lazy asy
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="pModel"></param>
+        /// <returns></returns>
+        public override ValueTask<Lazy<PageResultDyn>> ToLazyDynPageAsy( PageModel pModel, DataContext db = null, bool isOutSql = false)
+        {
+            return new ValueTask<Lazy<PageResultDyn>>(new Lazy<PageResultDyn>(() => ToDynPage(pModel, db, isOutSql)));
+        }
+        #endregion
     }
 }
