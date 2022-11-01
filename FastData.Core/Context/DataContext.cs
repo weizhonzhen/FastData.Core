@@ -476,6 +476,95 @@ namespace FastData.Core.Context
         }
         #endregion
 
+        #region 获取列表
+        /// <summary>
+        /// 获取列表
+        /// </summary>
+        /// <returns></returns>
+        public DataReturnDyn GetDyns(DataQuery item)
+        {
+            var param = new List<DbParameter>();
+            var result = new DataReturnDyn();
+            var sql = new StringBuilder();
+
+            try
+            {
+                //是否前几条或单条
+                if (item.Config.DbType == DataDbType.SqlServer && item.Take != 0)
+                    sql.AppendFormat("select top {2} {0} from {1}", string.Join(",", item.Field), item.Table[0], item.Take);
+                else
+                    sql.AppendFormat("select {0} from {1}", string.Join(",", item.Field), item.Table[0]);
+
+                for (var i = 1; i < item.Predicate.Count; i++)
+                {
+                    sql.AppendFormat(" {0} on {1}", item.Table[i], item.Predicate[i].Where);
+
+                    if (item.Predicate[i].Param.Count != 0)
+                        param.AddRange(item.Predicate[i].Param);
+                }
+
+                sql.AppendFormat(" where {0}", item.Predicate[0].Where);
+
+                //是否前几条或单条
+                if (item.Config.DbType == DataDbType.Oracle && item.Take != 0)
+                    sql.AppendFormat(" and rownum <={0}", item.Take);
+                else if (item.Config.DbType == DataDbType.DB2 && item.Take != 0)
+                    sql.AppendFormat(" and fetch first {0} rows only", item.Take);
+                else if (item.Config.DbType == DataDbType.MySql && item.Take != 0)
+                    sql.AppendFormat(" and limit {0}", item.Take);
+                else if (item.Config.DbType == DataDbType.PostgreSql && item.Take != 0)
+                    sql.AppendFormat(" and limit {0}", item.Take);
+                else if (item.Config.DbType == DataDbType.SQLite && item.Take != 0)
+                    sql.AppendFormat(" and limit 0 offset {0}", item.Take);
+
+                if (item.Predicate[0].Param.Count != 0)
+                    param.AddRange(item.Predicate[0].Param);
+
+                if (item.GroupBy.Count > 0)
+                    sql.AppendFormat(" group by {0}", string.Join(",", item.GroupBy));
+
+                if (item.OrderBy.Count > 0)
+                    sql.AppendFormat(" order by {0}", string.Join(",", item.OrderBy));
+
+                if (item.IsFilter)
+                    BaseFilter.Filter(param, FilterType.Query_List_Lambda, item.TableName, item.Config, sql);
+
+                result.Sql = ParameterToSql.ObjectParamToSql(param, sql.ToString(), item.Config);
+
+                Dispose(cmd);
+
+                if (param.Count != 0)
+                    cmd.Parameters.AddRange(param.ToArray());
+
+                BaseAop.AopBefore(item.TableName, sql.ToString(), param, config, true, AopType.Query_List_Lambda);
+
+                var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
+
+                if (item.Take == 1)
+                    result.Item = BaseDataReader.ToDyns(dr, item.Config).FirstOrDefault() ?? new object();
+                else
+                    result.List = BaseDataReader.ToDyns(dr, item.Config);
+
+                dr.Close();
+                dr.Dispose();
+                dr = null;
+
+                BaseAop.AopAfter(item.TableName, sql.ToString(), param, config, true, AopType.Query_List_Lambda, result.List);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                BaseAop.AopException(ex, $"to Dyns tableName:{string.Join(",",item.Table.ToArray())}", AopType.Query_List_Lambda, config);
+                if (string.Compare(config.SqlErrorType, SqlErrorType.Db, true) == 0)
+                    DbLogTable.LogException(config, ex, "GetDyns", "");
+                else
+                    DbLog.LogException(item.Config.IsOutError, item.Config.DbType, ex, "GetDyns", result.Sql);
+                return result;
+            }
+        }
+        #endregion
+
         #region fastread page
         private object GetPageSql(ServiceModel model, List<DbParameter> param, PageModel pModel)
         {
@@ -642,6 +731,66 @@ namespace FastData.Core.Context
                 }
                 else
                     result.PageResult.list = new List<Dictionary<string, object>>();
+
+                result.PageResult.pModel = pModel;
+            }
+            catch (Exception ex)
+            {
+                BaseAop.AopException(ex, "to Page ", AopType.Query_Page_Lambda_Dic, config);
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "GetPage", result.Sql);
+                else
+                    DbLog.LogException(item.Config.IsOutError, item.Config.DbType, ex, "GetPage", result.Sql);
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region 获取分页
+        /// <summary>
+        /// 获取分页
+        /// </summary>
+        /// <returns></returns>
+        public DataReturnDyn GetDynPage(DataQuery item, PageModel pModel)
+        {
+            var param = new List<DbParameter>();
+            var result = new DataReturnDyn();
+            var sql = "";
+
+            try
+            {
+                pModel.StarId = (pModel.PageId - 1) * pModel.PageSize + 1;
+                pModel.EndId = pModel.PageId * pModel.PageSize;
+                Dispose(cmd);
+                pModel.TotalRecord = BaseExecute.ToPageCount(item, cmd, ref sql, FilterType.Query_Page_Lambda_Dic);
+
+                if (pModel.TotalRecord > 0)
+                {
+                    if ((pModel.TotalRecord % pModel.PageSize) == 0)
+                        pModel.TotalPage = pModel.TotalRecord / pModel.PageSize;
+                    else
+                        pModel.TotalPage = (pModel.TotalRecord / pModel.PageSize) + 1;
+
+                    if (pModel.PageId > pModel.TotalPage)
+                        pModel.PageId = pModel.TotalPage;
+
+                    BaseAop.AopBefore(item.TableName, sql, param, config, true, AopType.Query_Page_Lambda_Dic);
+
+                    Dispose(cmd);
+                    var dr = BaseExecute.ToPageDataReader(item, cmd, pModel, ref sql, FilterType.Query_Page_Lambda_Dic);
+
+                    result.PageResult.list = BaseDataReader.ToDyns(dr, config);
+                    result.Sql = sql;
+
+                    dr.Close();
+                    dr.Dispose();
+                    dr = null;
+
+                    BaseAop.AopAfter(item.TableName, cmd.CommandText, param, config, true, AopType.Query_Page_Lambda_Dic, result.PageResult.list);
+                }
+                else
+                    result.PageResult.list = new List<dynamic>();
 
                 result.PageResult.pModel = pModel;
             }
