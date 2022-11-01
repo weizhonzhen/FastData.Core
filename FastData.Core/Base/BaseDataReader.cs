@@ -8,6 +8,8 @@ using FastData.Core.CacheModel;
 using System.Linq;
 using System.Collections;
 using FastUntility.Core.Base;
+using System.Dynamic;
+using System.Threading;
 
 namespace FastData.Core.Base
 {
@@ -75,6 +77,43 @@ namespace FastData.Core.Base
             return list;
         }
         #endregion
+
+        #region to dyns
+        /// <summary>
+        ///  to dyns
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dr"></param>
+        /// <param name="dbType"></param>
+        /// <returns></returns>
+        public static List<dynamic> ToDyns(DbDataReader dr, ConfigModel config)
+        {
+            List<dynamic> list = new List<dynamic>();
+            var colList = new List<string>();
+
+            if (dr == null)
+                return list;
+
+            if (dr.HasRows)
+                colList = GetCol(dr);
+
+            while (dr.Read())
+            {
+                dynamic item = new ExpandoObject();
+                var dic = (IDictionary<string, object>)item;
+
+                foreach (var key in colList)
+                {
+                    dic[key] = dr[key];
+                }
+
+                list.Add(item);
+            }
+
+            return list;
+        }
+        #endregion
+
 
         #region to list
         /// <summary>
