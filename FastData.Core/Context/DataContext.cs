@@ -527,7 +527,7 @@ namespace FastData.Core.Context
                     sql.AppendFormat(" order by {0}", string.Join(",", item.OrderBy));
 
                 if (item.IsFilter)
-                    BaseFilter.Filter(param, FilterType.Query_List_Lambda, item.TableName, item.Config, sql);
+                    BaseFilter.Filter(param, FilterType.Query_Dyn_Lambda, item.TableName, item.Config, sql);
 
                 result.Sql = ParameterToSql.ObjectParamToSql(param, sql.ToString(), item.Config);
 
@@ -536,7 +536,7 @@ namespace FastData.Core.Context
                 if (param.Count != 0)
                     cmd.Parameters.AddRange(param.ToArray());
 
-                BaseAop.AopBefore(item.TableName, sql.ToString(), param, config, true, AopType.Query_List_Lambda);
+                BaseAop.AopBefore(item.TableName, sql.ToString(), param, config, true, AopType.Query_Dyn_Lambda);
 
                 var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
 
@@ -549,13 +549,13 @@ namespace FastData.Core.Context
                 dr.Dispose();
                 dr = null;
 
-                BaseAop.AopAfter(item.TableName, sql.ToString(), param, config, true, AopType.Query_List_Lambda, result.List);
+                BaseAop.AopAfter(item.TableName, sql.ToString(), param, config, true, AopType.Query_Dyn_Lambda, result.List);
 
                 return result;
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, $"to Dyns tableName:{string.Join(",",item.Table.ToArray())}", AopType.Query_List_Lambda, config);
+                BaseAop.AopException(ex, $"to Dyns tableName:{string.Join(",",item.Table.ToArray())}", AopType.Query_Dyn_Lambda, config);
                 if (string.Compare(config.SqlErrorType, SqlErrorType.Db, true) == 0)
                     DbLogTable.LogException(config, ex, "GetDyns", "");
                 else
@@ -775,10 +775,10 @@ namespace FastData.Core.Context
                     if (pModel.PageId > pModel.TotalPage)
                         pModel.PageId = pModel.TotalPage;
 
-                    BaseAop.AopBefore(item.TableName, sql, param, config, true, AopType.Query_Page_Lambda_Dic);
+                    BaseAop.AopBefore(item.TableName, sql, param, config, true, AopType.Query_Page_Lambda_Dyn);
 
                     Dispose(cmd);
-                    var dr = BaseExecute.ToPageDataReader(item, cmd, pModel, ref sql, FilterType.Query_Page_Lambda_Dic);
+                    var dr = BaseExecute.ToPageDataReader(item, cmd, pModel, ref sql, FilterType.Query_Page_Lambda_Dyn);
 
                     result.PageResult.list = BaseDataReader.ToDyns(dr, config);
                     result.Sql = sql;
@@ -787,7 +787,7 @@ namespace FastData.Core.Context
                     dr.Dispose();
                     dr = null;
 
-                    BaseAop.AopAfter(item.TableName, cmd.CommandText, param, config, true, AopType.Query_Page_Lambda_Dic, result.PageResult.list);
+                    BaseAop.AopAfter(item.TableName, cmd.CommandText, param, config, true, AopType.Query_Page_Lambda_Dyn, result.PageResult.list);
                 }
                 else
                     result.PageResult.list = new List<dynamic>();
@@ -796,7 +796,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, "to Page ", AopType.Query_Page_Lambda_Dic, config);
+                BaseAop.AopException(ex, "to Page ", AopType.Query_Page_Lambda_Dyn, config);
                 if (config.SqlErrorType == SqlErrorType.Db)
                     DbLogTable.LogException(config, ex, "GetPage", result.Sql);
                 else
