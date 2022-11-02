@@ -47,6 +47,9 @@ namespace FastData.Core.Aop
         Navigate_Add = 33,
         Navigate_Delete = 34,
         Navigate_Update = 35,
-        Navigate_AddList = 36
+        Navigate_AddList = 36,
+
+        Query_Dyn_Lambda=37,
+        Query_Page_Lambda_Dyn=38
     }
 }
