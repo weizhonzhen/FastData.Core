@@ -10,6 +10,8 @@ namespace FastData.Core.Base
 {
     public static class DataConfig
     {
+        private static readonly string cacheKey = "FastData.Core.Config";
+
         /// <summary>
         /// 获取配置实体
         /// </summary>
@@ -19,7 +21,6 @@ namespace FastData.Core.Base
         {
             var list = new List<ConfigModel>();
             var item = new ConfigModel();
-            var cacheKey = "FastData.Core.Config";
 
             if (DbCache.Exists(CacheType.Web, cacheKey))
                 list = DbCache.Get<List<ConfigModel>>(CacheType.Web, cacheKey);
@@ -75,8 +76,6 @@ namespace FastData.Core.Base
 
         public static bool DataType(string key = null, string projectName = null, string dbFile = "db.json")
         {
-            var cacheKey = "FastData.Core.Config";
-
             if (!DbCache.Exists(CacheType.Web, cacheKey))
                 DataConfig.Get(key, projectName, dbFile);
 
@@ -91,6 +90,14 @@ namespace FastData.Core.Base
             result.Add(list.Count(a => string.Compare(a.DbType, DataDbType.SqlServer, true) == 0) > 0);
 
             return result.Count(a => a == true) > 1;
+        }
+
+        public static List<ConfigModel> List
+        {
+            get
+            {
+                return DbCache.Get<List<ConfigModel>>(CacheType.Web, cacheKey);
+            }
         }
     }
 }
