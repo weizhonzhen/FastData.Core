@@ -1,6 +1,7 @@
 ﻿using FastData.Core;
 using FastData.Core.Aop;
 using FastData.Core.Base;
+using FastData.Core.Context;
 using FastData.Core.Filter;
 using FastData.Core.Model;
 using FastData.Core.Proxy;
@@ -73,6 +74,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (!string.IsNullOrEmpty(config.NamespaceProperties) && !config.IsResource)
                 FastMap.InstanceProperties(config.NamespaceProperties, config.DbFile);
+
+            serviceCollection.AddScoped<IUnitOfWorK, UnitOfWorK>();
 
             return serviceCollection;
         }
