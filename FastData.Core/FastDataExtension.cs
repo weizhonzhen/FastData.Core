@@ -49,8 +49,6 @@ namespace Microsoft.Extensions.DependencyInjection
             if (!string.IsNullOrEmpty(config.NamespaceService))
                 FastMap.InstanceService(serviceCollection, config.NamespaceService);
 
-            ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
-
             var projectName = config.Current.GetName().Name;
             if (config.IsResource)
                 FastMap.InstanceMapResource(config.DbKey, config.DbFile, config.MapFile, projectName);
@@ -77,6 +75,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.AddScoped<IUnitOfWorK, UnitOfWorK>();
 
+            ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
             return serviceCollection;
         }
 

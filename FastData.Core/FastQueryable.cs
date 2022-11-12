@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using FastUntility.Core.Page;
 using System.Data;
 using System.Reflection;
+using FastUntility.Core;
 
 namespace FastData.Core
 {
@@ -156,15 +157,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetList<T>(Query);
-                }
-            }
-            else
-                result = db.GetList<T>(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetList<T>(Query);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -228,15 +222,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetList<R>(Query);
-                }
-            }
-            else
-                result = db.GetList<R>(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetList<R>(Query);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -300,15 +287,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetJson(Query);
-                }
-            }
-            else
-                result = db.GetJson(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetJson(Query);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -451,15 +431,8 @@ namespace FastData.Core
 
             Query.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetList<R>(Query);
-                }
-            }
-            else
-                result = db.GetList<R>(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetList<R>(Query);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -525,15 +498,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetCount(Query);
-                }
-            }
-            else
-                result = db.GetCount(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetCount(Query);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -575,15 +541,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetPage<T>(Query, pModel);
-                }
-            }
-            else
-                result = db.GetPage<T>(Query, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetPage<T>(Query, pModel);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -654,15 +613,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetPage<R>(Query, pModel);
-                }
-            }
-            else
-                result = db.GetPage<R>(Query, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetPage<R>(Query, pModel);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -732,15 +684,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetPage(Query, pModel);
-                }
-            }
-            else
-                result = db.GetPage(Query, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetPage(Query, pModel);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -808,15 +753,8 @@ namespace FastData.Core
             stopwatch.Start();
             Query.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetDataTable(Query);
-                }
-            }
-            else
-                result = db.GetDataTable(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetDataTable(Query);
 
             stopwatch.Stop();
 
@@ -880,15 +818,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetDic(Query);
-                }
-            }
-            else
-                result = db.GetDic(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetDic(Query);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;
@@ -952,15 +883,8 @@ namespace FastData.Core
             stopwatch.Start();
             Query.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetDic(Query);
-                }
-            }
-            else
-                result = db.GetDic(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetDic(Query);
 
             stopwatch.Stop();
 
@@ -1027,15 +951,8 @@ namespace FastData.Core
             stopwatch.Start();
             Query.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetDyns(Query);
-                }
-            }
-            else
-                result = db.GetDyns(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetDyns(Query);
 
             stopwatch.Stop();
 
@@ -1099,15 +1016,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetDyns(Query);
-                }
-            }
-            else
-                result = db.GetDyns(Query);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetDyns(Query);
 
             stopwatch.Stop();
 
@@ -1172,15 +1082,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Query.Key))
-                {
-                    result = tempDb.GetDynPage(Query, pModel);
-                }
-            }
-            else
-                result = db.GetDynPage(Query, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(Query.Key) : db;
+            result = db.GetDynPage(Query, pModel);
 
             stopwatch.Stop();
             Query.Config.IsOutSql = Query.Config.IsOutSql ? Query.Config.IsOutSql : isOutSql;

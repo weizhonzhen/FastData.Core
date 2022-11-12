@@ -1,6 +1,7 @@
 ﻿using FastData.Core.Base;
 using FastData.Core.Context;
 using FastData.Core.Model;
+using FastUntility.Core;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -79,19 +80,9 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.Add<T>(model, false);
-                    config = tempDb.config;
-                }
-            }
-            else
-            {
-                result = db.Add<T>(model, false);
-                config = db.config;
-            }
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            result = db.Add<T>(model, false);
+            config = db.config;
 
             stopwatch.Stop();
 
@@ -134,19 +125,9 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.Delete<T>(predicate);
-                    config = tempDb.config;
-                }
-            }
-            else
-            {
-                result = db.Delete<T>(predicate);
-                config = db.config;
-            }
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            result = db.Delete<T>(predicate);
+            config = db.config;
 
             stopwatch.Stop();
 
@@ -186,19 +167,9 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.Delete(model, isTrans);
-                    config = tempDb.config;
-                }
-            }
-            else
-            {
-                result = db.Delete(model, isTrans);
-                config = db.config;
-            }
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            result = db.Delete(model, isTrans);
+            config = db.config;
 
             stopwatch.Stop();
 
@@ -240,19 +211,9 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.Update<T>(model, predicate, field);
-                    config = tempDb.config;
-                }
-            }
-            else
-            {
-                result = db.Update<T>(model, predicate, field);
-                config = db.config;
-            }
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            result = db.Update<T>(model, predicate, field);
+            config = db.config;
 
             stopwatch.Stop();
 
@@ -295,19 +256,9 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.Update(model, field, isTrans);
-                    config = tempDb.config;
-                }
-            }
-            else
-            {
-                result = db.Update(model, field, isTrans);
-                config = db.config;
-            }
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            result = db.Update(model, field, isTrans);
+            config = db.config;
 
             stopwatch.Stop();
 
@@ -345,19 +296,9 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.UpdateList(list, field);
-                    config = tempDb.config;
-                }
-            }
-            else
-            {
-                result = db.UpdateList(list, field);
-                config = db.config;
-            }
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            result = db.UpdateList(list, field);
+            config = db.config;
 
             stopwatch.Stop();
 
@@ -396,21 +337,10 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    config = tempDb.config;
-                    config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-                    result = tempDb.ExecuteSql(sql, param, false, config.IsOutSql, false);
-                }
-            }
-            else
-            {
-                config = db.config;
-                config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-                result = db.ExecuteSql(sql, param, false, config.IsOutSql, false);
-            }
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            config = db.config;
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            result = db.ExecuteSql(sql, param, false, config.IsOutSql, false);
 
             stopwatch.Stop();
 
@@ -450,21 +380,10 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    config = tempDb.config;
-                    config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-                    result = tempDb.ExecuteDDL(sql, param, config.IsOutSql);
-                }
-            }
-            else
-            {
-                config = db.config;
-                config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-                result = db.ExecuteSql(sql, param, false, config.IsOutSql);
-            }
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            config = db.config;
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            result = db.ExecuteSql(sql, param, false, config.IsOutSql);
 
             stopwatch.Stop();
 

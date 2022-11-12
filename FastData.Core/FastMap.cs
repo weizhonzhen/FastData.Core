@@ -520,18 +520,11 @@ namespace FastData.Core
                 var result = FastRead.ExecuteSql<T>(sql, param, db, key, isOutSql, false);
                 if (MapXml.MapIsForEach(name, config))
                 {
-                    if (db == null)
+                    db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+                    for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
                     {
-                        using (var tempDb = new DataContext(key))
-                        {
-                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
-                            {
-                                result = MapXml.MapForEach<T>(result, name, tempDb, config, i);
-                            }
-                        }
+                        result = MapXml.MapForEach<T>(result, name, db, config, i);
                     }
-                    else
-                        result = MapXml.MapForEach<T>(result, name, db, config);
                 }
                 BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_List_Model, result);
                 return result;
@@ -599,18 +592,13 @@ namespace FastData.Core
 
                 if (MapXml.MapIsForEach(name, config))
                 {
-                    if (db == null)
+                    db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+
+                    for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
                     {
-                        using (var tempDb = new DataContext(key))
-                        {
-                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
-                            {
-                                result = MapXml.MapForEach(result, name, tempDb, key, config, i);
-                            }
-                        }
+                        result = MapXml.MapForEach(result, name, db, key, config, i);
                     }
-                    else
-                        result = MapXml.MapForEach(result, name, db, key, config);
+
                 }
 
                 BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_List_Dic, result);
@@ -733,15 +721,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.GetPageSql(pModel, sql, param, false);
-                }
-            }
-            else
-                result = db.GetPageSql(pModel, sql, param, false);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            result = db.GetPageSql(pModel, sql, param, false);
 
             stopwatch.Stop();
 
@@ -775,19 +756,12 @@ namespace FastData.Core
 
                 if (MapXml.MapIsForEach(name, config))
                 {
-                    if (db == null)
-                    {
-                        using (var tempDb = new DataContext(key))
-                        {
+                    db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
 
-                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
-                            {
-                                result.list = MapXml.MapForEach(result.list, name, tempDb, key, config, i);
-                            }
-                        }
+                    for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
+                    {
+                        result.list = MapXml.MapForEach(result.list, name, db, key, config, i);
                     }
-                    else
-                        result.list = MapXml.MapForEach(result.list, name, db, key, config);
                 }
 
                 BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Page_Dic, result.list);
@@ -849,15 +823,8 @@ namespace FastData.Core
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(key))
-                {
-                    result = tempDb.GetPageSql<T>(pModel, sql, param, false);
-                }
-            }
-            else
-                result = db.GetPageSql<T>(pModel, sql, param, false);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            result = db.GetPageSql<T>(pModel, sql, param, false);
 
             stopwatch.Stop();
 
@@ -891,18 +858,11 @@ namespace FastData.Core
 
                 if (MapXml.MapIsForEach(name, config))
                 {
-                    if (db == null)
+                    db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+                    for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
                     {
-                        using (var tempDb = new DataContext(key))
-                        {
-                            for (var i = 1; i <= MapXml.MapForEachCount(name, config); i++)
-                            {
-                                result.list = MapXml.MapForEach<T>(result.list, name, tempDb, config, i);
-                            }
-                        }
+                        result.list = MapXml.MapForEach<T>(result.list, name, db, config, i);
                     }
-                    else
-                        result.list = MapXml.MapForEach<T>(result.list, name, db, config);
                 }
 
                 return result;
