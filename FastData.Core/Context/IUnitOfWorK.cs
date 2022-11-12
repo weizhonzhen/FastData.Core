@@ -15,27 +15,43 @@ namespace FastData.Core.Context
 
     internal class UnitOfWorK : IUnitOfWorK, IDisposable
     {
-        public DataContext Context { get; set; }
+        private DataContext _Context;
+
+        public DataContext Context
+        {
+            set { _Context = value; }
+            get
+            {
+                if (_Context != null && !_Context.isDispose)
+                    return _Context;
+                else
+                {
+                    _Context = new DataContext(DataConfig.List[0].Key);
+                    return _Context;
+                }
+            }
+        }
+
         private readonly ConcurrentDictionary<string, DataContext> list = new ConcurrentDictionary<string, DataContext>();
 
         public UnitOfWorK()
         {
-            if (DataConfig.List.Count == 1)
-                Context = new DataContext(DataConfig.List[0].Key);
-            else
-                foreach (var item in DataConfig.List)
-                {
-                    list.TryAdd(item.Key, new DataContext(item.Key));
-                }
+            foreach (var item in DataConfig.List)
+            {
+                list.TryAdd(item.Key, new DataContext(item.Key));
+            }
+            _Context = list[DataConfig.List[0].Key];
         }
 
         public void Dispose()
         {
-            Context?.Dispose();
             foreach (var item in list)
             {
+                if (!item.Value.isDispose)
+                    _Context?.Dispose();
                 item.Value?.Dispose();
             }
+            list.Clear();
         }
 
         public DataContext Contexts(string key)
@@ -45,7 +61,7 @@ namespace FastData.Core.Context
 
             DataContext data;
             list.TryGetValue(key, out data);
-            if (data == null)
+            if (data == null || data?.isDispose == true)
             {
                 list.TryRemove(key, out data);
                 data = new DataContext(key);
