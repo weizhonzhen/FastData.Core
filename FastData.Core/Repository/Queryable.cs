@@ -1,6 +1,7 @@
 ﻿using FastData.Core.Base;
 using FastData.Core.Context;
 using FastData.Core.Model;
+using FastUntility.Core;
 using FastUntility.Core.Page;
 using System;
 using System.Collections.Generic;
@@ -169,15 +170,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetList<T>(this.Data);
-                }
-            }
-            else
-                result = db.GetList<T>(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetList<T>(this.Data);
 
             stopwatch.Stop();
 
@@ -244,15 +238,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetJson(this.Data);
-                }
-            }
-            else
-                result = db.GetJson(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetJson(this.Data);
 
             stopwatch.Stop();
 
@@ -319,15 +306,8 @@ namespace FastData.Core.Repository
 
             this.Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetList<T>(this.Data);
-                }
-            }
-            else
-                result = db.GetList<T>(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetList<T>(this.Data);
 
             stopwatch.Stop();
 
@@ -394,15 +374,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetCount(this.Data);
-                }
-            }
-            else
-                result = db.GetCount(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetCount(this.Data);
 
             stopwatch.Stop();
 
@@ -445,15 +418,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetPage<T>(this.Data, pModel);
-                }
-            }
-            else
-                result = db.GetPage<T>(this.Data, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetPage<T>(this.Data, pModel);
 
             stopwatch.Stop();
 
@@ -524,15 +490,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetPage(this.Data, pModel);
-                }
-            }
-            else
-                result = db.GetPage(this.Data, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetPage(this.Data, pModel);
 
             stopwatch.Stop();
 
@@ -601,15 +560,8 @@ namespace FastData.Core.Repository
             stopwatch.Start();
             this.Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetDataTable(this.Data);
-                }
-            }
-            else
-                result = db.GetDataTable(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDataTable(this.Data);
 
             stopwatch.Stop();
 
@@ -673,15 +625,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetDic(this.Data);
-                }
-            }
-            else
-                result = db.GetDic(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDic(this.Data);
 
             stopwatch.Stop();
 
@@ -746,15 +691,8 @@ namespace FastData.Core.Repository
             stopwatch.Start();
             this.Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetDic(this.Data);
-                }
-            }
-            else
-                result = db.GetDic(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDic(this.Data);
 
             stopwatch.Stop();
 
@@ -822,15 +760,8 @@ namespace FastData.Core.Repository
 
             this.Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetList<R>(this.Data);
-                }
-            }
-            else
-                result = db.GetList<R>(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetList<R>(this.Data);
 
             stopwatch.Stop();
 
@@ -903,15 +834,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetPage<R>(this.Data, pModel);
-                }
-            }
-            else
-                result = db.GetPage<R>(this.Data, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetPage<R>(this.Data, pModel);
 
             stopwatch.Stop();
 
@@ -986,15 +910,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetList<R>(this.Data);
-                }
-            }
-            else
-                result = db.GetList<R>(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetList<R>(this.Data);
 
             stopwatch.Stop();
 
@@ -1162,15 +1079,8 @@ namespace FastData.Core.Repository
             stopwatch.Start();
             Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Data.Key))
-                {
-                    result = tempDb.GetDyns(Data);
-                }
-            }
-            else
-                result = db.GetDyns(Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDyns(Data);
 
             stopwatch.Stop();
 
@@ -1234,15 +1144,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Data.Key))
-                {
-                    result = tempDb.GetDyns(Data);
-                }
-            }
-            else
-                result = db.GetDyns(Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDyns(Data);
 
             stopwatch.Stop();
 
@@ -1306,15 +1209,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Data.Key))
-                {
-                    result = tempDb.GetDynPage(Data, pModel);
-                }
-            }
-            else
-                result = db.GetDynPage(Data, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDynPage(Data, pModel);
 
             stopwatch.Stop();
             Data.Config.IsOutSql = Data.Config.IsOutSql ? Data.Config.IsOutSql : isOutSql;
@@ -1535,15 +1431,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetJson(this.Data);
-                }
-            }
-            else
-                result = db.GetJson(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetJson(this.Data);
 
             stopwatch.Stop();
 
@@ -1611,15 +1500,8 @@ namespace FastData.Core.Repository
 
             this.Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetList<R>(this.Data);
-                }
-            }
-            else
-                result = db.GetList<R>(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetList<R>(this.Data);
 
             stopwatch.Stop();
 
@@ -1689,15 +1571,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetCount(this.Data);
-                }
-            }
-            else
-                result = db.GetCount(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetCount(this.Data);
 
             stopwatch.Stop();
 
@@ -1741,15 +1616,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetPage<R>(this.Data, pModel);
-                }
-            }
-            else
-                result = db.GetPage<R>(this.Data, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetPage<R>(this.Data, pModel);
 
             stopwatch.Stop();
 
@@ -1823,15 +1691,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetPage(this.Data, pModel);
-                }
-            }
-            else
-                result = db.GetPage(this.Data, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetPage(this.Data, pModel);
 
             stopwatch.Stop();
 
@@ -1900,15 +1761,8 @@ namespace FastData.Core.Repository
             stopwatch.Start();
             this.Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetDataTable(this.Data);
-                }
-            }
-            else
-                result = db.GetDataTable(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDataTable(this.Data);
 
             stopwatch.Stop();
 
@@ -1972,15 +1826,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetDic(this.Data);
-                }
-            }
-            else
-                result = db.GetDic(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDic(this.Data);
 
             stopwatch.Stop();
 
@@ -2045,15 +1892,8 @@ namespace FastData.Core.Repository
             stopwatch.Start();
             this.Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetDic(this.Data);
-                }
-            }
-            else
-                result = db.GetDic(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDic(this.Data);
 
             stopwatch.Stop();
 
@@ -2119,15 +1959,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(this.Data.Key))
-                {
-                    result = tempDb.GetList<R>(this.Data);
-                }
-            }
-            else
-                result = db.GetList<R>(this.Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetList<R>(this.Data);
 
             stopwatch.Stop();
 
@@ -2197,15 +2030,8 @@ namespace FastData.Core.Repository
             stopwatch.Start();
             Data.Take = 1;
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Data.Key))
-                {
-                    result = tempDb.GetDyns(Data);
-                }
-            }
-            else
-                result = db.GetDyns(Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDyns(Data);
 
             stopwatch.Stop();
 
@@ -2269,15 +2095,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Data.Key))
-                {
-                    result = tempDb.GetDyns(Data);
-                }
-            }
-            else
-                result = db.GetDyns(Data);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDyns(Data);
 
             stopwatch.Stop();
 
@@ -2341,15 +2160,8 @@ namespace FastData.Core.Repository
 
             stopwatch.Start();
 
-            if (db == null)
-            {
-                using (var tempDb = new DataContext(Data.Key))
-                {
-                    result = tempDb.GetDynPage(Data, pModel);
-                }
-            }
-            else
-                result = db.GetDynPage(Data, pModel);
+            db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(this.Data.Key) : db;
+            result = db.GetDynPage(Data, pModel);
 
             stopwatch.Stop();
             Data.Config.IsOutSql = Data.Config.IsOutSql ? Data.Config.IsOutSql : isOutSql;
