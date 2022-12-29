@@ -24,8 +24,11 @@ namespace FastUntility.Core.Base
         {
             var result = new T();
             PropertyInfo<T>().ForEach(a => {
-                if (dic.ContainsKey(a.Name.ToLower()) && !string.IsNullOrEmpty(dic[a.Name.ToLower()].ToStr()))
-                    BaseEmit.Set(result, a.Name, dic[a.Name.ToLower()]);
+                if (dic.Keys.ToList().Exists(d => string.Compare(d, a.Name, true) == 0 && dic[d].ToStr() != ""))
+                {
+                    var key = dic.Keys.ToList().Find(d => string.Compare(d, a.Name, true) == 0 && dic[d].ToStr() != "");
+                    BaseEmit.Set(result, a.Name, dic[key]);
+                }
             });
 
             return result;
@@ -94,6 +97,55 @@ namespace FastUntility.Core.Base
             {
                 return typeof(T).GetProperties().ToList();
             }
+        }
+        #endregion
+    }
+
+
+    public static class BaseDyn
+    {
+        #region dyn to T
+        /// <summary>
+        ///  dyn to T
+        /// </summary>
+        /// <returns></returns>
+        public static T DynToModel<T>(dynamic dyn) where T : class, new()
+        {
+            var result = new T();
+
+            if (dyn != null && dyn is IDictionary<string, object>)
+            {
+                var dic = dyn as IDictionary<string, object>;
+                BaseDic.PropertyInfo<T>().ForEach(a =>
+                {
+                    if (dic.Keys.ToList().Exists(d => string.Compare(d, a.Name, true) == 0 && dic[d].ToStr() != ""))
+                    {
+                        var key = dic.Keys.ToList().Find(d => string.Compare(d, a.Name, true) == 0 && dic[d].ToStr() != "");
+                        BaseEmit.Set(result, a.Name, dic[key]);
+                    }
+                });
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region List<dyn> to List<T>
+        /// <summary>
+        ///  List<dyn> to List<T>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static List<T> DynToModel<T>(List<dynamic> dic) where T : class, new()
+        {
+            var result = new List<T>();
+
+            dic.ForEach(a => {
+                result.Add(DynToModel<T>(a));
+            });
+
+            return result;
         }
         #endregion
     }
