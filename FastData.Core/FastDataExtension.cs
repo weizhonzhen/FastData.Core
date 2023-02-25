@@ -43,6 +43,13 @@ namespace Microsoft.Extensions.DependencyInjection
                     try { Assembly.Load(a.Name); } catch (Exception ex) { }
             });
 
+            InitModelType(config.NamespaceProperties).ForEach(m =>
+            {
+                var type = typeof(FastRepository<>).MakeGenericType(new Type[1] { m });
+                var obj = Activator.CreateInstance(type);
+                serviceCollection.AddSingleton(type.GetInterfaces().First(), s => { return obj; });
+            });
+
             if (config.Aop != null)
                 serviceCollection.AddSingleton<IFastAop>(config.Aop);
 
@@ -75,6 +82,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.AddScoped<IUnitOfWorK, UnitOfWorK>();
 
+            serviceCollection.AddFastAopAutowired(typeof(FastRepository).Namespace, ServiceLifetime.Singleton);
+            serviceCollection.AddFastAopAutowiredGeneric(typeof(FastRepository<>).Namespace, config.NamespaceProperties, null, ServiceLifetime.Singleton);
             ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
             return serviceCollection;
         }
