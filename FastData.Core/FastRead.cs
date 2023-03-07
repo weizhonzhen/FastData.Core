@@ -75,7 +75,7 @@ namespace FastData.Core
         {
             var result = new DataQuery();
 
-            var projectName = FastDataExtension.config.Current.GetName().Name;
+            var projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name;
 
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
@@ -113,7 +113,7 @@ namespace FastData.Core
         public static FastQueryable<T> Queryable<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json") where T : class, new()
         {
             var result = new FastQueryable<T>();
-            var projectName = FastDataExtension.config.Current.GetName().Name;
+            var projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name;
 
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 

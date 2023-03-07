@@ -195,7 +195,7 @@ namespace FastData.Core
         internal static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
         {
             if (projectName == null)
-                projectName = FastDataExtension.config.Current.GetName().Name;
+                projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name; 
 
             var config = DataConfig.Get(dbKey, projectName, dbFile);
             using (var db = new DataContext(dbKey))
