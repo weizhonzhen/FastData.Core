@@ -1083,7 +1083,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public Queryable<T> Queryable<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json") where T : class, new()
         {
-            var projectName = FastDataExtension.config.Current.GetName().Name;
+            var projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name;
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
             if(DbCache.Exists(CacheType.Web,cacheKey) && key == null)            
@@ -1130,7 +1130,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public IQuery Query<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
-            var projectName = FastDataExtension.config.Current.GetName().Name;
+            var projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name;
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
             if (DbCache.Exists(CacheType.Web, cacheKey) && key == null)
@@ -1498,7 +1498,7 @@ namespace FastData.Core.Repository
         /// <returns></returns>
         public Queryable<T> Queryable(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> field = null, string key = null, string dbFile = "db.json")
         {
-            var projectName = FastDataExtension.config.Current.GetName().Name;
+            var projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name;
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
             if (DbCache.Exists(CacheType.Web, cacheKey) && key == null)
