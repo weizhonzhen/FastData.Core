@@ -26,6 +26,7 @@ namespace FastData.Core.Context
         private DbConnection conn;
         private DbCommand cmd;
         private DbTransaction trans;
+        private List<bool> IsSuccess=new List<bool>();
         internal bool isDispose;
 
         #region Navigate Add
@@ -51,6 +52,8 @@ namespace FastData.Core.Context
                     result.Add(AddList(model, navigate).WriteReturn);
             });
 
+            if (this.trans != null)
+                IsSuccess.AddRange(result.Select(a => a.IsSuccess));
             return result;
         }
         #endregion
@@ -80,6 +83,8 @@ namespace FastData.Core.Context
                 });
             });
 
+            if (this.trans != null)
+                IsSuccess.AddRange(result.Select(a => a.IsSuccess));
             return result;
         }
         #endregion
@@ -108,6 +113,8 @@ namespace FastData.Core.Context
                 });
             });
 
+            if (this.trans != null)
+                IsSuccess.AddRange(result.Select(a => a.IsSuccess));
             return result;
         }
         #endregion
@@ -358,6 +365,7 @@ namespace FastData.Core.Context
             cmd.Dispose();
             conn.Dispose();
             isDispose= true;
+            IsSuccess = null;
             GC.SuppressFinalize(this);
         }
         #endregion
@@ -1430,6 +1438,9 @@ namespace FastData.Core.Context
                     SubmitTrans();
                 else if (isTrans && result.WriteReturn.IsSuccess == false)
                     RollbackTrans();
+
+                if (this.trans != null && !isTrans)
+                    IsSuccess.Add(result.WriteReturn.IsSuccess);
             }
             catch (Exception ex)
             {
@@ -1466,7 +1477,7 @@ namespace FastData.Core.Context
 
             try
             {
-                isTrans = this.trans == null;
+                isTrans = this.trans == null && isTrans;
                 if (isTrans)
                     BeginTrans();
 
@@ -1511,6 +1522,9 @@ namespace FastData.Core.Context
                     SubmitTrans();
                 else if (isTrans && result.WriteReturn.IsSuccess == false)
                     RollbackTrans();
+
+                if (this.trans != null && !isTrans)
+                    IsSuccess.Add(result.WriteReturn.IsSuccess);
             }
             catch (Exception ex)
             {
@@ -1647,6 +1661,9 @@ namespace FastData.Core.Context
                     SubmitTrans();
                 else if (isTrans && result.WriteReturn.IsSuccess == false)
                     RollbackTrans();
+
+                if (this.trans != null && !isTrans)
+                    IsSuccess.Add(result.WriteReturn.IsSuccess);
             }
             catch (Exception ex)
             {
@@ -1692,7 +1709,7 @@ namespace FastData.Core.Context
 
                 if (update.IsSuccess)
                 {
-                    isTrans = this.trans == null;
+                    isTrans = this.trans == null && isTrans;
                     var dic = CheckNavigate<T>(model, AopType.Navigate_Update);
                     if (dic.Count > 0)
                     {
@@ -1731,6 +1748,9 @@ namespace FastData.Core.Context
                     SubmitTrans();
                 else if (isTrans && result.WriteReturn.IsSuccess == false)
                     RollbackTrans();
+
+                if (this.trans != null && !isTrans)
+                    IsSuccess.Add(result.WriteReturn.IsSuccess);
             }
             catch (Exception ex)
             {
@@ -1906,7 +1926,7 @@ namespace FastData.Core.Context
 
                 if (insert.IsSuccess)
                 {
-                    isTrans = this.trans == null;
+                    isTrans = this.trans == null && isTrans;
                     var dic = CheckNavigate<T>(model, AopType.Navigate_Add);
                     if (dic.Count > 0)
                     {
@@ -1939,6 +1959,9 @@ namespace FastData.Core.Context
                         SubmitTrans();
                     else if (isTrans && result.WriteReturn.IsSuccess == false)
                         RollbackTrans();
+
+                    if (this.trans != null && !isTrans)
+                        IsSuccess.Add(result.WriteReturn.IsSuccess);
                 }
 
                 BaseAop.AopAfter(tableName, insert.Sql, insert.Param, config, false, AopType.Add, result.WriteReturn, model);
@@ -2029,7 +2052,7 @@ namespace FastData.Core.Context
 
             try
             {
-                isTrans = this.trans == null;
+                isTrans = this.trans == null && isTrans;
                 if (isTrans)
                     BeginTrans();
 
@@ -2156,6 +2179,9 @@ namespace FastData.Core.Context
                 else if (result.WriteReturn.IsSuccess == false && isTrans)
                     RollbackTrans();
 
+                if (this.trans != null && !isTrans)
+                    IsSuccess.Add(result.WriteReturn.IsSuccess);
+
                 BaseAop.AopAfter(tableName, cmd.CommandText, null, config, false, AopType.AddList, result.WriteReturn, list);
             }
             catch (Exception ex)
@@ -2174,7 +2200,8 @@ namespace FastData.Core.Context
                 result.WriteReturn.IsSuccess = false;
             }
 
-            cmd = conn.CreateCommand();
+            if (this.trans != null && !isTrans)
+                IsSuccess.Add(result.WriteReturn.IsSuccess);
             return result;
         }
         #endregion
@@ -2386,6 +2413,8 @@ namespace FastData.Core.Context
                 result.WriteReturn.Message = ex.Message;
             }
 
+            if (this.trans != null && !isTrans)
+                IsSuccess.Add(result.WriteReturn.IsSuccess);
             return result;
         }
 
@@ -2460,6 +2489,7 @@ namespace FastData.Core.Context
             if (this.trans != null)
                 this.trans.Rollback();
             this.trans = this.conn.BeginTransaction();
+            this.IsSuccess.Clear();
             this.cmd.Transaction = trans;
         }
         #endregion
@@ -2467,7 +2497,14 @@ namespace FastData.Core.Context
         #region 提交事务
         public void SubmitTrans()
         {
-            this.trans.Commit();
+            if (this.IsSuccess.Count(a => a) == this.IsSuccess.Count)
+                this.trans.Commit();
+            else
+            {
+                this.IsSuccess.Clear();
+                this.trans.Rollback();
+            }
+
             this.trans.Dispose();
             this.trans = null;
         }
@@ -2476,6 +2513,7 @@ namespace FastData.Core.Context
         #region 回滚事务
         public void RollbackTrans()
         {
+            this.IsSuccess.Clear();
             this.trans.Rollback();
             this.trans.Dispose();
             this.trans = null;

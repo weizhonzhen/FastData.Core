@@ -56,8 +56,11 @@ namespace FastData.Core.Context
 
         public DataContext Contexts(string key)
         {
-            if (!DataConfig.List.Exists(a => a.Key == key))
+            if (!DataConfig.List.Exists(a => a.Key == key) && DataConfig.List.Count > 1)
                 throw new Exception($"不存在数据库Key:{key}");
+
+            if (string.IsNullOrEmpty(key))
+                key = DataConfig.List[0].Key;
 
             DataContext data;
             list.TryGetValue(key, out data);
