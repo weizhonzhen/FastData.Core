@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Common;
 
 namespace FastData.Core.Base
@@ -18,10 +18,15 @@ namespace FastData.Core.Base
         /// <returns></returns>
         public static List<DbParameter> ParamMerge(List<DbParameter> param1, List<DbParameter> param2)
         {
-            if (param2.Count != 0)
-                 param1.AddRange(param2);
+            var result = new List<DbParameter>();
 
-            return param1;
+            if (param1.Count != 0)
+                result.AddRange(param1);
+
+            if (param2.Count != 0)
+                result.AddRange(param2);
+
+            return result;
         }
         #endregion
     }
