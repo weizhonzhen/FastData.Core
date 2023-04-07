@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Reflection;
 using FastData.Core.Model;
 using System.Linq;
+using FastUntility.Core.Base;
 
 namespace FastData.Core.Base
 {
@@ -26,11 +27,9 @@ namespace FastData.Core.Base
                     if (assembly == null)
                         assembly = Assembly.Load(config.ProviderName);
 
-                    var type = assembly.GetType(config.FactoryClient, false);
-                    object instance = null;
-
-                    if (type != null)
-                        instance = Activator.CreateInstance(type);
+                    var model = assembly.GetType(config.FactoryClient, false);
+                    var field = model.GetField("Instance");
+                    var instance = field.GetValue(model);
 
                     DbCache.Set<object>(CacheType.Web, config.ProviderName, instance);
                     return instance as DbProviderFactory;
