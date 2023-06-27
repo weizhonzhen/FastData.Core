@@ -83,7 +83,6 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.AddScoped<IUnitOfWorK, UnitOfWorK>();
 
             serviceCollection.AddFastAopAutowired(typeof(FastRepository).Namespace, ServiceLifetime.Singleton);
-            serviceCollection.AddFastAopAutowiredGeneric(typeof(FastRepository<>).Namespace, config.NamespaceProperties, null, ServiceLifetime.Singleton);
             ServiceContext.Init(new ServiceEngine(serviceCollection.BuildServiceProvider()));
             return serviceCollection;
         }
