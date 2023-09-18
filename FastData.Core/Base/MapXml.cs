@@ -1,22 +1,20 @@
-﻿using FastData.Core.Context;
+﻿using FastData.Core.Aop;
+using FastData.Core.Check;
+using FastData.Core.Context;
+using FastData.Core.DataModel.Oracle;
 using FastData.Core.Model;
+using FastData.Core.Type;
+using FastUntility.Core;
 using FastUntility.Core.Base;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Text;
-using System.Linq;
-using System.Xml;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using FastData.Core.Property;
+using System.Text;
 using System.Threading.Tasks;
-using FastData.Core.Type;
-using FastData.Core.Check;
-using Microsoft.CodeAnalysis.Scripting;
-using FastData.Core.Aop;
-using FastUntility.Core;
+using System.Xml;
 
 namespace FastData.Core.Base
 {
@@ -77,287 +75,70 @@ namespace FastData.Core.Base
                         var tempSql = new StringBuilder();
                         foreach (var item in DbCache.Get<List<string>>(cacheType, string.Format("{0}.param", name.ToLower())))
                         {
-                            if (!param.ToList().Exists(a =>string.Compare( a.ParameterName, item, true) ==0))
+                            if (!param.ToList().Exists(a => string.Compare(a.ParameterName, item, true) == 0))
                                 continue;
-                            var temp = param.ToList().Find(a =>string.Compare( a.ParameterName, item, true) ==0);
+                            var temp = param.ToList().Find(a => string.Compare(a.ParameterName, item, true) == 0);
                             if (!tempParam.ToList().Exists(a => a.ParameterName == temp.ParameterName))
                                 tempParam.Add(temp);
 
-                            var paramKey = string.Format("{0}.{1}.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
-                            var conditionKey = string.Format("{0}.{1}.condition.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
-                            var conditionValueKey = string.Format("{0}.{1}.condition.value.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
+                            var sqlModel = new SqlModel() { CacheType = cacheType, I = i, MapName = name, Param = temp, Flag = flag };
 
-                            if (DbCache.Exists(cacheType, paramKey))
+                            if (DbCache.Exists(cacheType, sqlModel.ParamKey))
                             {
-                                var flagParam = string.Format("{0}{1}", flag, temp.ParameterName).ToLower();
-                                var tempKey = string.Format("#{0}#", temp.ParameterName).ToLower();
-                                var paramSql = DbCache.Get(cacheType, paramKey.ToLower()).ToLower();
-                                var condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
-                                var conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr().ToLower();
+                                var condition = DbCache.Get(cacheType, sqlModel.ConditionKey).ToStr().ToLower();
                                 switch (condition)
                                 {
                                     case "isequal":
                                         {
-                                            if (conditionValue == temp.Value.ToStr())
-                                            {
-                                                if (paramSql.IndexOf(tempKey) >= 0)
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
-                                                }
-                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                                }
-                                                else
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                            }
-                                            else
-                                                tempParam.Remove(temp);
+                                            XmlOption.IsEqualSql(sqlModel, tempParam);
                                             break;
                                         }
                                     case "isnotequal":
                                         {
-                                            if (conditionValue != temp.Value.ToStr())
-                                            {
-                                                if (paramSql.IndexOf(tempKey) >= 0)
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(temp.ParameterName.ToLower(), temp.Value.ToStr()));
-                                                }
-                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                                }
-                                                else
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                            }
-                                            else
-                                                tempParam.Remove(temp);
+                                            XmlOption.IsNotEqualSql(sqlModel, tempParam);
                                             break;
                                         }
                                     case "isgreaterthan":
                                         {
-                                            if (temp.Value.ToStr().ToDecimal(0) > conditionValue.ToDecimal(0))
-                                            {
-                                                if (paramSql.IndexOf(tempKey) >= 0)
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
-                                                }
-                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                                }
-                                                else
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                            }
-                                            else
-                                                tempParam.Remove(temp);
+                                            XmlOption.IsGreaterThanSql(sqlModel, tempParam);
                                             break;
                                         }
                                     case "islessthan":
                                         {
-                                            if (temp.Value.ToStr().ToDecimal(0) < conditionValue.ToDecimal(0))
-                                            {
-                                                if (paramSql.IndexOf(tempKey) >= 0)
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
-                                                }
-                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                                }
-                                                else
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                            }
-                                            else
-                                                tempParam.Remove(temp);
+                                            XmlOption.IsLessThanSql(sqlModel, tempParam);
                                             break;
                                         }
                                     case "isnullorempty":
                                         {
-                                            if (string.IsNullOrEmpty(temp.Value.ToStr()))
-                                            {
-                                                if (paramSql.IndexOf(tempKey) >= 0)
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
-                                                }
-                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                                }
-                                                else
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                            }
-                                            else
-                                                tempParam.Remove(temp);
+                                            XmlOption.IsNullOrEmptySql(sqlModel, tempParam);
                                             break;
                                         }
                                     case "isnotnullorempty":
                                         {
-                                            if (!string.IsNullOrEmpty(temp.Value.ToStr()))
-                                            {
-                                                if (paramSql.IndexOf(tempKey) >= 0)
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
-                                                }
-                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                                }
-                                                else
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                            }
-                                            else
-                                                tempParam.Remove(temp);
+                                            XmlOption.IsNotNullOrEmptySql(sqlModel, tempParam);
                                             break;
                                         }
                                     case "if":
                                         {
-                                            conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
-                                            conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
-                                            conditionValue = conditionValue.Replace("#", "\"");
-
-                                            //references
-                                            var ifSuccess = false;
-                                            var referencesKey = string.Format("{0}.{1}.references.{2}", name.ToLower(), temp.ParameterName.ToLower(), i);
-                                            if (DbCache.Get(cacheType, referencesKey).ToStr() != "")
-                                            {
-                                                var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == DbCache.Get(cacheType, referencesKey));
-                                                if (assembly == null)
-                                                    assembly = Assembly.Load(DbCache.Get(cacheType, referencesKey));
-                                                if (assembly != null)
-                                                {
-                                                    var options = ScriptOptions.Default.AddReferences(assembly);
-                                                    ifSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue, options).Result;
-                                                }
-                                                else
-                                                    ifSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
-                                            }
-                                            else
-                                                ifSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
-
-                                            if (ifSuccess)
-                                            {
-                                                if (paramSql.IndexOf(tempKey) >= 0)
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
-                                                }
-                                                else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                                }
-                                                else
-                                                    tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                            }
-                                            else
-                                                tempParam.Remove(temp);
+                                            XmlOption.IfSql(sqlModel, tempParam);
                                             break;
                                         }
                                     case "choose":
                                         {
-                                            var conditionOther = "";
-                                            var isSuccess = false;
-                                            for (int j = 0; j < DbCache.Get(cacheType, paramKey).ToStr().ToInt(0); j++)
-                                            {
-                                                var conditionOtherKey = string.Format("{0}.choose.other.{1}", paramKey, j);
-                                                if (DbCache.Get(cacheType, conditionOtherKey).ToStr() != "")
-                                                    conditionOther = DbCache.Get(cacheType, conditionOtherKey).ToLower();
-
-                                                conditionKey = string.Format("{0}.choose.{1}", paramKey, j);
-                                                condition = DbCache.Get(cacheType, conditionKey).ToStr().ToLower();
-                                                conditionValueKey = string.Format("{0}.choose.condition.{1}", paramKey, j);
-                                                conditionValue = DbCache.Get(cacheType, conditionValueKey).ToStr();
-                                                conditionValue = conditionValue.Replace(temp.ParameterName, temp.Value == null ? null : temp.Value.ToStr());
-                                                conditionValue = conditionValue.Replace("#", "\"");
-
-                                                //references
-                                                var referencesKey = string.Format("{0}.choose.references.{1}", paramKey, j);
-                                                if (DbCache.Get(cacheType, referencesKey).ToStr() != "")
-                                                {
-                                                    var assembly = AppDomain.CurrentDomain.GetAssemblies().ToList().Find(a => a.FullName.Split(',')[0] == DbCache.Get(cacheType, referencesKey));
-                                                    if (assembly == null)
-                                                        assembly = Assembly.Load(DbCache.Get(cacheType, referencesKey));
-                                                    if (assembly != null)
-                                                    {
-                                                        var options = ScriptOptions.Default.AddReferences(assembly);
-                                                        isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue, options).Result;
-                                                    }
-                                                    else
-                                                        isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
-                                                }
-                                                else
-                                                    isSuccess = CSharpScript.EvaluateAsync<bool>(conditionValue).Result;
-
-                                                if (isSuccess)
-                                                {
-                                                    if (condition.IndexOf(tempKey) >= 0)
-                                                    {
-                                                        tempParam.Remove(temp);
-                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToStr()));
-                                                    }
-                                                    else if (condition.IndexOf(flagParam) < 0 && flag != "")
-                                                    {
-                                                        tempParam.Remove(temp);
-                                                        tempSql.Append(condition.Replace(tempKey, temp.Value.ToStr()));
-                                                    }
-                                                    else
-                                                        tempSql.Append(condition);
-                                                    break;
-                                                }
-                                            }
-
-                                            if (!isSuccess)
-                                            {
-                                                if (conditionOther == "")
-                                                    tempParam.Remove(temp);
-                                                else if (conditionOther.IndexOf(tempKey) >= 0)
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(conditionOther.Replace(tempKey, temp.Value.ToStr()));
-                                                }
-                                                else if (conditionOther.IndexOf(flagParam) < 0 && flag != "")
-                                                {
-                                                    tempParam.Remove(temp);
-                                                    tempSql.Append(conditionOther.Replace(tempKey, temp.Value.ToStr()));
-                                                }
-                                                else
-                                                    tempSql.Append(conditionOther);
-                                            }
+                                            XmlOption.ChooseSql(sqlModel, tempParam);
                                             break;
                                         }
                                     default:
                                         {
-                                            //isPropertyAvailable
-                                            if (paramSql.IndexOf(tempKey) >= 0)
-                                            {
-                                                tempParam.Remove(temp);
-                                                tempSql.Append(paramSql.ToString().Replace(tempKey, temp.Value.ToStr()));
-                                            }
-                                            else if (paramSql.IndexOf(flagParam) < 0 && flag != "")
-                                            {
-                                                tempParam.Remove(temp);
-                                                tempSql.Append(DbCache.Get(cacheType, paramKey));
-                                            }
+                                            if (DbCache.Get(cacheType, sqlModel.IncludeKey).ToStr().ToLower() == "include")
+                                                GetMapSql(sqlModel.IncludeRefIdKey, ref param, db, key);
                                             else
-                                                tempSql.Append(DbCache.Get(cacheType, paramKey));
-
+                                                XmlOption.IsPropertyAvailableSql(sqlModel, tempParam);
                                             break;
                                         }
                                 }
                             }
+                            tempSql.Append(sqlModel.Sql);
                         }
 
                         if (tempSql.ToString() != "")
@@ -402,7 +183,7 @@ namespace FastData.Core.Base
         #endregion
 
         #region fastmap sql
-        internal static string GetFastMapSql(MethodInfo methodInfo,ConfigModel config, ref List<DbParameter> param)
+        internal static string GetFastMapSql(MethodInfo methodInfo, ConfigModel config, ref List<DbParameter> param)
         {
             var temp = param.ToArray();
             var key = string.Format("{0}.{1}", methodInfo.DeclaringType.FullName, methodInfo.Name);
@@ -438,7 +219,7 @@ namespace FastData.Core.Base
         /// <param name="db"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        internal static List<Dictionary<string, object>> MapForEach(List<Dictionary<string, object>> data, string name, DataContext db,string key, ConfigModel config, int i = 1)
+        internal static List<Dictionary<string, object>> MapForEach(List<Dictionary<string, object>> data, string name, DataContext db, string key, ConfigModel config, int i = 1)
         {
             var result = new List<Dictionary<string, object>>();
             var param = new List<DbParameter>();
@@ -446,7 +227,8 @@ namespace FastData.Core.Base
             var field = DbCache.Get(config.CacheType, string.Format("{0}.foreach.field.{1}", name.ToLower(), i));
             var sql = DbCache.Get(config.CacheType, string.Format("{0}.foreach.sql.{1}", name.ToLower(), i));
 
-            data.ForEach(a => {
+            data.ForEach(a =>
+            {
                 param.Clear();
                 if (field.IndexOf(',') > 0)
                 {
@@ -516,14 +298,14 @@ namespace FastData.Core.Base
                         var model = Activator.CreateInstance(assembly.GetType(type.Split(',')[0]));
                         var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(assembly.GetType(type.Split(',')[0])));
                         var infoResult = BaseDic.PropertyInfo<T>().Find(a => a.PropertyType == list.GetType());
-                   
+
                         //param
                         param.Clear();
                         if (field.IndexOf(',') > 0)
                         {
                             foreach (var split in field.Split(','))
                             {
-                                var infoField = BaseDic.PropertyInfo<T>().Find(a =>string.Compare( a.Name, split, true) ==0);
+                                var infoField = BaseDic.PropertyInfo<T>().Find(a => string.Compare(a.Name, split, true) == 0);
                                 var tempParam = DbProviderFactories.GetFactory(config).CreateParameter();
                                 tempParam.ParameterName = split;
                                 tempParam.Value = infoField.GetValue(item, null);
@@ -532,14 +314,14 @@ namespace FastData.Core.Base
                         }
                         else
                         {
-                            var infoField = BaseDic.PropertyInfo<T>().Find(a =>string.Compare( a.Name, field, true) ==0);
+                            var infoField = BaseDic.PropertyInfo<T>().Find(a => string.Compare(a.Name, field, true) == 0);
                             var tempParam = DbProviderFactories.GetFactory(config).CreateParameter();
                             tempParam.ParameterName = field;
                             tempParam.Value = BaseEmit.Get(item, infoField.Name);
                             param.Add(tempParam);
                         }
 
-                        var tempData = db.ExecuteSqlList(sql, param.ToArray(), false,false);
+                        var tempData = db.ExecuteSqlList(sql, param.ToArray(), false, false);
 
                         var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
                         foreach (var temp in tempData.DicList)
@@ -549,7 +331,7 @@ namespace FastData.Core.Base
                                 if (temp.GetValue(info.Name).ToStr() == "" && info.PropertyType.Name == "Nullable`1")
                                     continue;
 
-                                BaseEmit.Set(model, info.Name, temp.GetValue(info.Name));  
+                                BaseEmit.Set(model, info.Name, temp.GetValue(info.Name));
                             }
                             BaseEmit.Invoke(list, method, new object[] { model });
                         }
@@ -591,62 +373,21 @@ namespace FastData.Core.Base
                 else
                     deContent = enContent;
 
-                if (config.DbType == DataDbType.MySql)
+                var model = new Data_MapFile();
+                model.MapId = key;
+                var query = FastRead.Query<Data_MapFile>(a => a.MapId == key, null, dbKey);
+
+                if (query.ToCount() == 0)
                 {
-                    var model = new DataModel.MySql.Data_MapFile();
-                    model.MapId = key;
-                    var query = FastRead.Query<DataModel.MySql.Data_MapFile>(a => a.MapId == key, null, dbKey);
-
-                    if (query.ToCount() == 0)
-                    {
-                        model.FileName = info.Name;
-                        model.FilePath = info.FullName;
-                        model.LastTime = info.LastWriteTime;
-                        model.EnFileContent = enContent;
-                        model.DeFileContent = deContent;
-                        return db.Add(model).WriteReturn.IsSuccess;
-                    }
-                    else
-                        return db.Update<DataModel.MySql.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).WriteReturn.IsSuccess;
+                    model.FileName = info.Name;
+                    model.FilePath = info.FullName;
+                    model.LastTime = info.LastWriteTime;
+                    model.EnFileContent = enContent;
+                    model.DeFileContent = deContent;
+                    return db.Add(model).WriteReturn.IsSuccess;
                 }
-
-                if (config.DbType == DataDbType.Oracle)
-                {
-                    var model = new DataModel.Oracle.Data_MapFile();
-                    model.MapId = key;
-                    var query = FastRead.Query<DataModel.Oracle.Data_MapFile>(a => a.MapId == key, null, dbKey);
-
-                    if (query.ToCount() == 0)
-                    {
-                        model.FileName = info.Name;
-                        model.FilePath = info.FullName;
-                        model.LastTime = info.LastWriteTime;
-                        model.EnFileContent = enContent;
-                        model.DeFileContent = deContent;
-                        return db.Add(model).WriteReturn.IsSuccess;
-                    }
-                    else
-                        return db.Update<DataModel.Oracle.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).WriteReturn.IsSuccess;
-                }
-
-                if (config.DbType == DataDbType.SqlServer)
-                {
-                    var model = new DataModel.SqlServer.Data_MapFile();
-                    model.MapId = key;
-                    var query = FastRead.Query<DataModel.SqlServer.Data_MapFile>(a => a.MapId == key, null, dbKey);
-
-                    if (query.ToCount() == 0)
-                    {
-                        model.FileName = info.Name;
-                        model.FilePath = info.FullName;
-                        model.LastTime = info.LastWriteTime;
-                        model.EnFileContent = enContent;
-                        model.DeFileContent = deContent;
-                        return db.Add(model).WriteReturn.IsSuccess;
-                    }
-                    else
-                        return db.Update<DataModel.SqlServer.Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).WriteReturn.IsSuccess;
-                }
+                else
+                    return db.Update<Data_MapFile>(model, a => a.MapId == model.MapId, a => new { a.LastTime, a.EnFileContent, a.DeFileContent }).WriteReturn.IsSuccess;
             }
 
             return true;
@@ -657,7 +398,7 @@ namespace FastData.Core.Base
         /// <summary>
         /// 读取xml map并缓存
         /// </summary>
-        internal static List<string> ReadXml(string path, ConfigModel config, string fileName,string xml = null)
+        internal static List<string> ReadXml(string path, ConfigModel config, string fileName, string xml = null)
         {
             var map = DbCache.Get<Dictionary<string, object>>(DataConfig.Get().CacheType, "FastMap.Api") ?? new Dictionary<string, object>();
             var result = GetXmlList(path, "sqlMap", config, xml);
@@ -668,7 +409,8 @@ namespace FastData.Core.Base
             }
 
             var apilist = new List<string>();
-            result.Db.ToList().ForEach(a => {
+            result.Db.ToList().ForEach(a =>
+            {
                 DbCache.Set(config.CacheType, string.Format("{0}.db", a.Key.ToLower()), a.Value.ToStr());
                 apilist.Add(a.Key.ToLower());
             });
@@ -677,32 +419,38 @@ namespace FastData.Core.Base
             map.Add(fileName, apilist);
             DbCache.Set<Dictionary<string, object>>(config.CacheType, "FastMap.Api", map);
 
-            result.Type.ToList().ForEach(a => {
+            result.Type.ToList().ForEach(a =>
+            {
                 DbCache.Set(config.CacheType, string.Format("{0}.type", a.Key.ToLower()), a.Value.ToStr());
                 result.Key.Add(string.Format("{0}.type", a.Key.ToLower()));
             });
 
-            result.View.ToList().ForEach(a => {
+            result.View.ToList().ForEach(a =>
+            {
                 DbCache.Set(config.CacheType, string.Format("{0}.view", a.Key.ToLower()), a.Value.ToStr());
                 result.Key.Add(string.Format("{0}.view", a.Key.ToLower()));
             });
 
-            result.Param.ToList().ForEach(a => {
+            result.Param.ToList().ForEach(a =>
+            {
                 DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", a.Key.ToLower()), a.Value as List<string>);
                 result.Key.Add(string.Format("{0}.param", a.Key.ToLower()));
             });
 
-            result.Check.ToList().ForEach(a => {
+            result.Check.ToList().ForEach(a =>
+            {
                 DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
                 result.Key.Add(a.Key);
             });
 
-            result.Name.ToList().ForEach(a => {
+            result.Name.ToList().ForEach(a =>
+            {
                 DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
                 result.Key.Add(a.Key);
             });
 
-            result.ParameName.ToList().ForEach(a => {
+            result.ParameName.ToList().ForEach(a =>
+            {
                 DbCache.Set(config.CacheType, a.Key, a.Value.ToStr());
                 result.Key.Add(a.Key);
             });
@@ -716,17 +464,18 @@ namespace FastData.Core.Base
         /// </summary>
         /// <param name="xml"></param>
         /// <param name="methodInfo"></param>
-        internal static void ReadFastMap(string xml, MethodInfo methodInfo,ConfigModel config)
+        internal static void ReadFastMap(string xml, MethodInfo methodInfo, ConfigModel config)
         {
             var key = string.Format("{0}.{1}", methodInfo.DeclaringType.FullName, methodInfo.Name).ToLower();
-            var result = GetXmlList(null, "sqlMap", config, string.Format("<sqlMap>{0}</sqlMap>", xml),key);
+            var result = GetXmlList(null, "sqlMap", config, string.Format("<sqlMap>{0}</sqlMap>", xml), key);
 
             for (var i = 0; i < result.Key.Count; i++)
             {
                 DbCache.Set(config.CacheType, result.Key[i].ToLower(), result.Sql[i]);
             }
 
-            result.Param.ToList().ForEach(a => {
+            result.Param.ToList().ForEach(a =>
+            {
                 DbCache.Set<List<string>>(config.CacheType, string.Format("{0}.param", a.Key.ToLower()), a.Value as List<string>);
                 result.Key.Add(string.Format("{0}.param", a.Key.ToLower()));
             });
@@ -740,7 +489,7 @@ namespace FastData.Core.Base
         /// <param name="path">文件名</param>
         /// <param name="xmlNode">结点</param>
         /// <returns></returns>
-        internal static XmlModel GetXmlList(string path, string xmlNode, ConfigModel config,string xml=null,string id =null)
+        internal static XmlModel GetXmlList(string path, string xmlNode, ConfigModel config, string xml = null, string id = null)
         {
             var result = new XmlModel();
             result.IsSuccess = true;
@@ -822,149 +571,57 @@ namespace FastData.Core.Base
                                     }
 
                                     //foreach
-                                    if (string.Compare(node.Name, "foreach",true)==0)
+                                    if (string.Compare(node.Name, "foreach", true) == 0)
                                     {
-                                        //type
-                                        if (node.Attributes["type"] != null)
-                                        {
-                                            result.Key.Add(string.Format("{0}.foreach.type.{1}", tempKey, foreachCount));
-                                            result.Sql.Add(node.Attributes["type"].Value);
-                                        }
-
-                                        //result name
-                                        result.Key.Add(string.Format("{0}.foreach.name.{1}", tempKey, foreachCount));
-                                        if (node.Attributes["name"] != null)
-                                            result.Sql.Add(node.Attributes["name"].Value.ToLower());
-                                        else
-                                            result.Sql.Add("data");
-
-                                        //field
-                                        if (node.Attributes["field"] != null)
-                                        {
-                                            result.Key.Add(string.Format("{0}.foreach.field.{1}", tempKey, foreachCount));
-                                            result.Sql.Add(node.Attributes["field"].Value.ToLower());
-                                        }
-
-                                        //sql
-                                        if (node.ChildNodes[0] is XmlText)
-                                        {
-                                            result.Key.Add(string.Format("{0}.foreach.sql.{1}", tempKey, foreachCount));
-                                            result.Sql.Add(node.ChildNodes[0].InnerText.Replace("&lt;", "<").Replace("&gt", ">"));
-                                        }
+                                        XmlOption.ForeachXml(result, tempKey, node, foreachCount);
                                         foreachCount++;
+                                        continue;
+                                    }
+
+                                    //include
+                                    if (string.Compare(node.Name, "include", true) == 0)
+                                    {
+                                        XmlOption.IncludeXml(result, tempKey, node, i);
                                     }
 
                                     foreach (XmlNode dyn in node.ChildNodes)
                                     {
-                                        if (dyn is XmlText)
+                                        //foreach
+                                        if (string.Compare(dyn.Name, "foreach", true) == 0)
+                                        {
+                                            XmlOption.ForeachXml(result, tempKey, dyn, foreachCount);
+                                            foreachCount++;
                                             continue;
+                                        }
 
-                                        //check required
-                                        if (dyn.Attributes["required"] != null)
-                                            result.Check.Add(string.Format("{0}.{1}.required", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["required"].Value.ToStr());
-
-                                        //check maxlength
-                                        if (dyn.Attributes["maxlength"] != null)
-                                            result.Check.Add(string.Format("{0}.{1}.maxlength", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["maxlength"].Value.ToStr());
-
-                                        //check existsmap
-                                        if (dyn.Attributes["existsmap"] != null)
-                                            result.Check.Add(string.Format("{0}.{1}.existsmap", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["existsmap"].Value.ToStr());
-
-                                        //check checkmap
-                                        if (dyn.Attributes["checkmap"] != null)
-                                            result.Check.Add(string.Format("{0}.{1}.checkmap", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["checkmap"].Value.ToStr());
-
-                                        //check date
-                                        if (dyn.Attributes["date"] != null)
-                                            result.Check.Add(string.Format("{0}.{1}.date", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["date"].Value.ToStr());
+                                        //check
+                                        XmlOption.CheckXml(result, tempKey, dyn);
 
                                         //参数
-                                        tempParam.Add(dyn.Attributes["property"].Value);
+                                        if (dyn.Attributes["property"] != null)
+                                            tempParam.Add(dyn.Attributes["property"].Value);
 
                                         //param name
                                         if (dyn.Attributes["name"] != null)
                                             result.ParameName.Add(string.Format("{0}.{1}.remark", tempKey, dyn.Attributes["property"].Value.ToLower()), dyn.Attributes["name"].Value);
 
-                                        if (string.Compare( dyn.Name, "ispropertyavailable", true) ==0)
+                                        if (string.Compare(dyn.Name, "ispropertyavailable", true) == 0)
                                         {
                                             //属性和值
                                             result.Key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
                                             result.Sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
                                         }
-                                        else if (string.Compare( dyn.Name, "choose", true) !=0)
+                                        else if (string.Compare(dyn.Name, "include", true) == 0)
                                         {
-                                            //属性和值
-                                            result.Key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                            result.Sql.Add(string.Format("{0}{1}", dyn.Attributes["prepend"].Value.ToLower(), dyn.InnerText));
-
-                                            //条件类型
-                                            result.Key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                            result.Sql.Add(dyn.Name);
-
-                                            //判断条件内容
-                                            if (dyn.Attributes["condition"] != null)
-                                            {
-                                                result.Key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                result.Sql.Add(dyn.Attributes["condition"].Value);
-                                            }
-
-                                            //比较条件值
-                                            if (dyn.Attributes["compareValue"] != null)
-                                            {
-                                                result.Key.Add(string.Format("{0}.{1}.condition.value.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                result.Sql.Add(dyn.Attributes["compareValue"].Value.ToLower());
-                                            }
-
-                                            //引用dll
-                                            if (dyn.Attributes["references"] != null)
-                                            {
-                                                result.Key.Add(string.Format("{0}.{1}.references.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                result.Sql.Add(dyn.Attributes["references"].Value);
-                                            }
+                                            XmlOption.IncludeXml(result, tempKey, dyn, i);
+                                        }
+                                        else if (string.Compare(dyn.Name, "choose", true) != 0)
+                                        {
+                                            XmlOption.ConditionXml(result, tempKey, dyn, i);
                                         }
                                         else
                                         {
-                                            //条件类型
-                                            result.Key.Add(string.Format("{0}.{1}.condition.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                            result.Sql.Add(dyn.Name);
-
-                                            if (dyn is XmlElement)
-                                            {
-                                                var count = 0;
-                                                result.Key.Add(string.Format("{0}.{1}.{2}", tempKey, dyn.Attributes["property"].Value.ToLower(), i));
-                                                result.Sql.Add(dyn.ChildNodes.Count.ToStr());
-                                                foreach (XmlNode child in dyn.ChildNodes)
-                                                {
-                                                    //other
-                                                    if (child.Name == "other")
-                                                    {
-                                                        result.Key.Add(string.Format("{0}.{1}.{2}.choose.other.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                        result.Sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
-                                                    }
-                                                    else
-                                                    {
-                                                        //条件
-                                                        if (child.Attributes["property"] != null)
-                                                        {
-                                                            result.Key.Add(string.Format("{0}.{1}.{2}.choose.condition.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                            result.Sql.Add(child.Attributes["property"].Value);
-                                                        }
-
-                                                        //内容
-                                                        result.Key.Add(string.Format("{0}.{1}.{2}.choose.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                        result.Sql.Add(string.Format("{0}{1}", child.Attributes["prepend"].Value.ToLower(), child.InnerText));
-
-                                                        //引用dll
-                                                        if (child.Attributes["references"] != null)
-                                                        {
-                                                            result.Key.Add(string.Format("{0}.{1}.{2}.choose.references.{3}", tempKey, dyn.Attributes["property"].Value.ToLower(), i, count));
-                                                            result.Sql.Add(child.Attributes["references"].Value);
-                                                        }
-                                                    }
-                                                    count++;
-                                                }
-                                            }
+                                            XmlOption.ChooseXml(result, tempKey, dyn, i);
                                         }
                                     }
                                 }
@@ -1035,7 +692,7 @@ namespace FastData.Core.Base
         /// <param name="query"></param>
         internal static void CreateLogTable(DataQuery query)
         {
-            if (string.Compare( query.Config.SqlErrorType, SqlErrorType.Db, true) ==0)
+            if (string.Compare(query.Config.SqlErrorType, SqlErrorType.Db, true) == 0)
             {
                 query.Config.DesignModel = FastData.Core.Base.Config.CodeFirst;
                 if (query.Config.DbType == DataDbType.Oracle)
