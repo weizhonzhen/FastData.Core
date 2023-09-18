@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Data.Common;
-using FastUntility.Core.Page;
+﻿using FastData.Core.Aop;
 using FastData.Core.Base;
-using FastData.Core.Model;
-using FastData.Core.Type;
-using System.Linq.Expressions;
-using FastData.Core.Property;
-using System.Data;
-using FastUntility.Core.Base;
-using DbProviderFactories = FastData.Core.Base.DbProviderFactories;
-using FastData.Core.Aop;
 using FastData.Core.CacheModel;
-using System.Collections;
-using FastUntility.Core;
 using FastData.Core.Filter;
+using FastData.Core.Model;
+using FastData.Core.Property;
+using FastData.Core.Type;
+using FastUntility.Core.Base;
+using FastUntility.Core.Page;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using DbProviderFactories = FastData.Core.Base.DbProviderFactories;
 
 namespace FastData.Core.Context
 {
@@ -26,7 +24,7 @@ namespace FastData.Core.Context
         private DbConnection conn;
         private DbCommand cmd;
         private DbTransaction trans;
-        private List<bool> IsSuccess=new List<bool>();
+        private List<bool> IsSuccess = new List<bool>();
         internal bool isDispose;
 
         #region Navigate Add
@@ -364,7 +362,7 @@ namespace FastData.Core.Context
             conn.Close();
             cmd.Dispose();
             conn.Dispose();
-            isDispose= true;
+            isDispose = true;
             IsSuccess = null;
             GC.SuppressFinalize(this);
         }
@@ -565,7 +563,7 @@ namespace FastData.Core.Context
             }
             catch (Exception ex)
             {
-                BaseAop.AopException(ex, $"to Dyns tableName:{string.Join(",",item.Table.ToArray())}", AopType.Query_Dyn_Lambda, config);
+                BaseAop.AopException(ex, $"to Dyns tableName:{string.Join(",", item.Table.ToArray())}", AopType.Query_Dyn_Lambda, config);
                 if (string.Compare(config.SqlErrorType, SqlErrorType.Db, true) == 0)
                     DbLogTable.LogException(config, ex, "GetDyns", "");
                 else
@@ -608,7 +606,7 @@ namespace FastData.Core.Context
 
                     result.GetType().GetFields().ToList().ForEach(a =>
                     {
-                        if (a.Name == "pModel")                    
+                        if (a.Name == "pModel")
                             a.SetValueDirect(__makeref(result), pModel);
                         if (a.Name == "list")
                             a.SetValueDirect(__makeref(result), list);
@@ -1910,7 +1908,7 @@ namespace FastData.Core.Context
                     DbLogTable.LogException<T>(config, ex, "UpdateList<T>", "");
                 else
                     DbLog.LogException<T>(config.IsOutError, config.DbType, ex, "UpdateList<T>", result.Sql);
-                
+
                 if (this.trans != null)
                     IsSuccess.Add(false);
 
@@ -2090,11 +2088,11 @@ namespace FastData.Core.Context
 
                     cmd.GetType().GetMethods().ToList().ForEach(a =>
                     {
-                        if (a.Name == "set_ArrayBindCount")                        
+                        if (a.Name == "set_ArrayBindCount")
                             BaseEmit.Invoke(cmd, a, new object[] { list.Count });
-                        
+
                         if (a.Name == "set_BindByName")
-                            BaseEmit.Invoke(cmd, a, new object[] { true });                        
+                            BaseEmit.Invoke(cmd, a, new object[] { true });
                     });
 
                     sql.AppendFormat("insert into {0} values(", typeof(T).Name);
@@ -2102,7 +2100,7 @@ namespace FastData.Core.Context
                     {
                         var pValue = new List<object>();
                         var param = DbProviderFactories.GetFactory(config).CreateParameter();
-                        if (string.Compare( a.PropertyType.Name,"nullable`1", true) ==0)
+                        if (string.Compare(a.PropertyType.Name, "nullable`1", true) == 0)
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.GetGenericArguments()[0].Name);
                         else
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.Name);
@@ -2157,9 +2155,9 @@ namespace FastData.Core.Context
                             sqlParam.GetType().GetMethods().ToList().ForEach(a =>
                             {
                                 if (a.Name == "set_SqlDbType")
-                                    BaseEmit.Invoke(sqlParam, a, new object[] { SqlDbType.Structured });                                
+                                    BaseEmit.Invoke(sqlParam, a, new object[] { SqlDbType.Structured });
                                 if (a.Name == "set_TypeName")
-                                    BaseEmit.Invoke(sqlParam, a, new object[] { typeof(T).Name });                                
+                                    BaseEmit.Invoke(sqlParam, a, new object[] { typeof(T).Name });
                             });
                             break;
                         }
@@ -2256,10 +2254,10 @@ namespace FastData.Core.Context
                     cmd.GetType().GetMethods().ToList().ForEach(a =>
                     {
                         if (a.Name == "set_ArrayBindCount")
-                            BaseEmit.Invoke(cmd, a, new object[] { list.Count });                        
+                            BaseEmit.Invoke(cmd, a, new object[] { list.Count });
 
                         if (a.Name == "set_BindByName")
-                            BaseEmit.Invoke(cmd, a, new object[] { true });                        
+                            BaseEmit.Invoke(cmd, a, new object[] { true });
                     });
 
                     sql.AppendFormat("insert into {0} values(", navigate.PropertyType.Name);
@@ -2267,7 +2265,7 @@ namespace FastData.Core.Context
                     {
                         var pValue = new List<object>();
                         var param = DbProviderFactories.GetFactory(config).CreateParameter();
-                        if (string.Compare( a.PropertyType.Name, "nullable`1", true) ==0)
+                        if (string.Compare(a.PropertyType.Name, "nullable`1", true) == 0)
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.GetGenericArguments()[0].Name);
                         else
                             param.DbType = CommandParam.GetOracleDbType(a.PropertyType.Name);
@@ -2317,9 +2315,9 @@ namespace FastData.Core.Context
                             {
                                 if (a.Name == "set_SqlDbType")
                                     BaseEmit.Invoke(sqlParam, a, new object[] { SqlDbType.Structured });
-                                
+
                                 if (a.Name == "set_TypeName")
-                                    BaseEmit.Invoke(sqlParam, a, new object[] { navigate.PropertyType.Name });                                
+                                    BaseEmit.Invoke(sqlParam, a, new object[] { navigate.PropertyType.Name });
                             });
                             break;
                         }
