@@ -2,7 +2,7 @@
 
 namespace FastData.Core.Model
 {
-    public class XmlModel
+    internal class XmlModel
     {
         public List<string> Key { get; set; } = new List<string>();
 
