@@ -4,17 +4,14 @@ using FastData.Core.Base;
 using FastData.Core.Context;
 using FastData.Core.Filter;
 using FastData.Core.Model;
-using FastData.Core.Proxy;
 using FastData.Core.Repository;
 using FastRedis.Core.Repository;
 using FastUntility.Core;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.Loader;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

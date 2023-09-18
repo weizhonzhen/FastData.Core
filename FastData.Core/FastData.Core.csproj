@@ -1,18 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>orm(db first,code frist) for sqlserver mysql etl.
 https://github.com/weizhonzhen/FastData.Core
 </Description>
-    <Version>3.0.0</Version>
+    <Version>3.6.5</Version>
     <PackageId>Fast.Data.Core</PackageId>
     <Authors>Fast.Data.Core</Authors>
     <Company>Fast.Data.Core</Company>
     <PackageIconUrl>https://en.gravatar.com/userimage/151376774/1cba1ca23219db268cc5ed8abde11775.png</PackageIconUrl>
-    <PackageReleaseNotes>add Repository Generic</PackageReleaseNotes>
+    <PackageReleaseNotes>update bug</PackageReleaseNotes>
     <RepositoryUrl>https://en.gravatar.com/userimage/151376774/1cba1ca23219db268cc5ed8abde11775.png</RepositoryUrl>
     <PackageProjectUrl>https://github.com/weizhonzhen/FastData.Core</PackageProjectUrl>
   </PropertyGroup>
@@ -21,7 +22,7 @@ https://github.com/weizhonzhen/FastData.Core
     <Compile Remove="Property\DynamicSet.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FastAop.Core" Version="1.8.4" />
+    <PackageReference Include="FastAop.Core" Version="2.5.3" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.1.0" />
     <PackageReference Include="System.CodeDom" Version="6.0.0" />

@@ -1,24 +1,24 @@
+using FastData.Core.Aop;
 using FastData.Core.Base;
 using FastData.Core.CacheModel;
 using FastData.Core.Check;
 using FastData.Core.Context;
 using FastData.Core.Model;
+using FastData.Core.Property;
+using FastData.Core.Proxy;
 using FastData.Core.Type;
+using FastUntility.Core;
+using FastUntility.Core.Base;
+using FastUntility.Core.Page;
+using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using FastUntility.Core.Base;
-using FastUntility.Core.Page;
-using FastData.Core.Aop;
-using FastData.Core.Property;
-using FastUntility.Core;
-using Microsoft.Extensions.DependencyInjection;
-using FastData.Core.Proxy;
 
 namespace FastData.Core
 {
@@ -195,7 +195,7 @@ namespace FastData.Core
         internal static void InstanceMapResource(string dbKey = null, string dbFile = "db.json", string mapFile = "map.json", string projectName = null)
         {
             if (projectName == null)
-                projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name; 
+                projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name;
 
             var config = DataConfig.Get(dbKey, projectName, dbFile);
             using (var db = new DataContext(dbKey))
@@ -338,7 +338,7 @@ namespace FastData.Core
             {
                 try
                 {
-                    foreach(var a in  assembly.ExportedTypes.ToList())
+                    foreach (var a in assembly.ExportedTypes.ToList())
                     {
                         if (a.Namespace == nameSpace)
                         {
@@ -403,7 +403,8 @@ namespace FastData.Core
                         }
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     if (ex is ProxyException)
                         throw ex;
                 }
