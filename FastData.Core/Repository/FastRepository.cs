@@ -1,24 +1,23 @@
-﻿using FastData.Core.Base;
+﻿using FastData.Core.Aop;
+using FastData.Core.Base;
+using FastData.Core.CacheModel;
+using FastData.Core.Check;
 using FastData.Core.Context;
 using FastData.Core.Model;
+using FastData.Core.Type;
+using FastUntility.Core;
 using FastUntility.Core.Base;
 using FastUntility.Core.Page;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Linq;
-using FastData.Core.CacheModel;
-using FastData.Core.Check;
-using FastData.Core.Type;
-using System.Reflection;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
-using FastData.Core.Aop;
-using FastData.Core.Filter;
-using FastUntility.Core;
-using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace FastData.Core.Repository
 {
@@ -188,8 +187,8 @@ namespace FastData.Core.Repository
                 isOutSql = isOutSql ? isOutSql : IsMapLog(name);
 
                 BaseAop.AopMapBefore(name, sql, param, config, AopType.Map_Write);
-                var data = FastWrite.ExecuteSql(sql, param, db, key, isOutSql,false);
-                BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Write,data);
+                var data = FastWrite.ExecuteSql(sql, param, db, key, isOutSql, false);
+                BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Write, data);
                 return data;
             }
             else
@@ -249,7 +248,7 @@ namespace FastData.Core.Repository
             stopwatch.Start();
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
-            result = db.GetPageSql(pModel, sql, param,false);
+            result = db.GetPageSql(pModel, sql, param, false);
 
             stopwatch.Stop();
 
@@ -290,7 +289,7 @@ namespace FastData.Core.Repository
                     }
                 }
 
-                BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Page_Dic,result.list);
+                BaseAop.AopMapAfter(name, sql, param, config, AopType.Map_Page_Dic, result.list);
                 return result;
             }
             else
@@ -472,7 +471,7 @@ namespace FastData.Core.Repository
         {
             var list = BaseConfig.GetValue<MapConfigModel>(AppSettingKey.Map, mapFile);
             var config = DataConfig.Get(dbKey, null, dbFile);
-            var db = ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(dbKey) ;
+            var db = ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(dbKey);
             var query = new DataQuery { Config = config, Key = dbKey };
 
             list.Path.ForEach(p =>
@@ -612,7 +611,7 @@ namespace FastData.Core.Repository
         #region 获取map log
         public bool IsMapLog(string name)
         {
-            return string.Compare( DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.log", name.ToLower())).ToStr(), "true", true) ==0;
+            return string.Compare(DbCache.Get(DataConfig.Get().CacheType, string.Format("{0}.log", name.ToLower())).ToStr(), "true", true) == 0;
         }
         #endregion
 
@@ -753,8 +752,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Add<T>(model, false);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -797,8 +796,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Delete<T>(predicate);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -838,8 +837,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Delete(model, isTrans);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -881,8 +880,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Update<T>(model, predicate, field);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -925,8 +924,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Update(model, field, isTrans);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -964,8 +963,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.UpdateList(list, field);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -1004,9 +1003,9 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             config = db.config;
-                config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-                result = db.ExecuteSql(sql, param,false,config.IsOutSql,false);
-            
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            result = db.ExecuteSql(sql, param, false, config.IsOutSql, false);
+
             stopwatch.Stop();
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
@@ -1047,9 +1046,9 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             config = db.config;
-                config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
-                result = db.ExecuteSql(sql, param, false, config.IsOutSql);
-            
+            config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            result = db.ExecuteSql(sql, param, false, config.IsOutSql);
+
             stopwatch.Stop();
 
             DbLog.LogSql(config.IsOutSql, result.Sql, config.DbType, stopwatch.Elapsed.TotalMilliseconds);
@@ -1086,8 +1085,8 @@ namespace FastData.Core.Repository
             var projectName = FastDataExtension.config == null ? null : FastDataExtension.config.Current.GetName().Name;
             var cacheKey = $"FastData.Key.{typeof(Microsoft.Extensions.DependencyInjection.ConfigKey).Name}";
 
-            if(DbCache.Exists(CacheType.Web,cacheKey) && key == null)            
-                key = DbCache.Get<Microsoft.Extensions.DependencyInjection.ConfigKey>(CacheType.Web, cacheKey).dbKey;               
+            if (DbCache.Exists(CacheType.Web, cacheKey) && key == null)
+                key = DbCache.Get<Microsoft.Extensions.DependencyInjection.ConfigKey>(CacheType.Web, cacheKey).dbKey;
             else if (DataConfig.DataType(key, projectName, dbFile) && key == null)
                 throw new Exception("数据库查询key不能为空,数据库类型有多个");
 
@@ -1186,7 +1185,7 @@ namespace FastData.Core.Repository
         #endregion
     }
 
-    public class FastRepository<T> : IFastRepository<T> where T : class, new ()
+    public class FastRepository<T> : IFastRepository<T> where T : class, new()
     {
         internal DataQuery data = new DataQuery();
 
@@ -1254,8 +1253,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Add(model, false);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -1298,8 +1297,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Delete(predicate);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -1339,8 +1338,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Delete(model, isTrans);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -1382,8 +1381,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Update(model, predicate, field);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -1426,8 +1425,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.Update(model, field, isTrans);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
@@ -1465,8 +1464,8 @@ namespace FastData.Core.Repository
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             result = db.UpdateList(list, field);
-                config = db.config;
-            
+            config = db.config;
+
             stopwatch.Stop();
 
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
