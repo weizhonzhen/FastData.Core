@@ -34,15 +34,6 @@ namespace FastData.Core.Context
 
         private readonly ConcurrentDictionary<string, DataContext> list = new ConcurrentDictionary<string, DataContext>();
 
-        public UnitOfWorK()
-        {
-            foreach (var item in DataConfig.List)
-            {
-                list.TryAdd(item.Key, new DataContext(item.Key));
-            }
-            _Context = list[DataConfig.List[0].Key];
-        }
-
         public void Dispose()
         {
             foreach (var item in list)
