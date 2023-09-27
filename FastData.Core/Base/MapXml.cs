@@ -297,7 +297,7 @@ namespace FastData.Core.Base
                     {
                         var model = Activator.CreateInstance(assembly.GetType(type.Split(',')[0]));
                         var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(assembly.GetType(type.Split(',')[0])));
-                        var infoResult = BaseDic.PropertyInfo<T>().Find(a => a.PropertyType == list.GetType());
+                        var infoResult = BaseDic.PropertyInfo<T>().Find(a => a.PropertyType == list.GetType() && a.Name == dicName);
 
                         //param
                         param.Clear();
@@ -321,20 +321,7 @@ namespace FastData.Core.Base
                             param.Add(tempParam);
                         }
 
-                        var tempData = db.ExecuteSqlList(sql, param.ToArray(), false, false);
-
-                        var method = list.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
-                        foreach (var temp in tempData.DicList)
-                        {
-                            foreach (var info in model.GetType().GetProperties())
-                            {
-                                if (temp.GetValue(info.Name).ToStr() == "" && info.PropertyType.Name == "Nullable`1")
-                                    continue;
-
-                                BaseEmit.Set(model, info.Name, temp.GetValue(info.Name));
-                            }
-                            BaseEmit.Invoke(list, method, new object[] { model });
-                        }
+                        list = db.ExecuteSqlList(model.GetType(), sql, param.ToArray(), false, false).List;
 
                         BaseEmit.Set(item, infoResult.Name, list);
                         result.Add(item);
