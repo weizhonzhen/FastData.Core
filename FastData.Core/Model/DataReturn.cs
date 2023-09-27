@@ -59,7 +59,7 @@ namespace FastData.Core.Model
         /// <summary>
         /// 列表
         /// </summary>
-        public List<dynamic> List { set; get; }=new List<dynamic>();
+        public List<dynamic> List { set; get; } = new List<dynamic>();
 
         /// <summary>
         /// sql
@@ -121,6 +121,11 @@ namespace FastData.Core.Model
         /// 写返回结果
         /// </summary>
         public WriteReturn WriteReturn = new WriteReturn();
+
+        /// <summary>
+        /// list
+        /// </summary>
+        public object List { get; set; }
     }
 
     /// <summary>
