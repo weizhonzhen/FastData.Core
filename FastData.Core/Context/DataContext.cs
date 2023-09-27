@@ -1206,6 +1206,62 @@ namespace FastData.Core.Context
         }
         #endregion
 
+        #region 执行sql
+        /// <summary>
+        /// 执行sql
+        /// </summary>
+        /// <returns></returns>
+        public DataReturn ExecuteSqlList(System.Type type, string sql, DbParameter[] param = null, bool isLog = false, bool isAop = true)
+        {
+            var result = new DataReturn();
+            try
+            {
+                if (param != null)
+                    result.Sql = ParameterToSql.ObjectParamToSql(param.ToList(), sql, config);
+                else
+                    result.Sql = sql;
+
+                Dispose(cmd);
+
+                DbLog.LogSql(isLog, result.Sql, config.DbType, 0);
+
+                if (param != null)
+                    cmd.Parameters.AddRange(param.ToArray());
+
+                if (isAop)
+                    BaseAop.AopBefore(null, sql, param?.ToList(), config, true, AopType.Execute_Sql_Model);
+
+                var dr = BaseExecute.ToDataReader(cmd, sql);
+
+                result.WriteReturn.IsSuccess = true;
+
+                var instance = Activator.CreateInstance(type);
+                var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
+                result.List = BaseDataReader.ToList(list.GetType(), instance, dr, config);
+
+                dr.Close();
+                dr.Dispose();
+                dr = null;
+
+                if (isAop)
+                    BaseAop.AopAfter(null, sql, param?.ToList(), config, true, AopType.Execute_Sql_Model, result.List);
+            }
+            catch (Exception ex)
+            {
+                BaseAop.AopException(ex, "Excute Sql", AopType.Execute_Sql_Model, config);
+                result.WriteReturn.IsSuccess = false;
+                result.DicList = new List<Dictionary<string, object>>();
+
+                if (config.SqlErrorType == SqlErrorType.Db)
+                    DbLogTable.LogException(config, ex, "ExecuteSql", result.Sql);
+                else
+                    DbLog.LogException(config.IsOutError, config.DbType, ex, "ExecuteSql", result.Sql);
+            }
+
+            return result;
+        }
+        #endregion
+
         #region 获取dic
         /// <summary>
         /// 获取dic
