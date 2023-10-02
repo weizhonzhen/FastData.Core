@@ -5,19 +5,52 @@ using System.Reflection.Emit;
 using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
+using FastUntility.Core.Cache;
+using System.Collections.Concurrent;
 
 namespace FastUntility.Core.Base
 {
     public static class BaseEmit
     {
+        private static ConcurrentDictionary<string, MethodInfo> cache = new ConcurrentDictionary<string, MethodInfo>();
+
+        private static MethodInfo Get(string key)
+        {
+            if (cache.ContainsKey(key))
+                return cache[key];
+            else
+            {
+                return null;
+            }
+        }
+
+        private static void Set(string key, MethodInfo method)
+        {
+            if (!cache.ContainsKey(key))
+            {
+                cache.TryAdd(key, method);
+            }
+            else
+            {
+                cache.TryRemove(key, out _);
+                cache.TryAdd(key, method);
+            }
+        }
+
         public static void Set<T>(T model, string name, object value)
         {
             try
             {
                 var type = typeof(T);
-                var method = type.GetMethod($"set_{name}");
+                var key = $"set_{name}_{type.FullName}";
+                MethodInfo method = Get(key);
                 if (method == null)
-                    return;
+                {
+                    method = type.GetMethod($"set_{name}");
+                    if (method == null)
+                        return;
+                    Set(key, method);
+                }
 
                 var dynamicMethod = new DynamicMethod("SetEmit", null, new[] { type, typeof(object) }, type.Module);
                 var iL = dynamicMethod.GetILGenerator();
@@ -56,9 +89,15 @@ namespace FastUntility.Core.Base
             try
             {
                 var type = model.GetType();
-                var method = type.GetMethod($"set_{name}");
+                var key = $"set_{name}_{type.FullName}";
+                MethodInfo method = Get(key);
                 if (method == null)
-                    return;
+                {
+                    method = type.GetMethod($"set_{name}");
+                    if (method == null)
+                        return;
+                    Set(key, method);
+                }
 
                 var parameter = method.GetParameters()[0];
                 if (parameter == null)
@@ -82,10 +121,17 @@ namespace FastUntility.Core.Base
 
             var type = typeof(T);
             var dynamicMethod = new DynamicMethod("GetEmit", typeof(object), new[] { typeof(object) }, type, true);
-            var method = type.GetMethod($"get_{name}");
+
+            var key = $"get_{name}_{type.FullName}";
+            MethodInfo method = Get(key);
 
             if (method == null)
-                return null;
+            {
+                method = type.GetMethod($"get_{name}");
+                if (method == null)
+                    return null;
+                Set(key, method);
+            }
 
             var property = type.GetProperty(name);
 
@@ -114,10 +160,16 @@ namespace FastUntility.Core.Base
 
             var type = model.GetType();
             var dynamicMethod = new DynamicMethod("GetEmit", typeof(object), new[] { typeof(object) }, type, true);
-            var method = type.GetMethod($"get_{name}");
+            var key = $"get_{name}_{type.FullName}";
+            MethodInfo method = Get(key);
 
             if (method == null)
-                return null;
+            {
+                method = type.GetMethod($"get_{name}");
+                if (method == null)
+                    return null;
+                Set(key, method);
+            }
 
             var property = type.GetProperty(name);
 
