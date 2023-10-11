@@ -182,6 +182,8 @@ namespace FastData.Core.Base
         /// <param name="i"></param>
         internal static void IncludeXml(XmlModel result, string tempKey, XmlNode dyn, int i)
         {
+            result.Key.Add(string.Format("{0}.format.{1}", tempKey, i));
+            result.Sql.Add(dyn.Name);
             result.Key.Add(string.Format("{0}.condition.{1}", tempKey, i));
             result.Sql.Add(dyn.Name);
             result.Key.Add(string.Format("{0}.condition.include.{1}", tempKey, i));
@@ -417,9 +419,90 @@ namespace FastData.Core.Base
         /// </summary>
         /// <param name="model"></param>
         /// <param name="tempParam"></param>
-        internal static void IncludeSql(SqlModel model, List<DbParameter> tempParam)
+        internal static void IncludeSql(SqlModel model, List<DbParameter> tempParam, DbParameter[] param)
         {
+            var key = DbCache.Get(model.CacheType, model.IncludeRefIdKey).ToLower();
+            if (DbCache.Exists(model.CacheType, key))
+            {
+                for (var i = 0; i <= DbCache.Get(model.CacheType, key).ToInt(0); i++)
+                {
+                    var txtKey = string.Format("{0}.{1}", key, i);
+                    if (DbCache.Exists(model.CacheType, txtKey))
+                        model.Sql.Append(DbCache.Get(model.CacheType, txtKey));
 
+                    var dynKey = string.Format("{0}.format.{1}", key, i);
+                    if (DbCache.Exists(model.CacheType, dynKey))
+                    {
+                        foreach (var item in DbCache.Get<List<string>>(model.CacheType, string.Format("{0}.param", key)))
+                        {
+                            if (!param.ToList().Exists(a => string.Compare(a.ParameterName, item, true) == 0))
+                                continue;
+
+                            var temp = param.ToList().Find(a => string.Compare(a.ParameterName, item, true) == 0);
+                            if (!tempParam.ToList().Exists(a => a.ParameterName == temp.ParameterName))
+                                tempParam.Add(temp);
+
+                            var sqlModel = new SqlModel() { CacheType = model.CacheType, I = i, MapName = key, Param = temp, Flag = model.Flag };
+                            if (DbCache.Exists(model.CacheType, sqlModel.ParamKey))
+                            {
+                                var condition = DbCache.Get(sqlModel.CacheType, sqlModel.ConditionKey).ToStr().ToLower();
+                                switch (condition)
+                                {
+                                    case "isequal":
+                                        {
+                                            XmlOption.IsEqualSql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                    case "isnotequal":
+                                        {
+                                            XmlOption.IsNotEqualSql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                    case "isgreaterthan":
+                                        {
+                                            XmlOption.IsGreaterThanSql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                    case "islessthan":
+                                        {
+                                            XmlOption.IsLessThanSql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                    case "isnullorempty":
+                                        {
+                                            XmlOption.IsNullOrEmptySql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                    case "isnotnullorempty":
+                                        {
+                                            XmlOption.IsNotNullOrEmptySql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                    case "if":
+                                        {
+                                            XmlOption.IfSql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                    case "choose":
+                                        {
+                                            XmlOption.ChooseSql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                    default:
+                                        {
+                                            XmlOption.IsPropertyAvailableSql(sqlModel, tempParam);
+                                            break;
+                                        }
+                                }
+                            }
+                            model.Sql.Append(sqlModel.Sql);
+                        }
+
+                        if (model.Sql.ToString() != "")
+                            model.Sql.Append(DbCache.Get(model.CacheType, dynKey));
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -42,6 +42,7 @@ namespace FastData.Core.Base
         /// <returns></returns>
         public static string GetMapSql(string name, ref DbParameter[] param, DataContext db, string key)
         {
+            name = name.ToLower();
             var tempParam = new List<DbParameter>();
             var sql = new StringBuilder();
             var flag = "";
@@ -58,22 +59,22 @@ namespace FastData.Core.Base
                 cacheType = DataConfig.Get(key).CacheType;
             }
 
-            for (var i = 0; i <= DbCache.Get(cacheType, name.ToLower()).ToInt(0); i++)
+            for (var i = 0; i <= DbCache.Get(cacheType, name).ToInt(0); i++)
             {
                 #region 文本
-                var txtKey = string.Format("{0}.{1}", name.ToLower(), i);
+                var txtKey = string.Format("{0}.{1}", name, i);
                 if (DbCache.Exists(cacheType, txtKey))
                     sql.Append(DbCache.Get(cacheType, txtKey));
                 #endregion
 
                 #region 动态
-                var dynKey = string.Format("{0}.format.{1}", name.ToLower(), i);
+                var dynKey = string.Format("{0}.format.{1}", name, i);
                 if (DbCache.Exists(cacheType, dynKey))
                 {
                     if (param != null)
                     {
                         var tempSql = new StringBuilder();
-                        foreach (var item in DbCache.Get<List<string>>(cacheType, string.Format("{0}.param", name.ToLower())))
+                        foreach (var item in DbCache.Get<List<string>>(cacheType, string.Format("{0}.param", name)))
                         {
                             if (!param.ToList().Exists(a => string.Compare(a.ParameterName, item, true) == 0))
                                 continue;
@@ -83,7 +84,7 @@ namespace FastData.Core.Base
 
                             var sqlModel = new SqlModel() { CacheType = cacheType, I = i, MapName = name, Param = temp, Flag = flag };
 
-                            if (DbCache.Exists(cacheType, sqlModel.ParamKey))
+                            if (DbCache.Exists(cacheType, sqlModel.ParamKey) || string.Compare(DbCache.Get(cacheType, dynKey), "include", true) == 0)
                             {
                                 var condition = DbCache.Get(cacheType, sqlModel.ConditionKey).ToStr().ToLower();
                                 switch (condition)
@@ -130,8 +131,8 @@ namespace FastData.Core.Base
                                         }
                                     default:
                                         {
-                                            if (DbCache.Get(cacheType, sqlModel.IncludeKey).ToStr().ToLower() == "include")
-                                                GetMapSql(sqlModel.IncludeRefIdKey, ref param, db, key);
+                                            if (string.Compare(DbCache.Get(cacheType, sqlModel.IncludeKey), "include", true) == 0)
+                                                XmlOption.IncludeSql(sqlModel, tempParam, param);
                                             else
                                                 XmlOption.IsPropertyAvailableSql(sqlModel, tempParam);
                                             break;
@@ -143,7 +144,8 @@ namespace FastData.Core.Base
 
                         if (tempSql.ToString() != "")
                         {
-                            sql.Append(DbCache.Get(cacheType, dynKey));
+                            var dynKeySql = DbCache.Get(cacheType, dynKey);
+                            sql.Append(string.Compare(dynKeySql, "include", true) == 0 ? "" : dynKeySql);
                             sql.Append(tempSql.ToString());
                         }
                     }
@@ -151,7 +153,7 @@ namespace FastData.Core.Base
                 #endregion
             }
 
-            if (DbCache.Get<List<string>>(cacheType, string.Format("{0}.param", name.ToLower())).Count > 0)
+            if (DbCache.Get<List<string>>(cacheType, string.Format("{0}.param", name)).Count > 0)
                 param = tempParam.ToArray();
             else
             {
@@ -201,9 +203,10 @@ namespace FastData.Core.Base
         /// <returns></returns>
         internal static bool MapIsForEach(string name, ConfigModel config, int i = 1)
         {
-            var keyName = string.Format("{0}.foreach.name.{1}", name.ToLower(), i);
-            var keyField = string.Format("{0}.foreach.field.{1}", name.ToLower(), i);
-            var keySql = string.Format("{0}.foreach.sql.{1}", name.ToLower(), i);
+            name = name.ToLower();
+            var keyName = string.Format("{0}.foreach.name.{1}", name, i);
+            var keyField = string.Format("{0}.foreach.field.{1}", name, i);
+            var keySql = string.Format("{0}.foreach.sql.{1}", name, i);
 
             return !string.IsNullOrEmpty(DbCache.Get(config.CacheType, keyName)) &&
                 !string.IsNullOrEmpty(DbCache.Get(config.CacheType, keyField)) &&
@@ -221,11 +224,12 @@ namespace FastData.Core.Base
         /// <returns></returns>
         internal static List<Dictionary<string, object>> MapForEach(List<Dictionary<string, object>> data, string name, DataContext db, string key, ConfigModel config, int i = 1)
         {
+            name = name.ToLower();
             var result = new List<Dictionary<string, object>>();
             var param = new List<DbParameter>();
-            var dicName = DbCache.Get(config.CacheType, string.Format("{0}.foreach.name.{1}", name.ToLower(), i));
-            var field = DbCache.Get(config.CacheType, string.Format("{0}.foreach.field.{1}", name.ToLower(), i));
-            var sql = DbCache.Get(config.CacheType, string.Format("{0}.foreach.sql.{1}", name.ToLower(), i));
+            var dicName = DbCache.Get(config.CacheType, string.Format("{0}.foreach.name.{1}", name, i));
+            var field = DbCache.Get(config.CacheType, string.Format("{0}.foreach.field.{1}", name, i));
+            var sql = DbCache.Get(config.CacheType, string.Format("{0}.foreach.sql.{1}", name, i));
 
             data.ForEach(a =>
             {
@@ -268,12 +272,13 @@ namespace FastData.Core.Base
         /// <returns></returns>
         internal static List<T> MapForEach<T>(List<T> data, string name, DataContext db, ConfigModel config, int i = 1) where T : class, new()
         {
+            name = name.ToLower();
             var result = new List<T>();
             var param = new List<DbParameter>();
-            var dicName = DbCache.Get(config.CacheType, string.Format("{0}.foreach.name.{1}", name.ToLower(), i));
-            var type = DbCache.Get(config.CacheType, string.Format("{0}.foreach.type.{1}", name.ToLower(), i));
-            var field = DbCache.Get(config.CacheType, string.Format("{0}.foreach.field.{1}", name.ToLower(), i));
-            var sql = DbCache.Get(config.CacheType, string.Format("{0}.foreach.sql.{1}", name.ToLower(), i));
+            var dicName = DbCache.Get(config.CacheType, string.Format("{0}.foreach.name.{1}", name, i));
+            var type = DbCache.Get(config.CacheType, string.Format("{0}.foreach.type.{1}", name, i));
+            var field = DbCache.Get(config.CacheType, string.Format("{0}.foreach.field.{1}", name, i));
+            var sql = DbCache.Get(config.CacheType, string.Format("{0}.foreach.sql.{1}", name, i));
             Assembly assembly;
 
             if (type.IndexOf(',') > 0)
@@ -322,7 +327,7 @@ namespace FastData.Core.Base
                         }
 
                         list = db.ExecuteSqlList(model.GetType(), sql, param.ToArray(), false, false).List;
-
+                     
                         BaseEmit.Set(item, infoResult.Name, list);
                         result.Add(item);
                     }
