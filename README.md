@@ -242,7 +242,7 @@ map xml
                     select ypxh from base_role where userId=:userId
                  </foreach>
                 </dynamic>
-	  <include refid="Include.Id"></include>
+	        <include refid="Include.Id"></include>
               </select>
               
               <select id="Patient.Test">
@@ -258,12 +258,12 @@ map xml
                 </foreach>
               </select>
 
-	 <select id="Include.Id">
+	      <select id="Include.Id">
 		<dynamic prepend="">
 		    <isNotNullOrEmpty prepend=" and " property="BeginTime">a.BeginTime >= '#BeginTime#'</isNotNullOrEmpty>
 		    <isNotNullOrEmpty prepend=" and " property="EndTime">a.EndTime &lt; '#EndTime#'</isNotNullOrEmpty>
-                        </dynamic>
-	 </select>	
+                </dynamic>
+	      </select>	
           </sqlMap>
   
   
