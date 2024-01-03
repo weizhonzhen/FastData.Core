@@ -1,17 +1,16 @@
 ﻿using FastData.Core.Base;
 using FastData.Core.Context;
 using FastData.Core.Model;
+using FastUntility.Core;
+using FastUntility.Core.Page;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using FastUntility.Core.Page;
-using System.Data;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using FastUntility.Core;
 
 namespace FastData.Core
 {
@@ -703,6 +702,7 @@ namespace FastData.Core
             stopwatch.Start();
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            param = Parameter.ToDbParameter(param, db.config);
             result = db.ExecuteSql<T>(sql, param, isAop);
             config = db.config;
 
@@ -904,6 +904,7 @@ namespace FastData.Core
             stopwatch.Start();
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
+            param = Parameter.ToDbParameter(param, db.config);
             result = db.ExecuteSqlList(sql, param, false, isAop);
             config = db.config;
 

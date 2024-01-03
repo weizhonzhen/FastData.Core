@@ -339,6 +339,7 @@ namespace FastData.Core
 
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             config = db.config;
+            param = Parameter.ToDbParameter(param, config);
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
             result = db.ExecuteSql(sql, param, false, config.IsOutSql, false);
 
@@ -383,6 +384,7 @@ namespace FastData.Core
             db = db == null ? ServiceContext.Engine.Resolve<IUnitOfWorK>().Contexts(key) : db;
             config = db.config;
             config.IsOutSql = config.IsOutSql ? config.IsOutSql : isOutSql;
+            param = Parameter.ToDbParameter(param, config);
             result = db.ExecuteSql(sql, param, false, config.IsOutSql);
 
             stopwatch.Stop();
