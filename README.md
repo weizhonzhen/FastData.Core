@@ -278,8 +278,8 @@ map xml
                  FastMap.QueryPage(pageModel, "getuser", param.ToArray());
 
 
-                 var param = new List<OracleParameter>();
-        param.Add(new OracleParameter { ParameterName = "userid", Value = "dd5c99f2-0892-4179-83db-c2ccf243104c" });
+                 var param = new List<DataParameter>();//
+        param.Add(new DataParameter { ParameterName = "userid", Value = "dd5c99f2-0892-4179-83db-c2ccf243104c" });
         var tt = FastMap.Query<TestResult>("Patient.Test", param.ToArray(), null, "test");
         
         //Navigate
