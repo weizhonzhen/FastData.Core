@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using FastData.Core.Model;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
+using System.Linq;
 
 namespace FastData.Core.Base
 {
@@ -29,5 +32,36 @@ namespace FastData.Core.Base
             return result;
         }
         #endregion
+
+        public static DbParameter[] ToDbParameter(DbParameter[] param, ConfigModel config)
+        {
+            var list = new List<DbParameter>();
+            if (param == null || param.Length == 0)
+                return list.ToArray();
+            else
+            {
+                if (param.ToList().Exists(a => a.GetType() == typeof(DataParameter)))
+                {
+                    param.ToList().ForEach(p =>
+                    {
+                        if (p.GetType() == typeof(DataParameter))
+                        {
+                            var info = DbProviderFactories.GetFactory(config).CreateParameter();
+                            info.ParameterName = p.ParameterName;
+                            info.Direction = p.Direction == 0 ? ParameterDirection.Input : p.Direction;
+                            info.Value = p.Value;
+                            info.DbType = p.DbType;
+                            list.Add(info);
+                        }
+                        else
+                            list.Add(p);
+                    });
+
+                    return list.ToArray();
+                }
+                else
+                    return param;
+            }
+        }
     }
 }
