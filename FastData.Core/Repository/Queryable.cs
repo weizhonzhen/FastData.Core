@@ -1428,11 +1428,11 @@ namespace FastData.Core.Repository
         }
         #endregion
 
-        #region 是否过滤
+        #region 是否导航
         /// <summary>
-        /// 是否过滤
+        /// 是否导航
         /// </summary>
-        /// <param name="isFilter"></param>
+        /// <param name="isNavigate"></param>
         /// <returns></returns>
         public override IQueryable<T, T1> Navigate(bool isNavigate = true)
         {
