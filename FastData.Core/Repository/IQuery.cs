@@ -19,7 +19,7 @@ namespace FastData.Core.Repository
 
         public abstract IQuery Or<T>(Expression<Func<T, bool>> predicate);
 
-        public abstract IQuery AndIf<T,T1>(bool condtion, Expression<Func<T, T1, bool>> predicate);
+        public abstract IQuery AndIf<T, T1>(bool condtion, Expression<Func<T, T1, bool>> predicate);
 
         public abstract IQuery And<T, T1>(Expression<Func<T, T1, bool>> predicate);
 
@@ -40,6 +40,8 @@ namespace FastData.Core.Repository
         public abstract IQuery Take(int i);
 
         public abstract IQuery Filter(bool isFilter = true);
+
+        public abstract IQuery Navigate(bool isNavigate = true);
 
         public abstract string ToJson(DataContext db = null, bool isOutSql = false);
 
@@ -125,12 +127,12 @@ namespace FastData.Core.Repository
 
         public abstract ValueTask<Lazy<List<dynamic>>> ToLazyDynsAsy(DataContext db = null, bool isOutSql = false);
 
-        public abstract  PageResultDyn ToDynPage( PageModel pModel, DataContext db = null, bool isOutSql = false);
+        public abstract PageResultDyn ToDynPage(PageModel pModel, DataContext db = null, bool isOutSql = false);
 
-        public abstract ValueTask<PageResultDyn> ToDynPageAsy( PageModel pModel, DataContext db = null, bool isOutSql = false);
+        public abstract ValueTask<PageResultDyn> ToDynPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false);
 
-        public abstract Lazy<PageResultDyn> ToLazyDynPage( PageModel pModel, DataContext db = null, bool isOutSql = false);
+        public abstract Lazy<PageResultDyn> ToLazyDynPage(PageModel pModel, DataContext db = null, bool isOutSql = false);
 
-        public abstract ValueTask<Lazy<PageResultDyn>> ToLazyDynPageAsy( PageModel pModel, DataContext db = null, bool isOutSql = false);
+        public abstract ValueTask<Lazy<PageResultDyn>> ToLazyDynPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false);
     }
 }

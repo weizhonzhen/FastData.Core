@@ -40,7 +40,7 @@ namespace FastData.Core.Repository
             this.Data.Table.Add(string.Format("{2} {0}{3} {1}", typeof(T1).Name, predicate.Parameters[1].Name
             , joinType, isDblink && !string.IsNullOrEmpty(this.Data.Config.DbLinkName) ? string.Format("@", this.Data.Config.DbLinkName) : ""));
 
-            return new Queryable<T, T1>() { Data=this.Data };
+            return new Queryable<T, T1>() { Data = this.Data };
         }
         #endregion
 
@@ -148,6 +148,19 @@ namespace FastData.Core.Repository
         public override IQueryable<T> Filter(bool isFilter = true)
         {
             this.Data.IsFilter = isFilter;
+            return this;
+        }
+        #endregion
+
+        #region 是否导航
+        /// <summary>
+        /// 是否导航
+        /// </summary>
+        /// <param name="isNavigate"></param>
+        /// <returns></returns>
+        public override IQueryable<T> Navigate(bool isNavigate = true)
+        {
+            this.Data.IsNavigate = isNavigate;
             return this;
         }
         #endregion
@@ -1260,7 +1273,7 @@ namespace FastData.Core.Repository
         #endregion
     }
 
-    public class Queryable<T,T1> : IQueryable<T,T1> where T : class, new()
+    public class Queryable<T, T1> : IQueryable<T, T1> where T : class, new()
     {
         internal DataQuery Data { get; set; } = new DataQuery();
 
@@ -1271,7 +1284,7 @@ namespace FastData.Core.Repository
         /// <param name="condtion"></param>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public override IQueryable<T,T1> AndIf(bool condtion, Expression<Func<T, T1, bool>> predicate)
+        public override IQueryable<T, T1> AndIf(bool condtion, Expression<Func<T, T1, bool>> predicate)
         {
             if (condtion)
             {
@@ -1305,7 +1318,7 @@ namespace FastData.Core.Repository
             {
                 this.Data.Table.Add(string.Format("{0} {1}", typeof(T).Name, predicate.Parameters[0].Name));
                 this.Data.TableName.Add(typeof(T).Name);
-                this.Data.TableAsName.Add(typeof(T).Name,predicate.Parameters[0].Name);
+                this.Data.TableAsName.Add(typeof(T).Name, predicate.Parameters[0].Name);
                 this.Data.Predicate.Add(visitModel);
             }
             return this;
@@ -1411,6 +1424,19 @@ namespace FastData.Core.Repository
         public override IQueryable<T, T1> Filter(bool isFilter = true)
         {
             this.Data.IsFilter = isFilter;
+            return this;
+        }
+        #endregion
+
+        #region 是否过滤
+        /// <summary>
+        /// 是否过滤
+        /// </summary>
+        /// <param name="isFilter"></param>
+        /// <returns></returns>
+        public override IQueryable<T, T1> Navigate(bool isNavigate = true)
+        {
+            this.Data.IsNavigate = isNavigate;
             return this;
         }
         #endregion

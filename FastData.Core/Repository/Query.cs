@@ -152,6 +152,19 @@ namespace FastData.Core.Repository
         }
         #endregion
 
+        #region 是否导航
+        /// <summary>
+        /// 是否导航
+        /// </summary>
+        /// <param name="isNavigate"></param>
+        /// <returns></returns>
+        public override IQuery Navigate(bool isNavigate = true)
+        {
+            this.Data.IsNavigate = isNavigate;
+            return this;
+        }
+        #endregion
+
 
         #region 返回list
         /// <summary>
@@ -845,7 +858,7 @@ namespace FastData.Core.Repository
         /// <param name="condtion"></param>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public override IQuery AndIf<T,T1>(bool condtion, Expression<Func<T, T1, bool>> predicate)
+        public override IQuery AndIf<T, T1>(bool condtion, Expression<Func<T, T1, bool>> predicate)
         {
             if (condtion)
             {
@@ -1009,7 +1022,7 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override List<dynamic> ToDyns( DataContext db = null, bool isOutSql = false)
+        public override List<dynamic> ToDyns(DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturnDyn();
             var stopwatch = new Stopwatch();
@@ -1037,7 +1050,7 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override ValueTask<List<dynamic>> ToDynsAsy( DataContext db = null, bool isOutSql = false)
+        public override ValueTask<List<dynamic>> ToDynsAsy(DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<List<dynamic>>(ToDyns(db, isOutSql));
         }
@@ -1049,7 +1062,7 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override Lazy<List<dynamic>> ToLazyDyns( DataContext db = null, bool isOutSql = false)
+        public override Lazy<List<dynamic>> ToLazyDyns(DataContext db = null, bool isOutSql = false)
         {
             return new Lazy<List<dynamic>>(() => ToDyns(db, isOutSql));
         }
@@ -1061,7 +1074,7 @@ namespace FastData.Core.Repository
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public override ValueTask<Lazy<List<dynamic>>> ToLazyDynsAsy( DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<List<dynamic>>> ToLazyDynsAsy(DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<Lazy<List<dynamic>>>(new Lazy<List<dynamic>>(() => ToDyns(db, isOutSql)));
         }
@@ -1075,7 +1088,7 @@ namespace FastData.Core.Repository
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public override PageResultDyn ToDynPage( PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public override PageResultDyn ToDynPage(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             var result = new DataReturnDyn();
             var stopwatch = new Stopwatch();
@@ -1103,7 +1116,7 @@ namespace FastData.Core.Repository
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public override ValueTask<PageResultDyn> ToDynPageAsy( PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public override ValueTask<PageResultDyn> ToDynPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<PageResultDyn>(ToDynPage(pModel, db, isOutSql));
         }
@@ -1116,7 +1129,7 @@ namespace FastData.Core.Repository
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public override Lazy<PageResultDyn> ToLazyDynPage( PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public override Lazy<PageResultDyn> ToLazyDynPage(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             return new Lazy<PageResultDyn>(() => ToDynPage(pModel, db, isOutSql));
         }
@@ -1129,7 +1142,7 @@ namespace FastData.Core.Repository
         /// <param name="item"></param>
         /// <param name="pModel"></param>
         /// <returns></returns>
-        public override ValueTask<Lazy<PageResultDyn>> ToLazyDynPageAsy( PageModel pModel, DataContext db = null, bool isOutSql = false)
+        public override ValueTask<Lazy<PageResultDyn>> ToLazyDynPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false)
         {
             return new ValueTask<Lazy<PageResultDyn>>(new Lazy<PageResultDyn>(() => ToDynPage(pModel, db, isOutSql)));
         }

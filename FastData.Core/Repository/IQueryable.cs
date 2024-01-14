@@ -12,13 +12,13 @@ namespace FastData.Core.Repository
     {
         public abstract IQueryable<T> AndIf(bool condtion, Expression<Func<T, bool>> predicate);
 
-        public abstract IQueryable<T> And( Expression<Func<T, bool>> predicate);
+        public abstract IQueryable<T> And(Expression<Func<T, bool>> predicate);
 
         public abstract IQueryable<T> OrIf(bool condtion, Expression<Func<T, bool>> predicate);
 
         public abstract IQueryable<T> Or(Expression<Func<T, bool>> predicate);
 
-        public abstract IQueryable<T,T1> LeftJoin<T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false);
+        public abstract IQueryable<T, T1> LeftJoin<T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false);
 
         public abstract IQueryable<T, T1> RightJoin<T1>(Expression<Func<T, T1, bool>> predicate, Expression<Func<T1, object>> field = null, bool isDblink = false) where T1 : class, new();
 
@@ -31,6 +31,8 @@ namespace FastData.Core.Repository
         public abstract IQueryable<T> Take(int i);
 
         public abstract IQueryable<T> Filter(bool isFilter = true);
+
+        public abstract IQueryable<T> Navigate(bool isNavigate = true);
 
         public abstract string ToJson(DataContext db = null, bool isOutSql = false);
 
@@ -149,9 +151,9 @@ namespace FastData.Core.Repository
         public abstract ValueTask<Lazy<PageResultDyn>> ToLazyDynPageAsy(PageModel pModel, DataContext db = null, bool isOutSql = false);
     }
 
-    public abstract class IQueryable<T,T1> where T : class, new()
+    public abstract class IQueryable<T, T1> where T : class, new()
     {
-        public abstract IQueryable<T,T1> AndIf(bool condtion, Expression<Func<T, T1, bool>> predicate);
+        public abstract IQueryable<T, T1> AndIf(bool condtion, Expression<Func<T, T1, bool>> predicate);
 
         public abstract IQueryable<T, T1> And(Expression<Func<T, T1, bool>> predicate);
 
@@ -166,6 +168,8 @@ namespace FastData.Core.Repository
         public abstract IQueryable<T, T1> Take(int i);
 
         public abstract IQueryable<T, T1> Filter(bool isFilter = true);
+
+        public abstract IQueryable<T, T1> Navigate(bool isNavigate = true);
 
         public abstract string ToJson(DataContext db = null, bool isOutSql = false);
 
