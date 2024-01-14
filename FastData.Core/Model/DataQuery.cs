@@ -32,7 +32,7 @@ namespace FastData.Core.Model
         /// 前几条
         /// </summary>
         internal int Take { get; set; }
-        
+
         /// <summary>
         /// 数据库键
         /// </summary>
@@ -51,7 +51,7 @@ namespace FastData.Core.Model
         /// <summary>
         /// 表别名
         /// </summary>
-        internal Dictionary<string,object> TableAsName { get; set; } = new Dictionary<string, object>();
+        internal Dictionary<string, object> TableAsName { get; set; } = new Dictionary<string, object>();
 
         /// <summary>
         /// 连接配置
@@ -67,6 +67,11 @@ namespace FastData.Core.Model
         /// 过滤
         /// </summary>
         internal bool IsFilter { get; set; } = true;
+
+        /// <summary>
+        /// 导航
+        /// </summary>
+        internal bool IsNavigate { get; set; }= true;
     }
     #endregion
 }
