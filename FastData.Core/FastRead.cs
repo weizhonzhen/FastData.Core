@@ -61,6 +61,19 @@ namespace FastData.Core
         }
         #endregion
 
+        #region 是否导航
+        /// <summary>
+        /// 是否导航
+        /// </summary>
+        /// <param name="isNavigate"></param>
+        /// <returns></returns>
+        public static DataQuery Navigate(this DataQuery item, bool isNavigate = true)
+        {
+            item.IsNavigate = isNavigate;
+            return item;
+        }
+        #endregion
+
         #region 表查询
         /// <summary>
         /// 表查询
