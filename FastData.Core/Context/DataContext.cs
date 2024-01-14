@@ -468,7 +468,8 @@ namespace FastData.Core.Context
 
                 BaseAop.AopAfter(item.TableName, sql.ToString(), param, config, true, AopType.Query_List_Lambda, result.List);
 
-                Navigate<T>(result, item.Config, false);
+                if (item.IsNavigate)
+                    Navigate<T>(result, item.Config, false);
 
                 return result;
             }
@@ -675,7 +676,8 @@ namespace FastData.Core.Context
 
                     BaseAop.AopAfter(item.TableName, cmd.CommandText, param, config, true, AopType.Query_Page_Lambda_Model, result.PageResult.list);
 
-                    Navigate<T>(result, item.Config, true);
+                    if (item.IsNavigate)
+                        Navigate<T>(result, item.Config, true);
                 }
                 else
                     result.PageResult.list = new List<T>();
@@ -1237,7 +1239,7 @@ namespace FastData.Core.Context
 
                 var instance = Activator.CreateInstance(type);
                 var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
-                result.List = BaseDataReader.ToList(list.GetType(), instance, dr, config);
+                result.List = BaseDataReader.ToList(list.GetType(), instance, dr, config); 
 
                 dr.Close();
                 dr.Dispose();
