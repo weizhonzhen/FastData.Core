@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FastData.Core.Filter
+﻿namespace FastData.Core.Filter
 {
     public enum FilterType
     {
+        All = 0,
         Execute_Sql_Model = 1,
         Query_List_Lambda = 2,
         Query_Dic_Lambda = 3,
@@ -16,8 +13,8 @@ namespace FastData.Core.Filter
         Query_Page_Lambda_Model = 8,
         Query_Page_Sql_Model = 9,
         Query_Page_Sql_Dic = 10,
-        FastRead_Page =11,
-        Query_Dyn_Lambda=12,
+        FastRead_Page = 11,
+        Query_Dyn_Lambda = 12,
         Query_Page_Lambda_Dyn = 13,
     }
 }
