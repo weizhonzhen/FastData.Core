@@ -46,7 +46,7 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// post url(insert)
         /// </summary>
-        public static string PostUrl( string url, Dictionary<string, object> dic, IHttpClientFactory client, string key = null, int version = 1, int minor = 1, string mediaType = "application/json")
+        public static string PostUrl(string url, Dictionary<string, object> dic, IHttpClientFactory client, string key = null, int version = 1, int minor = 1, string mediaType = "application/json")
         {
             try
             {
@@ -82,11 +82,39 @@ namespace FastUntility.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostUrl_exp"); });
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostUrl_exp"); }).ConfigureAwait(false);
                 return null;
             }
         }
         #endregion
+
+        /// <summary>
+        /// post form
+        /// </summary>
+        public static string PostForm(string url, List<KeyValuePair<string, string>> param, IHttpClientFactory client, string key = null)
+        {
+            try
+            {
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
+
+                var handle = new HttpRequestMessage();
+                handle.Content = new FormUrlEncodedContent(param);
+                handle.Method = HttpMethod.Post;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
+                handle.Content?.Dispose();
+                handle.Dispose();
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch (Exception ex)
+            {
+                return string.Empty;
+            }
+        }
 
         #region post content(insert)
         /// <summary>
@@ -113,7 +141,7 @@ namespace FastUntility.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostContent_exp"); });
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostContent_exp"); }).ConfigureAwait(false);
                 return null;
             }
         }
@@ -146,7 +174,7 @@ namespace FastUntility.Core.Base
                     }
                     count++;
                 }
-                
+
                 var handle = new HttpRequestMessage();
                 handle.Version = new Version(version, minor);
                 handle.Content = new StringContent("", Encoding.UTF8, mediaType);
@@ -159,11 +187,39 @@ namespace FastUntility.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PutUrl_exp"); });
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PutUrl_exp"); }).ConfigureAwait(false);
                 return null;
             }
         }
         #endregion
+
+        /// <summary>
+        /// Put form
+        /// </summary>
+        public static string PutForm(string url, List<KeyValuePair<string, string>> param, IHttpClientFactory client, string key = null)
+        {
+            try
+            {
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
+
+                var handle = new HttpRequestMessage();
+                handle.Content = new FormUrlEncodedContent(param);
+                handle.Method = HttpMethod.Put;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
+                handle.Content?.Dispose();
+                handle.Dispose();
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch (Exception ex)
+            {
+                return string.Empty;
+            }
+        }
 
         #region put content (update)
         /// <summary>
@@ -190,7 +246,7 @@ namespace FastUntility.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PutUrl_exp"); });
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PutUrl_exp"); }).ConfigureAwait(false);
                 return null;
             }
         }
@@ -222,13 +278,42 @@ namespace FastUntility.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PutUrl_exp"); });
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PutUrl_exp"); }).ConfigureAwait(false);
                 BaseLog.SaveLog(url + ":" + ex.ToString(), "DeleteUrl_exp");
                 return null;
             }
         }
         #endregion
-        
+
+
+        /// <summary>
+        /// Delete form
+        /// </summary>
+        public static string DeleteForm(string url, List<KeyValuePair<string, string>> param, IHttpClientFactory client, string key = null)
+        {
+            try
+            {
+                HttpClient http;
+                if (string.IsNullOrEmpty(key))
+                    http = client.CreateClient();
+                else
+                    http = client.CreateClient(key);
+
+                var handle = new HttpRequestMessage();
+                handle.Content = new FormUrlEncodedContent(param);
+                handle.Method = HttpMethod.Delete;
+                handle.RequestUri = new Uri(url);
+                var response = http.SendAsync(handle).Result;
+                handle.Content?.Dispose();
+                handle.Dispose();
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch (Exception ex)
+            {
+                return string.Empty;
+            }
+        }
+
         #region post soap
         /// <summary>
         /// post content(insert)
@@ -257,7 +342,7 @@ namespace FastUntility.Core.Base
 
                 xml.AppendFormat("</{0}>", method);
                 xml.Append("</soap:Body>");
-                xml.Append("</soap:Envelope>");;
+                xml.Append("</soap:Envelope>"); ;
 
                 var handle = new HttpRequestMessage();
                 handle.Version = new Version(version, minor);
@@ -280,7 +365,7 @@ namespace FastUntility.Core.Base
             }
             catch (Exception ex)
             {
-                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostSoap_exp"); });
+                Task.Factory.StartNew(() => { BaseLog.SaveLog(url + ":" + ex.ToString(), "PostSoap_exp"); }).ConfigureAwait(false);
                 return null;
             }
         }
