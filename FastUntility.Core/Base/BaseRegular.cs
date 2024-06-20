@@ -6,6 +6,8 @@ using FastUntility.Core.Attributes;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace FastUntility.Core.Base
 {
@@ -381,7 +383,7 @@ namespace FastUntility.Core.Base
             }
             int y = -1;
             Math.DivRem(sum, 11, out y);
-            if (string.Compare( arrVarifyCode[y], input.Substring(17, 1), true) !=0)
+            if (string.Compare(arrVarifyCode[y], input.Substring(17, 1), true) != 0)
             {
                 return false;
             }
@@ -498,6 +500,77 @@ namespace FastUntility.Core.Base
                 return true;
             else
                 return false;
+        }
+        #endregion
+
+        #region 是不是基本类型
+        /// <summary>
+        /// 是否数字型
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsNumericType(Type type)
+        {
+            if (type == typeof(byte) ||
+                type == typeof(sbyte) ||
+                type == typeof(short) ||
+                type == typeof(ushort) ||
+                type == typeof(int) ||
+                type == typeof(uint) ||
+                type == typeof(long) ||
+                type == typeof(ulong) ||
+                type == typeof(float) ||
+                type == typeof(double) ||
+                type == typeof(decimal))
+            {
+                return true;
+            }
+
+            return false;
+        }
+        #endregion
+
+        #region jwt json to model
+        /// <summary>
+        /// jwt json to model
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public static T GetJwtToken<T>(string token) where T : class, new()
+        {
+            if (!string.IsNullOrEmpty(token) && token.IndexOf('.') > 0)
+            {
+                var payload = token.Split('.')[1];
+                var padded = payload.Length % 4 == 0 ? payload : payload + "====".Substring(payload.Length % 4);
+                var base64 = padded.Replace("_", "/").Replace("-", "+");
+                string json = Encoding.Default.GetString(Convert.FromBase64String(base64));
+                return BaseJson.JsonToModel<T>(json);
+            }
+            else
+                return new T();
+        }
+        #endregion
+
+        #region jwt json to dic
+        /// <summary>
+        /// jwt json to dic
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public static Dictionary<string, object> GetJwtToken(string token)
+        {
+            if (!string.IsNullOrEmpty(token) && token.IndexOf('.') > 0)
+            {
+                var payload = token.Split('.')[1];
+                var padded = payload.Length % 4 == 0 ? payload : payload + "====".Substring(payload.Length % 4);
+                var base64 = padded.Replace("_", "/").Replace("-", "+");
+                string json = Encoding.Default.GetString(Convert.FromBase64String(base64));
+                return BaseJson.JsonToDic(json);
+            }
+            else
+                return new Dictionary<string, object>();
         }
         #endregion
     }

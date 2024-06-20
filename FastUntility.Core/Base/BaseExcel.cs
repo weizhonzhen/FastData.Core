@@ -1,5 +1,6 @@
 ﻿using NPOI.HPSF;
 using NPOI.HSSF.UserModel;
+using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using System;
@@ -98,7 +99,8 @@ namespace FastUntility.Core.Base
 
                 result.row = result.sheet.CreateRow(2);
                 i = 0;
-                title2.ToList().ForEach(a => {
+                title2.ToList().ForEach(a =>
+                {
                     result.cell = result.row.CreateCell(i++);
                     result.cell.Row.Height = 420;
                     result.cell.SetCellValue(a.Value.ToStr());
@@ -122,7 +124,7 @@ namespace FastUntility.Core.Base
         /// <param name="headerText">标题</param>
         /// <param name="title">表头</param>
         /// <returns></returns>
-        public static ExcelModel Init(string headerText, Dictionary<string, object> title1,List<Dictionary<string,object>> title2=null)
+        public static ExcelModel Init(string headerText, Dictionary<string, object> title1, List<Dictionary<string, object>> title2 = null)
         {
             try
             {
@@ -145,7 +147,8 @@ namespace FastUntility.Core.Base
 
                 result.row = result.sheet.CreateRow(1);
                 int i = 0;
-                title1.ToList().ForEach(a => {
+                title1.ToList().ForEach(a =>
+                {
                     result.cell = result.row.CreateCell(i++);
                     result.cell.Row.Height = 420;
                     result.cell.SetCellValue(a.Value.ToStr());
@@ -187,7 +190,7 @@ namespace FastUntility.Core.Base
         /// </summary>
         /// <param name="listContent">内容列表</param>
         /// <param name="model"></param>
-        public static void FillContent(List<Dictionary<string, object>> listContent, ExcelModel model, string exclude = "",bool IsSmallTile=false)
+        public static void FillContent(List<Dictionary<string, object>> listContent, ExcelModel model, string exclude = "", bool IsSmallTile = false)
         {
             try
             {
@@ -204,10 +207,10 @@ namespace FastUntility.Core.Base
                         else
                             model.row = model.sheet.CreateRow(i + 2);
                         int j = 0;
-                                                
+
                         foreach (var temp in item)
                         {
-                            if (string.Compare( temp.Key, exclude, true) ==0)
+                            if (string.Compare(temp.Key, exclude, true) == 0)
                                 continue;
 
                             model.cell = model.row.CreateCell(j++);
@@ -220,7 +223,17 @@ namespace FastUntility.Core.Base
                                     info.GetValue("rowbegin").ToStr().ToInt(0), info.GetValue("rowend").ToStr().ToInt(0),
                                     info.GetValue("colbegin").ToStr().ToInt(0) - 1, info.GetValue("colend").ToStr().ToInt(0) - 1));
 
-                                model.cell.SetCellValue(info.GetValue("text").ToStr());
+
+                                if (BaseRegular.IsNumericType(info.GetValue("text").GetType()))
+                                {
+                                    model.cell.SetCellType(CellType.Numeric);
+                                    model.cell.SetCellValue(info.GetValue("text").ToStr().ToDouble(0));
+                                }
+                                else
+                                {
+                                    model.cell.SetCellType(CellType.String);
+                                    model.cell.SetCellValue(info.GetValue("text").ToStr());
+                                }
 
                                 if (info.GetValue("text").ToStr().Contains("\n"))
                                     model.cell.CellStyle = model.style_n;
@@ -229,7 +242,16 @@ namespace FastUntility.Core.Base
                             }
                             else
                             {
-                                model.cell.SetCellValue(temp.Value.ToStr());
+                                if (BaseRegular.IsNumericType(temp.Value.GetType()))
+                                {
+                                    model.cell.SetCellType(CellType.Numeric);
+                                    model.cell.SetCellValue(temp.Value.ToStr().ToDouble(0));
+                                }
+                                else
+                                {
+                                    model.cell.SetCellType(CellType.String);
+                                    model.cell.SetCellValue(temp.Value.ToStr());
+                                }
 
                                 if (temp.Value.ToStr().Contains("\n"))
                                     model.cell.CellStyle = model.style_n;
@@ -279,7 +301,7 @@ namespace FastUntility.Core.Base
                             var length = System.Text.Encoding.UTF8.GetBytes(currentCell.ToString()).Length;
                             if ((25 * (length / 60 + 1)) > height)
                                 height = 25 * (length / 60 + 1);
-                        }                            
+                        }
                     }
 
                     currentRow.HeightInPoints = height;
