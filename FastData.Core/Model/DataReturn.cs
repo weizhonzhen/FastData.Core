@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using FastUntility.Core.Page;
+using System.Collections.Generic;
 using System.Data;
-using FastUntility.Core.Page;
-using NPOI.SS.Formula.Functions;
+using System.Dynamic;
 
 namespace FastData.Core.Model
 {
@@ -54,7 +54,7 @@ namespace FastData.Core.Model
         /// <summary>
         /// 实体
         /// </summary>
-        public dynamic Item { set; get; }
+        public dynamic Item { set; get; } = new ExpandoObject();
 
         /// <summary>
         /// 列表
