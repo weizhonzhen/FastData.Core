@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Reflection.Emit;
-using System.Reflection;
-using System.Security;
-using System.Security.Permissions;
-using FastUntility.Core.Cache;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Concurrent;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace FastUntility.Core.Base
 {
@@ -61,25 +57,30 @@ namespace FastUntility.Core.Base
 
                 Type defType = parameter.ParameterType;
                 if (parameter.ParameterType.Name == "Nullable`1" && parameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    defType = Nullable.GetUnderlyingType(parameter.ParameterType);
-
-                var local = iL.DeclareLocal(defType, true);
-
-                iL.Emit(OpCodes.Ldarg_1);
-
-                if (defType.IsValueType)
-                    iL.Emit(OpCodes.Unbox_Any, defType);
+                {
+                    var dyn = new DynamicSet<T>();
+                    dyn.SetValue(model, name, value);
+                }
                 else
-                    iL.Emit(OpCodes.Castclass, defType);
+                {
+                    var local = iL.DeclareLocal(defType, true);
 
-                iL.Emit(OpCodes.Stloc, local);
-                iL.Emit(OpCodes.Ldarg_0);
-                iL.Emit(OpCodes.Ldloc, local);
-                iL.EmitCall(OpCodes.Callvirt, method, null);
-                iL.Emit(OpCodes.Ret);
+                    iL.Emit(OpCodes.Ldarg_1);
 
-                var dyn = dynamicMethod.CreateDelegate(typeof(Action<T, object>)) as Action<T, object>;
-                dyn(model, Convert.ChangeType(value, defType));
+                    if (defType.IsValueType)
+                        iL.Emit(OpCodes.Unbox_Any, defType);
+                    else
+                        iL.Emit(OpCodes.Castclass, defType);
+
+                    iL.Emit(OpCodes.Stloc, local);
+                    iL.Emit(OpCodes.Ldarg_0);
+                    iL.Emit(OpCodes.Ldloc, local);
+                    iL.EmitCall(OpCodes.Callvirt, method, null);
+                    iL.Emit(OpCodes.Ret);
+
+                    var dyn = dynamicMethod.CreateDelegate(typeof(Action<T, object>)) as Action<T, object>;
+                    dyn(model, Convert.ChangeType(value, defType));
+                }
             }
             catch (Exception ex) { }
         }
@@ -105,11 +106,12 @@ namespace FastUntility.Core.Base
 
                 var defType = parameter.ParameterType;
                 if (parameter.ParameterType.Name == "Nullable`1" && parameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    defType = Nullable.GetUnderlyingType(parameter.ParameterType);
-
-                value = Convert.ChangeType(value, defType);
-
-                Invoke(model, method, new object[] { value });
+                {
+                    var dyn = new FastUntility.Core.Base.DynamicSet(model);
+                    dyn.SetValue(model, name, value);
+                }
+                else
+                    Invoke(model, method, new object[] { value });
             }
             catch (Exception ex) { }
         }
