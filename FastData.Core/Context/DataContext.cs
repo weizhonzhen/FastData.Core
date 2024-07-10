@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -426,13 +427,13 @@ namespace FastData.Core.Context
                 if (item.Config.DbType == DataDbType.Oracle && item.Take != 0)
                     sql.AppendFormat(" and rownum <={0}", item.Take);
                 else if (item.Config.DbType == DataDbType.DB2 && item.Take != 0)
-                    sql.AppendFormat(" and fetch first {0} rows only", item.Take);
+                    sql.AppendFormat(" fetch first {0} rows only", item.Take);
                 else if (item.Config.DbType == DataDbType.MySql && item.Take != 0)
-                    sql.AppendFormat(" and limit {0}", item.Take);
+                    sql.AppendFormat(" limit {0}", item.Take);
                 else if (item.Config.DbType == DataDbType.PostgreSql && item.Take != 0)
-                    sql.AppendFormat(" and limit {0}", item.Take);
+                    sql.AppendFormat(" limit {0}", item.Take);
                 else if (item.Config.DbType == DataDbType.SQLite && item.Take != 0)
-                    sql.AppendFormat(" and limit 0 offset {0}", item.Take);
+                    sql.AppendFormat(" limit 0 offset {0}", item.Take);
 
                 if (item.Predicate[0].Param.Count != 0)
                     param.AddRange(item.Predicate[0].Param);
@@ -550,7 +551,7 @@ namespace FastData.Core.Context
                 var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
 
                 if (item.Take == 1)
-                    result.Item = BaseDataReader.ToDyns(dr, item.Config).FirstOrDefault() ?? new object();
+                    result.Item = BaseDataReader.ToDyns(dr, item.Config).FirstOrDefault() ?? new ExpandoObject();
                 else
                     result.List = BaseDataReader.ToDyns(dr, item.Config);
 
