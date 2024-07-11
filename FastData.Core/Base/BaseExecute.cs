@@ -174,7 +174,7 @@ namespace FastData.Core.Base
                 else if (item.Config.DbType == DataDbType.SQLite)
                 {
                     #region sqlite
-                    sb.AppendFormat("select {2} from {3} where {4} limit {1} offset {0}"
+                    sb.AppendFormat("select {2} from {3} where {4} limit {0} offset {1}"
                                        , pModel.StarId
                                        , pModel.PageSize
                                        , string.Join(",", item.Field)
@@ -185,7 +185,7 @@ namespace FastData.Core.Base
                 else if (item.Config.DbType == DataDbType.PostgreSql)
                 {
                     #region PostgreSql
-                    sb.AppendFormat("select {2} from {3} where {4} limit {1} offset {0}"
+                    sb.AppendFormat("select {2} from {3} where {4} limit {10 offset {1}"
                                        , pModel.StarId
                                        , pModel.PageSize
                                        , string.Join(",", item.Field)
