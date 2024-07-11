@@ -34,6 +34,7 @@ namespace FastData.Core.Base
             {
                 dt.Load(dr);
                 dr.Close();
+                dr.Dispose();
                 return dt;
             }
         }
@@ -73,7 +74,7 @@ namespace FastData.Core.Base
             return cmd.ExecuteNonQuery() > -1;
         }
         #endregion
-                
+
         #region 返回分页DataReader
         /// <summary>
         /// 返回分页DataReader
@@ -213,13 +214,13 @@ namespace FastData.Core.Base
             }
         }
         #endregion
-        
+
         #region 返回分页条数
         /// <summary>
         /// 返回分页条数
         /// </summary>
         /// <returns></returns>
-        public static int ToPageCount(DataQuery item, DbCommand cmd,  ref string sql, FilterType type)
+        public static int ToPageCount(DataQuery item, DbCommand cmd, ref string sql, FilterType type)
         {
             try
             {
@@ -267,7 +268,7 @@ namespace FastData.Core.Base
         /// 返回分页条数sql
         /// </summary>
         /// <returns></returns>
-        public static int ToPageCountSql(DbParameter[] param, DbCommand cmd, string sql, ConfigModel config, ref string tempSql, FilterType type,string tableName)
+        public static int ToPageCountSql(DbParameter[] param, DbCommand cmd, string sql, ConfigModel config, ref string tempSql, FilterType type, string tableName)
         {
             try
             {
@@ -316,7 +317,7 @@ namespace FastData.Core.Base
             try
             {
                 var table = new List<string>();
-                if(tableName!=null)
+                if (tableName != null)
                     table.Add(tableName);
 
                 if (config.DbType == DataDbType.Oracle)
@@ -336,10 +337,10 @@ namespace FastData.Core.Base
                                     , sql, pModel.EndId, pModel.StarId);
 
                 if (config.DbType == DataDbType.PostgreSql)
-                    sql = string.Format("{0} limit {1} offset {2}", sql, pModel.PageSize, pModel.StarId);
+                    sql = string.Format("{0} limit {1} offset {2}", sql, pModel.StarId, pModel.PageSize);
 
                 if (config.DbType == DataDbType.SQLite)
-                    sql = string.Format("{0} limit {1} offset {2}", sql, pModel.PageSize, pModel.StarId);
+                    sql = string.Format("{0} limit {1} offset {2}", sql, pModel.StarId, pModel.PageSize);
 
                 if (param != null)
                     cmd.Parameters.AddRange(param.ToArray());
