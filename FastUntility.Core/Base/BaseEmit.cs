@@ -58,7 +58,7 @@ namespace FastUntility.Core.Base
                 Type defType = parameter.ParameterType;
                 if (parameter.ParameterType.Name == "Nullable`1" && parameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
-                    var dyn = new DynamicSet<T>();
+                    var dyn = new DynamicSet<T>(name);
                     dyn.SetValue(model, name, value);
                 }
                 else
@@ -77,7 +77,7 @@ namespace FastUntility.Core.Base
                     iL.Emit(OpCodes.Ldloc, local);
                     iL.EmitCall(OpCodes.Callvirt, method, null);
                     iL.Emit(OpCodes.Ret);
-
+                    DateTime? sd = new Nullable<DateTime>();
                     var dyn = dynamicMethod.CreateDelegate(typeof(Action<T, object>)) as Action<T, object>;
                     dyn(model, Convert.ChangeType(value, defType));
                 }
@@ -104,10 +104,9 @@ namespace FastUntility.Core.Base
                 if (parameter == null)
                     return;
 
-                var defType = parameter.ParameterType;
                 if (parameter.ParameterType.Name == "Nullable`1" && parameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
-                    var dyn = new FastUntility.Core.Base.DynamicSet(model);
+                    var dyn = new FastUntility.Core.Base.DynamicSet(model, name);
                     dyn.SetValue(model, name, value);
                 }
                 else
