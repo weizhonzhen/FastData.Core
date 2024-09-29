@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -56,31 +55,25 @@ namespace FastUntility.Core.Base
                     return;
 
                 Type defType = parameter.ParameterType;
-                if (parameter.ParameterType.Name == "Nullable`1" && parameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                {
-                    var dyn = new DynamicSet<T>(name);
-                    dyn.SetValue(model, name, value);
-                }
+                var local = iL.DeclareLocal(defType, true);
+
+                iL.Emit(OpCodes.Ldarg_1);
+
+                if (defType.IsValueType)
+                    iL.Emit(OpCodes.Unbox_Any, defType);
                 else
-                {
-                    var local = iL.DeclareLocal(defType, true);
+                    iL.Emit(OpCodes.Castclass, defType);
 
-                    iL.Emit(OpCodes.Ldarg_1);
-
-                    if (defType.IsValueType)
-                        iL.Emit(OpCodes.Unbox_Any, defType);
-                    else
-                        iL.Emit(OpCodes.Castclass, defType);
-
-                    iL.Emit(OpCodes.Stloc, local);
-                    iL.Emit(OpCodes.Ldarg_0);
-                    iL.Emit(OpCodes.Ldloc, local);
-                    iL.EmitCall(OpCodes.Callvirt, method, null);
-                    iL.Emit(OpCodes.Ret);
-                    DateTime? sd = new Nullable<DateTime>();
-                    var dyn = dynamicMethod.CreateDelegate(typeof(Action<T, object>)) as Action<T, object>;
+                iL.Emit(OpCodes.Stloc, local);
+                iL.Emit(OpCodes.Ldarg_0);
+                iL.Emit(OpCodes.Ldloc, local);
+                iL.EmitCall(OpCodes.Callvirt, method, null);
+                iL.Emit(OpCodes.Ret);
+                var dyn = dynamicMethod.CreateDelegate(typeof(Action<T, object>)) as Action<T, object>;
+                if (parameter.ParameterType.Name == "Nullable`1" && parameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    dyn(model, value);
+                else
                     dyn(model, Convert.ChangeType(value, defType));
-                }
             }
             catch (Exception ex) { }
         }
