@@ -332,6 +332,7 @@ namespace FastData.Core.Base
             {
                 list.Add(dr.GetName(i));
             }
+            list.Distinct();
             return list;
         }
         #endregion
