@@ -333,7 +333,9 @@ namespace FastUntility.Core.Base
             var list = new List<string>();
             for (var i = 0; i < dr.FieldCount; i++)
             {
-                list.Add(dr.GetName(i));
+                var colName = dr.GetName(i);
+                if (!list.Exists(a => string.Compare(a, colName, true) == 0))
+                    list.Add(colName);
             }
             list.Distinct();
             return list;
