@@ -190,20 +190,25 @@ namespace FastUntility.Core.Base
                         ExecIL(iL, local, method);
                     }
 
-                    if (defType == typeof(int))
+                    if (defType == typeof(int) || defType == typeof(byte))
                     {
                         iL.Emit(OpCodes.Ldc_I4, item.Value.ToStr().ToInt(0));
                         ExecIL(iL, local, method);
                     }
 
-                    if (defType == typeof(int?))
+                    if (defType == typeof(int?) || defType == typeof(byte?))
                     {
                         if (item.Value == null)
                             iL.Emit(OpCodes.Ldnull);
                         else
                         {
                             iL.Emit(OpCodes.Ldc_I4, item.Value.ToStr().ToInt(0));
-                            iL.Emit(OpCodes.Newobj, typeof(int?).GetConstructor(new Type[] { typeof(int) }));
+
+                            if (defType == typeof(int?))
+                                iL.Emit(OpCodes.Newobj, typeof(int?).GetConstructor(new Type[] { typeof(int) }));
+
+                            if (defType == typeof(byte?))
+                                iL.Emit(OpCodes.Newobj, typeof(byte?).GetConstructor(new Type[] { typeof(byte) }));
                         }
                         ExecIL(iL, local, method);
                     }
@@ -244,20 +249,23 @@ namespace FastUntility.Core.Base
                         ExecIL(iL, local, method);
                     }
 
-                    if (defType == typeof(sbyte))
+                    if (defType == typeof(sbyte) || defType == typeof(short))
                     {
                         iL.Emit(OpCodes.Ldc_I4_S, item.Value.ToStr().ToInt16(0));
                         ExecIL(iL, local, method);
                     }
 
-                    if (defType == typeof(sbyte?))
+                    if (defType == typeof(sbyte?) || defType == typeof(short?))
                     {
                         if (item.Value == null)
                             iL.Emit(OpCodes.Ldnull);
                         else
                         {
-                            iL.Emit(OpCodes.Ldc_I4_S, item.Value.ToStr().ToInt(0));
-                            iL.Emit(OpCodes.Newobj, typeof(sbyte?).GetConstructor(new Type[] { typeof(sbyte) }));
+                            iL.Emit(OpCodes.Ldc_I4_S, 1);
+                            if (defType == typeof(sbyte?))
+                                iL.Emit(OpCodes.Newobj, typeof(sbyte?).GetConstructor(new Type[] { typeof(sbyte) }));
+                            if (defType == typeof(short?))
+                                iL.Emit(OpCodes.Newobj, typeof(short?).GetConstructor(new Type[] { typeof(short) }));
                         }
                         ExecIL(iL, local, method);
                     }
