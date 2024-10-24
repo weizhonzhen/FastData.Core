@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
+﻿using FastData.Core.CacheModel;
+using FastData.Core.Model;
 using FastData.Core.Property;
 using FastData.Core.Type;
-using FastData.Core.Model;
-using FastData.Core.CacheModel;
-using System.Linq;
-using System.Collections;
 using FastUntility.Core.Base;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data.Common;
 using System.Dynamic;
-using System.Threading;
+using System.Linq;
 
 namespace FastData.Core.Base
 {
@@ -26,7 +25,7 @@ namespace FastData.Core.Base
         /// <param name="dr"></param>
         /// <param name="dbType"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(DbDataReader dr, ConfigModel config, List<string> field = null) where T : class,new()
+        public static List<T> ToList<T>(DbDataReader dr, ConfigModel config, List<string> field = null) where T : class, new()
         {
             var list = new List<T>();
             var colList = new List<string>();
@@ -42,38 +41,56 @@ namespace FastData.Core.Base
             while (dr.Read())
             {
                 var item = new T();
+                var dic = new Dictionary<string, object>();
 
                 if (field == null || field.Count == 0)
                 {
-                    foreach (var info in propertyList)
+                    colList.ForEach(a =>
                     {
-                        if (!colList.Exists(a => string.Compare(a,info.Name,true)==0))
-                            continue;
+                        if (dr[a] is DBNull)
+                            return;
+                        else
+                        {
+                            var info = propertyList.Find(b => string.Compare(b.Name, a, true) == 0);
 
-                        if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
-                            continue;
+                            if (info == null)
+                                return;
 
-                        item = SetValue<T>(item, dr, info, config);
-                    }
+                            if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
+                                return;
+
+                            dic.Add(info.Name, dr[a]);
+                        }
+                    });
                 }
                 else
                 {
-                    for (var i = 0; i < field.Count; i++)
+                    colList.ForEach(a =>
                     {
-                        if (!colList.Exists(a => string.Compare(a, field[i], true) == 0))
-                            continue;
-
-                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], true) ==0))
+                        if (dr[a] is DBNull)
+                            return;
+                        else
                         {
-                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], true) == 0);
-                            item = SetValue<T>(item, dr, info, config);
+                            if (!field.Exists(b => string.Compare(a, b, true) == 0))
+                                return;
+
+                            var info = propertyList.Find(b => string.Compare(b.Name, a, true) == 0);
+
+                            if (info == null)
+                                return;
+
+                            if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
+                                return;
+
+                            dic.Add(info.Name, dr[a]);
                         }
-                    }
+                    });
                 }
 
+                BaseEmit.Set(item, dic);
                 list.Add(item);
             }
-                                    
+
             return list;
         }
         #endregion
@@ -123,7 +140,7 @@ namespace FastData.Core.Base
         /// <param name="dr"></param>
         /// <param name="dbType"></param>
         /// <returns></returns>
-        public static IList ToList(System.Type type,Object model, DbDataReader dr, ConfigModel config, List<string> field = null)
+        public static IList ToList(System.Type type, Object model, DbDataReader dr, ConfigModel config, List<string> field = null)
         {
             var list = Activator.CreateInstance(type);
             var colList = new List<string>();
@@ -134,7 +151,7 @@ namespace FastData.Core.Base
             if (dr.HasRows)
                 colList = GetCol(dr);
 
-            var propertyList = PropertyCache.GetPropertyInfo(model,config.IsPropertyCache);
+            var propertyList = PropertyCache.GetPropertyInfo(model, config.IsPropertyCache);
 
             while (dr.Read())
             {
@@ -144,7 +161,7 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
-                        if (!colList.Exists(a => string.Compare(a,info.Name, true) ==0))
+                        if (!colList.Exists(a => string.Compare(a, info.Name, true) == 0))
                             continue;
 
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
@@ -157,7 +174,7 @@ namespace FastData.Core.Base
                 {
                     for (var i = 0; i < field.Count; i++)
                     {
-                        if (!colList.Exists(a => string.Compare(a,field[i], true) ==0))
+                        if (!colList.Exists(a => string.Compare(a, field[i], true) == 0))
                             continue;
 
                         if (propertyList.Exists(a => string.Compare(a.Name, field[i], true) == 0))
@@ -207,7 +224,7 @@ namespace FastData.Core.Base
                 {
                     foreach (var info in propertyList)
                     {
-                        if (!colList.Exists(a => string.Compare(a,info.Name, true) ==0))
+                        if (!colList.Exists(a => string.Compare(a, info.Name, true) == 0))
                             continue;
 
                         if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
@@ -233,33 +250,6 @@ namespace FastData.Core.Base
             }
 
             return result;
-        }
-        #endregion
-
-        #region set value T
-        /// <summary>
-        /// set value
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <param name="dynSet"></param>
-        /// <param name="dr"></param>
-        /// <param name="info"></param>
-        /// <param name="config"></param>
-        private static T SetValue<T>(T item, DbDataReader dr, PropertyModel info, ConfigModel config)
-        {
-            try
-            {
-                var colName = config.DbType == DataDbType.Oracle ? info.Name.ToUpper() : info.Name;
-                var id = dr.GetOrdinal(colName);
-                if (DataDbType.Oracle == config.DbType)
-                    ReadOracle(item, dr, id, info);
-                else if (!dr.IsDBNull(id))
-                    BaseEmit.Set(item, info.Name, dr.GetValue(id));
-
-                return item;
-            }
-            catch { return item; }
         }
         #endregion
 
@@ -293,11 +283,11 @@ namespace FastData.Core.Base
         }
         #endregion
 
-        private static void ReadOracle(Object item,DbDataReader dr, int id, PropertyModel info)
+        private static void ReadOracle(Object item, DbDataReader dr, int id, PropertyModel info)
         {
             object value = null;
             var typeName = dr.GetDataTypeName(id);
-            if (string.Compare(typeName,"clob", true) ==0 || string.Compare(typeName, "nclob", true) == 0)
+            if (string.Compare(typeName, "clob", true) == 0 || string.Compare(typeName, "nclob", true) == 0)
             {
                 var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleClob"), new object[] { id });
                 if (temp != null)
@@ -334,7 +324,6 @@ namespace FastData.Core.Base
                 if (!list.Exists(a => string.Compare(a, colName, true) == 0))
                     list.Add(colName);
             }
-            list.Distinct();
             return list;
         }
         #endregion
