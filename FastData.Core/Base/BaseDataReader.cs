@@ -156,34 +156,53 @@ namespace FastData.Core.Base
             while (dr.Read())
             {
                 var item = Activator.CreateInstance(model.GetType());
+                var dic = new Dictionary<string, object>();
 
                 if (field == null || field.Count == 0)
                 {
-                    foreach (var info in propertyList)
+                    colList.ForEach(a =>
                     {
-                        if (!colList.Exists(a => string.Compare(a, info.Name, true) == 0))
-                            continue;
+                        if (dr[a] is DBNull)
+                            return;
+                        else
+                        {
+                            var info = propertyList.Find(b => string.Compare(b.Name, a, true) == 0);
 
-                        if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
-                            continue;
+                            if (info == null)
+                                return;
 
-                        item = SetValue(item, dr, info, config);
-                    }
+                            if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
+                                return;
+
+                            dic.Add(info.Name, dr[a]);
+                        }
+                    });
                 }
                 else
                 {
-                    for (var i = 0; i < field.Count; i++)
+                    colList.ForEach(a =>
                     {
-                        if (!colList.Exists(a => string.Compare(a, field[i], true) == 0))
-                            continue;
-
-                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], true) == 0))
+                        if (dr[a] is DBNull)
+                            return;
+                        else
                         {
-                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], true) == 0);
-                            item = SetValue(item, dr, info, config);
+                            if (!field.Exists(b => string.Compare(a, b, true) == 0))
+                                return;
+
+                            var info = propertyList.Find(b => string.Compare(b.Name, a, true) == 0);
+
+                            if (info == null)
+                                return;
+
+                            if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
+                                return;
+
+                            dic.Add(info.Name, dr[a]);
                         }
-                    }
+                    });
                 }
+
+                BaseEmit.Set(item, dic);
 
                 list.GetType().GetMethods().ToList().ForEach(m =>
                 {
@@ -220,33 +239,51 @@ namespace FastData.Core.Base
 
             while (dr.Read())
             {
+                var dic = new Dictionary<string, object>();
                 if (field == null || field.Count == 0)
                 {
-                    foreach (var info in propertyList)
+                    colList.ForEach(a =>
                     {
-                        if (!colList.Exists(a => string.Compare(a, info.Name, true) == 0))
-                            continue;
+                        if (dr[a] is DBNull)
+                            return;
+                        else
+                        {
+                            var info = propertyList.Find(b => string.Compare(b.Name, a, true) == 0);
 
-                        if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
-                            continue;
+                            if (info == null)
+                                return;
 
-                        result = SetValue(result, dr, info, config);
-                    }
+                            if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
+                                return;
+
+                            dic.Add(info.Name, dr[a]);
+                        }
+                    });
                 }
                 else
                 {
-                    for (var i = 0; i < field.Count; i++)
+                    colList.ForEach(a =>
                     {
-                        if (!colList.Exists(a => string.Compare(a, field[i], true) == 0))
-                            continue;
-
-                        if (propertyList.Exists(a => string.Compare(a.Name, field[i], true) == 0))
+                        if (dr[a] is DBNull)
+                            return;
+                        else
                         {
-                            var info = propertyList.Find(a => string.Compare(a.Name, field[i], true) == 0);
-                            result = SetValue(result, dr, info, config);
+                            if (!field.Exists(b => string.Compare(a, b, true) == 0))
+                                return;
+
+                            var info = propertyList.Find(b => string.Compare(b.Name, a, true) == 0);
+
+                            if (info == null)
+                                return;
+
+                            if (info.PropertyType.IsGenericType && info.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>))
+                                return;
+
+                            dic.Add(info.Name, dr[a]);
                         }
-                    }
+                    });
                 }
+                BaseEmit.Set(result, dic);
             }
 
             return result;
