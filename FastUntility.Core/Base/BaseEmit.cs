@@ -1,7 +1,13 @@
-﻿using System;
+﻿using NPOI.HPSF;
+using NPOI.HSSF.Record.Chart;
+using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using System.Security;
 
 namespace FastUntility.Core.Base
 {
@@ -100,6 +106,169 @@ namespace FastUntility.Core.Base
                 Invoke(model, method, new object[] { value });
             }
             catch (Exception ex) { }
+        }
+
+        public static void Set<T>(T model, Dictionary<string, object> dic)
+        {
+            try
+            {
+                var type = typeof(T);
+                var dynamicMethod = new DynamicMethod("SetEmit", null, new[] { type, typeof(object) }, type.Module);
+                var iL = dynamicMethod.GetILGenerator();
+
+                foreach (var item in dic)
+                {
+                    var key = $"set_{item.Key}_{type.FullName}";
+                    MethodInfo method = Get(key);
+                    if (method == null)
+                    {
+                        method = type.GetMethod($"set_{item.Key}");
+                        if (method == null)
+                            return;
+                        Set(key, method);
+                    }
+                    var parameter = method.GetParameters()[0];
+                    if (parameter == null)
+                        return;
+
+                    Type defType = parameter.ParameterType;
+                    var local = iL.DeclareLocal(defType, true);
+
+                    if (defType == typeof(bool))
+                    {
+                        if (item.Value.ToStr().ToInt(9) == 0)
+                            iL.Emit(OpCodes.Ldc_I4_1);
+                        else
+                            iL.Emit(OpCodes.Ldc_I4_0);
+                        iL.Emit(OpCodes.Box, typeof(bool));
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(bool?))
+                    {
+                        if (item.Value.ToStr().ToInt(9) == 0)
+                            iL.Emit(OpCodes.Ldc_I4_0);
+                        else
+                            iL.Emit(OpCodes.Ldc_I4_1);
+
+                        iL.Emit(OpCodes.Newobj, typeof(bool?).GetConstructor(new Type[] { typeof(bool) }));
+                        ExecIL(iL, local, method);
+                    }
+
+                    if ((defType == typeof(decimal)))
+                    {
+                        iL.Emit(OpCodes.Ldc_R8, item.Value.ToStr().ToDouble(0));
+                        iL.Emit(OpCodes.Newobj, typeof(decimal).GetConstructor(new Type[] { typeof(double) }));
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(decimal?))
+                    {
+                        if (item.Value == null)
+                            iL.Emit(OpCodes.Ldnull);
+                        else
+                        {
+                            iL.Emit(OpCodes.Ldc_R8, item.Value.ToStr().ToDouble(0));
+                            iL.Emit(OpCodes.Newobj, typeof(decimal).GetConstructor(new Type[] { typeof(double) }));
+                            iL.Emit(OpCodes.Newobj, typeof(decimal?).GetConstructor(new[] { typeof(decimal) }));
+                        }
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(DateTime))
+                    {
+                        iL.Emit(OpCodes.Ldc_I8, item.Value.ToDate().Value.Ticks);
+                        iL.Emit(OpCodes.Newobj, typeof(DateTime).GetConstructor(new Type[] { typeof(long) }));
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(DateTime?))
+                    {
+                        if (item.Value == null)
+                            iL.Emit(OpCodes.Ldnull);
+                        else
+                        {
+                            iL.Emit(OpCodes.Ldc_I8, item.Value.ToDate().Value.Ticks);
+                            iL.Emit(OpCodes.Newobj, typeof(DateTime).GetConstructor(new Type[] { typeof(long) }));
+                            iL.Emit(OpCodes.Newobj, typeof(DateTime?).GetConstructor(new Type[] { typeof(DateTime) }));
+                        }
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(int?))
+                    {
+                        if (item.Value == null)
+                            iL.Emit(OpCodes.Ldnull);
+                        else
+                        {
+                            iL.Emit(OpCodes.Ldc_I4, item.Value.ToStr().ToInt(0));
+                            iL.Emit(OpCodes.Newobj, typeof(int?).GetConstructor(new Type[] { typeof(int) }));
+                        }
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(long))
+                    {
+                        iL.Emit(OpCodes.Ldc_I8, item.Value.ToStr().ToLong(0));
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(long?))
+                    {
+                        if (item.Value == null)
+                            iL.Emit(OpCodes.Ldnull);
+                        else
+                        {
+                            iL.Emit(OpCodes.Ldc_I8, item.Value.ToStr().ToLong(0));
+                            iL.Emit(OpCodes.Newobj, typeof(long?).GetConstructor(new Type[] { typeof(long) }));
+                        }
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(double))
+                    {
+                        iL.Emit(OpCodes.Ldc_R8, item.Value.ToStr().ToDouble(0));
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(double?))
+                    {
+                        if (item.Value == null)
+                            iL.Emit(OpCodes.Ldnull);
+                        else
+                        {
+                            iL.Emit(OpCodes.Ldc_R8, item.Value.ToStr().ToDouble(0));
+                            iL.Emit(OpCodes.Newobj, typeof(double?).GetConstructor(new Type[] { typeof(double) }));
+                        }
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(int))
+                    {
+                        iL.Emit(OpCodes.Ldc_I4, item.Value.ToStr().ToInt(0));
+                        ExecIL(iL, local, method);
+                    }
+
+                    if (defType == typeof(string) || defType == typeof(String))
+                    {
+                        iL.Emit(OpCodes.Ldstr, item.Value.ToStr());
+                        ExecIL(iL, local, method);
+                    }
+                }
+
+                iL.Emit(OpCodes.Ret);
+                var dyn = dynamicMethod.CreateDelegate(typeof(Action<T, object>)) as Action<T, object>;
+                dyn(model, dic);
+            }
+            catch (Exception ex) { }
+        }
+
+        private static void ExecIL(ILGenerator iL, LocalBuilder local,MethodInfo method)
+        {
+            iL.Emit(OpCodes.Stloc, local);
+            iL.Emit(OpCodes.Ldarg_0);
+            iL.Emit(OpCodes.Ldloc, local);
+            iL.EmitCall(OpCodes.Callvirt, method, null);
         }
 
         public static object Get<T>(T model, string name)
