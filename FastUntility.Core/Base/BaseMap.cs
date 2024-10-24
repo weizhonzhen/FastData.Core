@@ -16,7 +16,7 @@ namespace FastUntility.Core.Base
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public static T CopyModel<T, T1>(T1 model, Expression<Func<T1, object>> field=null) where T : class, new()
+        public static T CopyModel<T, T1>(T1 model, Expression<Func<T1, object>> field = null) where T : class, new()
         {
             var result = new T();
             var list = BaseDic.PropertyInfo<T>();
@@ -31,10 +31,11 @@ namespace FastUntility.Core.Base
                 }
             }
 
-            BaseDic.PropertyInfo<T1>().ForEach(m => {
-                if (list.Exists(a => string.Compare( a.Name, m.Name, true) ==0))
+            BaseDic.PropertyInfo<T1>().ForEach(m =>
+            {
+                if (list.Exists(a => string.Compare(a.Name, m.Name, true) == 0))
                 {
-                    var property = list.Find(a =>string.Compare( a.Name, m.Name, true) ==0);
+                    var property = list.Find(a => string.Compare(a.Name, m.Name, true) == 0);
                     var isList = m.PropertyType.GetGenericArguments().Length > 0;
                     var isLeafSystemType = isList && m.PropertyType.GetGenericArguments()[0].FullName.StartsWith("System.");
                     var isSystemType = m.PropertyType.FullName.StartsWith("System.");
@@ -50,15 +51,17 @@ namespace FastUntility.Core.Base
                             {
                                 var leafModel = Activator.CreateInstance(property.PropertyType.GetGenericArguments()[0]);
                                 var propertyList = leafModel.GetType().GetProperties().ToList();
-
+                                var param = new Dictionary<string, object>();
                                 temp.GetType().GetProperties().ToList().ForEach(p =>
                                 {
                                     if (propertyList.Exists(a => a.Name == p.Name))
                                     {
-                                        var tempProperty = propertyList.Find(a => string.Compare( a.Name, p.Name, true) ==0);
-                                        BaseEmit.Set(leafModel, p.Name, BaseEmit.Get(temp, p.Name));
+                                        //var tempProperty = propertyList.Find(a => string.Compare(a.Name, p.Name, true) == 0);
+                                        //BaseEmit.Set(leafModel, p.Name, BaseEmit.Get(temp, p.Name));
+                                        param.Add(p.Name, BaseEmit.Get(temp, p.Name));
                                     }
                                 });
+                                BaseEmit.Set(leafModel, param);
 
                                 var method = leafList.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
                                 BaseEmit.Invoke(leafList, method, new object[] { leafModel });
@@ -72,26 +75,30 @@ namespace FastUntility.Core.Base
                     }
                     else
                     {
-                        var tempModel = Convert.ChangeType(BaseEmit.Get<T1>(model, m.Name), m.PropertyType); 
+                        var tempModel = Convert.ChangeType(BaseEmit.Get<T1>(model, m.Name), m.PropertyType);
                         var leafModel = Activator.CreateInstance(property.PropertyType);
                         var propertyList = (property.PropertyType as TypeInfo).GetProperties().ToList();
 
+                        var param = new Dictionary<string, object>();
                         (m.PropertyType as TypeInfo).GetProperties().ToList().ForEach(p =>
                         {
                             if (propertyList.Exists(a => a.Name == p.Name))
                             {
-                                var temp = propertyList.Find(a => string.Compare( a.Name, p.Name, true) ==0);
-                                BaseEmit.Set(leafModel, p.Name, BaseEmit.Get(tempModel,p.Name));
+                                //var temp = propertyList.Find(a => string.Compare(a.Name, p.Name, true) == 0);
+                                //BaseEmit.Set(leafModel, p.Name, BaseEmit.Get(tempModel, p.Name));
+                                param.Add(p.Name, BaseEmit.Get(tempModel, p.Name));
                             }
+
                         });
+                        BaseEmit.Set(leafModel, param);
                         BaseEmit.Set<T>(result, property.Name, leafModel);
                     }
                 }
                 else
                 {
-                    if (dic.ToList().Exists(n => string.Compare( (n.Value as MemberExpression).Member.Name, m.Name, true) ==0))
+                    if (dic.ToList().Exists(n => string.Compare((n.Value as MemberExpression).Member.Name, m.Name, true) == 0))
                     {
-                        var temp = dic.ToList().Find(n =>string.Compare( (n.Value as MemberExpression).Member.Name, m.Name, true) ==0);
+                        var temp = dic.ToList().Find(n => string.Compare((n.Value as MemberExpression).Member.Name, m.Name, true) == 0);
                         BaseEmit.Set<T>(result, temp.Key.Name, BaseEmit.Get<T1>(model, (temp.Value as MemberExpression).Member.Name));
                     }
                 }
@@ -99,7 +106,7 @@ namespace FastUntility.Core.Base
             return result;
         }
 
-        public static List<Result> Parameters<T,Result>(T item, Expression<Func<T, object>> field) where Result : class, new()
+        public static List<Result> Parameters<T, Result>(T item, Expression<Func<T, object>> field) where Result : class, new()
         {
             if (typeof(Result).BaseType != typeof(DbParameter))
                 throw new Exception("Result type error is not DbParameter");
@@ -131,7 +138,7 @@ namespace FastUntility.Core.Base
                         BaseEmit.Set<Result>(param, "Value", Expression.Lambda(a.Value as MemberExpression).Compile().DynamicInvoke());
                 }
                 else
-                    BaseEmit.Set<Result>(param, "Value", BaseEmit.Get<T>(item,a.Value.ToStr()));
+                    BaseEmit.Set<Result>(param, "Value", BaseEmit.Get<T>(item, a.Value.ToStr()));
 
                 result.Add(param);
             });
