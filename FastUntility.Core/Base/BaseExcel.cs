@@ -3,10 +3,12 @@ using NPOI.HSSF.UserModel;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
+using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace FastUntility.Core.Base
 {
@@ -21,7 +23,7 @@ namespace FastUntility.Core.Base
             /// <summary>
             /// 工作区
             /// </summary>
-            public HSSFWorkbook workbook { get; set; }
+            public XSSFWorkbook workbook { get; set; }
 
             /// <summary>
             /// 工作页
@@ -32,6 +34,11 @@ namespace FastUntility.Core.Base
             /// 行
             /// </summary>
             public IRow row { get; set; }
+
+            /// <summary>
+            /// 行
+            /// </summary>
+            public List<IRow> rows { get; set; } = new List<IRow>();
 
             /// <summary>
             /// 单元格
@@ -57,13 +64,13 @@ namespace FastUntility.Core.Base
         /// <param name="headerText">标题</param>
         /// <param name="title">表头</param>
         /// <returns></returns>
-        public static ExcelModel Init(string headerText, List<Dictionary<string, object>> title1, Dictionary<string, object> title2)
+        public static ExcelModel Init(string headerText, List<Dictionary<string, object>> title1, Dictionary<string, object> title2, int rows = 0)
         {
             try
             {
                 var result = new ExcelModel();
-
-                result.workbook = new HSSFWorkbook();
+                result.workbook = new XSSFWorkbook();
+                result.workbook.SetForceFormulaRecalculation(false);
                 InitializeWorkbook(result.workbook);
                 result.sheet = result.workbook.CreateSheet(headerText);
 
@@ -107,6 +114,13 @@ namespace FastUntility.Core.Base
                     result.cell.CellStyle = GetStyle(result.workbook, true);
                 });
 
+                for (var j = 0; j < rows; j++)
+                {
+                    var row = result.sheet.CreateRow(j + 2);
+                    row.Height = 420;
+                    result.rows.Add(row);
+                }
+
                 return result;
             }
             catch (Exception ex)
@@ -124,13 +138,14 @@ namespace FastUntility.Core.Base
         /// <param name="headerText">标题</param>
         /// <param name="title">表头</param>
         /// <returns></returns>
-        public static ExcelModel Init(string headerText, Dictionary<string, object> title1, List<Dictionary<string, object>> title2 = null)
+        public static ExcelModel Init(string headerText, Dictionary<string, object> title1, List<Dictionary<string, object>> title2 = null, int rows = 0)
         {
             try
             {
                 var result = new ExcelModel();
 
-                result.workbook = new HSSFWorkbook();
+                result.workbook = new XSSFWorkbook();
+                result.workbook.SetForceFormulaRecalculation(false);
                 InitializeWorkbook(result.workbook);
                 result.sheet = result.workbook.CreateSheet(headerText);
 
@@ -174,6 +189,12 @@ namespace FastUntility.Core.Base
                     });
                 }
 
+                for (var j = 0; j < rows; j++)
+                {
+                    var row = result.sheet.CreateRow(j + 2);
+                    row.Height = 420;
+                    result.rows.Add(row);
+                }
                 return result;
             }
             catch (Exception ex)
@@ -200,12 +221,20 @@ namespace FastUntility.Core.Base
                 {
                     model.style_n = GetStyle(model.workbook, true, true);
                     model.style = GetStyle(model.workbook);
-                    foreach (var item in listContent)
+                    for (var row = 0; row < listContent.Count; row++)
                     {
-                        if (IsSmallTile)
-                            model.row = model.sheet.CreateRow(i + 3);
+                        var item = listContent[row];
+
+                        if (model.rows.Count == 0)
+                        {
+                            if (IsSmallTile)
+                                model.row = model.sheet.CreateRow(i + 3);
+                            else
+                                model.row = model.sheet.CreateRow(i + 2);
+                        }
                         else
-                            model.row = model.sheet.CreateRow(i + 2);
+                            model.row = model.rows[row];
+
                         int j = 0;
 
                         foreach (var temp in item)
@@ -252,6 +281,12 @@ namespace FastUntility.Core.Base
                                     model.cell.SetCellType(CellType.String);
                                     model.cell.SetCellValue(temp.Value.ToStr());
                                 }
+                               
+                                var height = 0;
+                                var length = System.Text.Encoding.UTF8.GetBytes(model.cell.ToString()).Length;
+                                if ((25 * (length / 60 + 1)) > height)
+                                    height = 25 * (length / 60 + 1);
+                                model.rows[row].HeightInPoints = height;
 
                                 if (temp.Value.ToStr().Contains("\n"))
                                     model.cell.CellStyle = model.style_n;
@@ -289,24 +324,6 @@ namespace FastUntility.Core.Base
                     model.sheet.HorizontallyCenter = true;
                 });
 
-                for (int rowNum = 2; rowNum <= model.sheet.LastRowNum; rowNum++)
-                {
-                    var currentRow = model.sheet.GetRow(rowNum);
-                    var height = 0;
-                    for (var col = 0; col < title.Count; col++)
-                    {
-                        var currentCell = currentRow.GetCell(col);
-                        if (currentCell != null)
-                        {
-                            var length = System.Text.Encoding.UTF8.GetBytes(currentCell.ToString()).Length;
-                            if ((25 * (length / 60 + 1)) > height)
-                                height = 25 * (length / 60 + 1);
-                        }
-                    }
-
-                    currentRow.HeightInPoints = height;
-                }
-
                 using (var file = new MemoryStream())
                 {
                     model.workbook.Write(file);
@@ -325,17 +342,17 @@ namespace FastUntility.Core.Base
         /// <summary>
         /// 初始化工作区
         /// </summary>
-        private static void InitializeWorkbook(HSSFWorkbook hssfworkbook)
+        private static void InitializeWorkbook(XSSFWorkbook hssfworkbook)
         {
             //信息
             var dsi = PropertySetFactory.CreateDocumentSummaryInformation();
             dsi.Company = "";
-            hssfworkbook.DocumentSummaryInformation = dsi;
+            //hssfworkbook.DocumentSummaryInformation = dsi;
 
             //工区名称
             var si = PropertySetFactory.CreateSummaryInformation();
             si.Subject = "";
-            hssfworkbook.SummaryInformation = si;
+            //hssfworkbook.SummaryInformation = si;
         }
         #endregion
 
@@ -344,7 +361,7 @@ namespace FastUntility.Core.Base
         /// 样式
         /// </summary>
         /// <returns></returns>
-        private static ICellStyle GetStyle(HSSFWorkbook hssfworkbook, bool IsHead = false, bool IsWrapText = false)
+        private static ICellStyle GetStyle(XSSFWorkbook hssfworkbook, bool IsHead = false, bool IsWrapText = false)
         {
             var style = hssfworkbook.CreateCellStyle();
             style.Alignment = HorizontalAlignment.Center;
