@@ -191,7 +191,7 @@ namespace FastUntility.Core.Base
 
                 for (var j = 0; j < rows; j++)
                 {
-                    var row = result.sheet.CreateRow(j + 2);
+                    var row = result.sheet.CreateRow(j + (title2 == null ? 2 : 3));
                     row.Height = 420;
                     result.rows.Add(row);
                 }
