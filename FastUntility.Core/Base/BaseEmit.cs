@@ -139,13 +139,8 @@ namespace FastUntility.Core.Base
             try
             {
                 var type = typeof(T);
-                var dynKey = $"SetEmit_{type}_T_dic_{type.Module}";
-                var dynamicMethod = GetDyn(dynKey);
-                if (dynamicMethod == null)
-                {
-                    dynamicMethod = new DynamicMethod("SetEmit", null, new[] { type, typeof(object) }, type.Module);
-                    SetDyn(dynKey, dynamicMethod);
-                }
+                var dynamicMethod = new DynamicMethod("SetEmit", null, new[] { type, typeof(object) }, type.Module);
+              
                 var iL = dynamicMethod.GetILGenerator();
 
                 foreach (var item in dic)
@@ -181,13 +176,8 @@ namespace FastUntility.Core.Base
             try
             {
                 var type = model.GetType();
-                var dynKey = $"SetEmit_{type}_model_dic_{type.Module}";
-                var dynamicMethod = GetDyn(dynKey);
-                if (dynamicMethod == null)
-                {
-                    dynamicMethod = new DynamicMethod("SetEmit", null, new[] { type, typeof(object) }, type.Module);
-                    SetDyn(dynKey, dynamicMethod);
-                }
+                var dynamicMethod = new DynamicMethod("SetEmit", null, new[] { type, typeof(object) }, type.Module);
+
                 var iL = dynamicMethod.GetILGenerator();
 
                 foreach (var item in dic)
