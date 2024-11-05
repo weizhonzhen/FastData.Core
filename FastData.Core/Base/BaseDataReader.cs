@@ -3,6 +3,7 @@ using FastData.Core.Model;
 using FastData.Core.Property;
 using FastData.Core.Type;
 using FastUntility.Core.Base;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,6 +38,7 @@ namespace FastData.Core.Base
                 colList = GetCol(dr);
 
             var propertyList = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
+            var dics = new List<Dictionary<string, object>>();
 
             while (dr.Read())
             {
@@ -87,10 +89,12 @@ namespace FastData.Core.Base
                     });
                 }
 
-                BaseEmit.Set(item, dic);
-                list.Add(item);
+                dics.Add(dic);
+                //BaseEmit.Set(item, dic);
+                //list.Add(item);
             }
 
+            BaseEmit.Set<T>(list, dics);
             return list;
         }
         #endregion
@@ -152,6 +156,7 @@ namespace FastData.Core.Base
                 colList = GetCol(dr);
 
             var propertyList = PropertyCache.GetPropertyInfo(model, config.IsPropertyCache);
+            var dics = new List<Dictionary<string, object>>();
 
             while (dr.Read())
             {
@@ -202,15 +207,16 @@ namespace FastData.Core.Base
                     });
                 }
 
-                BaseEmit.Set(item, dic);
-
-                list.GetType().GetMethods().ToList().ForEach(m =>
-                {
-                    if (m.Name == "Add")
-                        BaseEmit.Invoke(list, m, new object[] { item });
-                });
+                //BaseEmit.Set(item, dic);
+                //list.GetType().GetMethods().ToList().ForEach(m =>
+                //{
+                //    if (m.Name == "Add")
+                //        BaseEmit.Invoke(list, m, new object[] { item });
+                //});
+                dics.Add(dic);
             }
 
+            BaseEmit.Set(model.GetType(), list, dics);
             return (IList)list;
         }
         #endregion
@@ -300,56 +306,56 @@ namespace FastData.Core.Base
         /// <param name="info"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        private static Object SetValue(Object item, DbDataReader dr, PropertyModel info, ConfigModel config)
-        {
-            try
-            {
-                var colName = config.DbType == DataDbType.Oracle ? info.Name.ToUpper() : info.Name;
-                var id = dr.GetOrdinal(colName);
-                if (DataDbType.Oracle == config.DbType)
-                    ReadOracle(item, dr, id, info);
-                else if (!dr.IsDBNull(id))
-                    BaseEmit.Set(item, info.Name, dr.GetValue(id));
+        //private static Object SetValue(Object item, DbDataReader dr, PropertyModel info, ConfigModel config)
+        //{
+        //    try
+        //    {
+        //        var colName = config.DbType == DataDbType.Oracle ? info.Name.ToUpper() : info.Name;
+        //        var id = dr.GetOrdinal(colName);
+        //        if (DataDbType.Oracle == config.DbType)
+        //            ReadOracle(item, dr, id, info);
+        //        else if (!dr.IsDBNull(id))
+        //            BaseEmit.Set(item, info.Name, dr.GetValue(id));
 
-                return item;
-            }
-            catch
-            {
-                return item;
-            }
-        }
+        //        return item;
+        //    }
+        //    catch
+        //    {
+        //        return item;
+        //    }
+        //}
         #endregion
 
-        private static void ReadOracle(Object item, DbDataReader dr, int id, PropertyModel info)
-        {
-            object value = null;
-            var typeName = dr.GetDataTypeName(id);
-            if (string.Compare(typeName, "clob", true) == 0 || string.Compare(typeName, "nclob", true) == 0)
-            {
-                var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleClob"), new object[] { id });
-                if (temp != null)
-                {
-                    value = BaseEmit.Get(temp, "Value");
-                    BaseEmit.Invoke(temp, temp.GetType().GetMethod("Close"), null);
-                    BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
-                }
-            }
-            else if (string.Compare(typeName, "blob", true) == 0)
-            {
-                var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleBlob"), new object[] { id });
-                if (temp != null)
-                {
-                    value = BaseEmit.Get(temp, "Value");
-                    BaseEmit.Invoke(temp, temp.GetType().GetMethod("Close"), null);
-                    BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
-                }
-            }
-            else
-                value = dr.GetValue(id);
+        //private static void ReadOracle(Object item, DbDataReader dr, int id, PropertyModel info)
+        //{
+        //    object value = null;
+        //    var typeName = dr.GetDataTypeName(id);
+        //    if (string.Compare(typeName, "clob", true) == 0 || string.Compare(typeName, "nclob", true) == 0)
+        //    {
+        //        var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleClob"), new object[] { id });
+        //        if (temp != null)
+        //        {
+        //            value = BaseEmit.Get(temp, "Value");
+        //            BaseEmit.Invoke(temp, temp.GetType().GetMethod("Close"), null);
+        //            BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
+        //        }
+        //    }
+        //    else if (string.Compare(typeName, "blob", true) == 0)
+        //    {
+        //        var temp = BaseEmit.Invoke(dr, dr.GetType().GetMethod("GetOracleBlob"), new object[] { id });
+        //        if (temp != null)
+        //        {
+        //            value = BaseEmit.Get(temp, "Value");
+        //            BaseEmit.Invoke(temp, temp.GetType().GetMethod("Close"), null);
+        //            BaseEmit.Invoke(temp, temp.GetType().GetMethod("Dispose"), null);
+        //        }
+        //    }
+        //    else
+        //        value = dr.GetValue(id);
 
-            if (!dr.IsDBNull(id))
-                BaseEmit.Set(item, info.Name, value);
-        }
+        //    if (!dr.IsDBNull(id))
+        //        BaseEmit.Set(item, info.Name, value);
+        //}
 
         #region get datareader col
         private static List<string> GetCol(DbDataReader dr)
