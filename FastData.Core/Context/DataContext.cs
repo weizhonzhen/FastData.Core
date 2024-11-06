@@ -459,7 +459,7 @@ namespace FastData.Core.Context
                 var dr = BaseExecute.ToDataReader(cmd, sql.ToString());
 
                 if (item.Take == 1)
-                    result.Item = BaseDataReader.ToList<T>(dr, item.Config, item.AsName).FirstOrDefault<T>() ?? new T();
+                    result.Item = BaseDataReader.ToItem<T>(dr, item.Config, item.AsName) ?? new T();
                 else
                     result.List = BaseDataReader.ToList<T>(dr, item.Config, item.AsName);
 
