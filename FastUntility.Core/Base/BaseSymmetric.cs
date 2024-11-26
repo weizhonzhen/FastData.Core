@@ -127,7 +127,7 @@ namespace FastUntility.Core.Base
             {
                 provider.Key = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
                 provider.IV = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-                byte[] bytes = Encoding.GetEncoding("GB2312").GetBytes(Source);
+                byte[] bytes = Encoding.GetEncoding(Encoding.Default.BodyName).GetBytes(Source);
                 using (MemoryStream stream = new MemoryStream())
                 {
                     using (CryptoStream stream2 = new CryptoStream(stream, provider.CreateEncryptor(), CryptoStreamMode.Write))
@@ -174,7 +174,7 @@ namespace FastUntility.Core.Base
                         {
                             stream2.Write(buffer, 0, buffer.Length);
                             stream2.FlushFinalBlock();
-                            return Encoding.GetEncoding("GB2312").GetString(stream.ToArray());
+                            return Encoding.GetEncoding(Encoding.Default.BodyName).GetString(stream.ToArray());
                         }
                     }
                 }
