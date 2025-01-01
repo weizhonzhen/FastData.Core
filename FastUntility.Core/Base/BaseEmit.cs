@@ -116,10 +116,7 @@ namespace FastUntility.Core.Base
                 iL.Emit(OpCodes.Ret);
                 var dyn = dynamicMethod.CreateDelegate(typeof(Action<T, object>)) as Action<T, object>;
 
-                if (parameter.ParameterType.Name == "Nullable`1" && parameter.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    dyn(model, value);
-                else
-                    dyn(model, Convert.ChangeType(value, defType));
+                dyn(model, value);
             }
             catch (Exception ex) { }
         }
