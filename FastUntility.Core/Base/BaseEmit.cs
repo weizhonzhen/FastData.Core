@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -136,11 +137,51 @@ namespace FastUntility.Core.Base
                     SetMethod(key, method);
                 }
 
+                var dynamicMethod = new DynamicMethod("SetEmit", null, new[] { type, typeof(object) }, type.Module);
+
+                var iL = dynamicMethod.GetILGenerator();
+
                 var parameter = method.GetParameters()[0];
                 if (parameter == null)
                     return;
 
-                Invoke(model, method, new object[] { value });
+                Type defType = parameter.ParameterType;
+                var info = EmitParam(defType);
+                var local = iL.DeclareLocal(defType, true);
+
+                if (info.OpCodeParam == OpCodes.Ldc_R8)
+                    iL.Emit(info.OpCodeParam.Value, value.ToStr().ToDouble(0));
+                else if (info.OpCodeParam == OpCodes.Ldstr)
+                    iL.Emit(info.OpCodeParam.Value, value.ToStr());
+                else if (info.OpCodeParam == OpCodes.Ldc_R4)
+                    iL.Emit(info.OpCodeParam.Value, value.ToStr().ToFloat(0));
+                else if (info.OpCodeParam == OpCodes.Ldc_I4)
+                    iL.Emit(info.OpCodeParam.Value, value.ToStr().ToInt(0));
+                else if (info.OpCodeParam == OpCodes.Ldc_I4_S)
+                    iL.Emit(info.OpCodeParam.Value, value.ToStr().ToInt16(0));
+                else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(long) || info.GenericType == typeof(long)))
+                    iL.Emit(info.OpCodeParam.Value, value.ToStr().ToLong(0));
+                else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(DateTime) || info.GenericType == typeof(DateTime)))
+                    iL.Emit(info.OpCodeParam.Value, value.ToStr().ToDate().Ticks);
+                else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(TimeSpan) || info.GenericType == typeof(TimeSpan)))
+                    iL.Emit(info.OpCodeParam.Value, value.ToStr().ToDate().Ticks);
+
+                if (!info.IsGenericType && info.OpCodeNewobj != null)
+                    iL.Emit(info.OpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
+                if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
+                    iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
+                if (info.IsGenericType && info.GenericOpCodeNewobj != null)
+                    iL.Emit(info.GenericOpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
+
+                iL.Emit(OpCodes.Stloc, local);
+                iL.Emit(OpCodes.Ldarg_0);
+                iL.Emit(OpCodes.Ldloc, local);
+                iL.EmitCall(OpCodes.Callvirt, method, null);
+
+                iL.Emit(OpCodes.Ret);
+                var dyn = dynamicMethod.CreateDelegate(typeof(Action<object, object>)) as Action<object, object>;
+
+                dyn(model, value);
             }
             catch (Exception ex) { }
         }
