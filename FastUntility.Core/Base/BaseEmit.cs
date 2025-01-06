@@ -109,6 +109,8 @@ namespace FastUntility.Core.Base
                             iL.Emit(OpCodes.Newobj, typeof(bool?).GetConstructor(new Type[] { typeof(bool) }));
                     }
                 }
+                else if (value == null && defType.IsGenericType)
+                    iL.Emit(OpCodes.Ldnull);
                 else
                 {
                     if (info.OpCodeParam == OpCodes.Ldc_R8)
@@ -121,11 +123,11 @@ namespace FastUntility.Core.Base
                         iL.Emit(info.OpCodeParam.Value, value.ToStr().ToInt(0));
                     else if (info.OpCodeParam == OpCodes.Ldc_I4_S)
                         iL.Emit(info.OpCodeParam.Value, value.ToStr().ToInt16(0));
-                    else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(long) || info.GenericType == typeof(long)))
+                    else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(long) || info.GenericType == typeof(long)) && value != null)
                         iL.Emit(info.OpCodeParam.Value, value.ToStr().ToLong(0));
-                    else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(DateTime) || info.GenericType == typeof(DateTime)))
+                    else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(DateTime) || info.GenericType == typeof(DateTime)) && value != null)
                         iL.Emit(info.OpCodeParam.Value, value.ToStr().ToDate().Ticks);
-                    else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(TimeSpan) || info.GenericType == typeof(TimeSpan)))
+                    else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(TimeSpan) || info.GenericType == typeof(TimeSpan)) && value != null)
                         iL.Emit(info.OpCodeParam.Value, value.ToStr().ToDate().Ticks);
 
                     if (!info.IsGenericType && info.OpCodeNewobj != null)
@@ -200,6 +202,8 @@ namespace FastUntility.Core.Base
                             iL.Emit(OpCodes.Newobj, typeof(bool?).GetConstructor(new Type[] { typeof(bool) }));
                     }
                 }
+                else if (value == null && defType.IsGenericType)
+                    iL.Emit(OpCodes.Ldnull);
                 else
                 {
                     if (info.OpCodeParam == OpCodes.Ldc_R8)
