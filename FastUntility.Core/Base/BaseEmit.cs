@@ -130,12 +130,16 @@ namespace FastUntility.Core.Base
                     else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(TimeSpan) || info.GenericType == typeof(TimeSpan)) && value != null)
                         iL.Emit(info.OpCodeParam.Value, value.ToStr().ToDate().Ticks);
 
-                    if (!info.IsGenericType && info.OpCodeNewobj != null)
-                        iL.Emit(info.OpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
-                    if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
-                        iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
-                    if (info.IsGenericType && info.GenericOpCodeNewobj != null)
-                        iL.Emit(info.GenericOpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
+                    if (info.GenericType != null)
+                    {
+                        var constructorstu = info.type.GetConstructor(new Type[] { info.GenericType });
+                        if (!info.IsGenericType && info.OpCodeNewobj != null && constructorstu != null)
+                            iL.Emit(info.OpCodeNewobj.Value, constructorstu);
+                        if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
+                            iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
+                        if (info.IsGenericType && info.GenericOpCodeNewobj != null && constructorstu != null)
+                            iL.Emit(info.GenericOpCodeNewobj.Value, constructorstu);
+                    }
                 }
 
                 iL.Emit(OpCodes.Stloc, local);
@@ -223,12 +227,16 @@ namespace FastUntility.Core.Base
                     else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(TimeSpan) || info.GenericType == typeof(TimeSpan)))
                         iL.Emit(info.OpCodeParam.Value, value.ToStr().ToDate().Ticks);
 
-                    if (!info.IsGenericType && info.OpCodeNewobj != null)
-                        iL.Emit(info.OpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
-                    if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
-                        iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
-                    if (info.IsGenericType && info.GenericOpCodeNewobj != null)
-                        iL.Emit(info.GenericOpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
+                    if (info.GenericType != null)
+                    {
+                        var constructorstu = info.type.GetConstructor(new Type[] { info.GenericType });
+                        if (!info.IsGenericType && info.OpCodeNewobj != null && constructorstu != null)
+                            iL.Emit(info.OpCodeNewobj.Value, constructorstu);
+                        if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
+                            iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
+                        if (info.IsGenericType && info.GenericOpCodeNewobj != null && constructorstu != null)
+                            iL.Emit(info.GenericOpCodeNewobj.Value, constructorstu);
+                    }
                 }
 
                 iL.Emit(OpCodes.Stloc, local);
@@ -405,12 +413,16 @@ namespace FastUntility.Core.Base
                             else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(TimeSpan) || info.GenericType == typeof(TimeSpan)))
                                 iL.Emit(info.OpCodeParam.Value, item.Value.ToStr().ToDate().Ticks);
 
-                            if (!info.IsGenericType && info.OpCodeNewobj != null)
-                                iL.Emit(info.OpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
-                            if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
-                                iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
-                            if (info.IsGenericType && info.GenericOpCodeNewobj != null)
-                                iL.Emit(info.GenericOpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
+                            if (info.GenericType != null)
+                            {
+                                var constructorstu = info.type.GetConstructor(new Type[] { info.GenericType });
+                                if (!info.IsGenericType && info.OpCodeNewobj != null && constructorstu != null)
+                                    iL.Emit(info.OpCodeNewobj.Value, constructorstu);
+                                if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
+                                    iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
+                                if (info.IsGenericType && info.GenericOpCodeNewobj != null && constructorstu != null)
+                                    iL.Emit(info.GenericOpCodeNewobj.Value, constructorstu);
+                            }
                         }
                         iL.EmitCall(OpCodes.Callvirt, method, null);
                     }
@@ -513,12 +525,16 @@ namespace FastUntility.Core.Base
                             else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(TimeSpan) || info.GenericType == typeof(TimeSpan)))
                                 iL.Emit(info.OpCodeParam.Value, item.Value.ToStr().ToDate().Ticks);
 
-                            if (!info.IsGenericType && info.OpCodeNewobj != null)
-                                iL.Emit(info.OpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
-                            if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
-                                iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
-                            if (info.IsGenericType && info.GenericOpCodeNewobj != null)
-                                iL.Emit(info.GenericOpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
+                            if (info.GenericType != null)
+                            {
+                                var constructorstu = info.type.GetConstructor(new Type[] { info.GenericType });
+                                if (!info.IsGenericType && info.OpCodeNewobj != null && constructorstu != null)
+                                    iL.Emit(info.OpCodeNewobj.Value, constructorstu);
+                                if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
+                                    iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
+                                if (info.IsGenericType && info.GenericOpCodeNewobj != null && constructorstu != null)
+                                    iL.Emit(info.GenericOpCodeNewobj.Value, constructorstu);
+                            }
                         }
                         iL.EmitCall(OpCodes.Callvirt, method, null);
                     }
@@ -582,13 +598,17 @@ namespace FastUntility.Core.Base
                     iL.Emit(info.OpCodeParam.Value, item.Value.ToStr().ToDate().Ticks);
                 else if (info.OpCodeParam == OpCodes.Ldc_I8 && (info.type == typeof(TimeSpan) || info.GenericType == typeof(TimeSpan)))
                     iL.Emit(info.OpCodeParam.Value, item.Value.ToStr().ToDate().Ticks);
-
-                if (!info.IsGenericType && info.OpCodeNewobj != null)
-                    iL.Emit(info.OpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
-                if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
-                    iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
-                if (info.IsGenericType && info.GenericOpCodeNewobj != null)
-                    iL.Emit(info.GenericOpCodeNewobj.Value, info.type.GetConstructor(new Type[] { info.GenericType }));
+                
+                if (info.GenericType != null)
+                {
+                    var constructorstu = info.type.GetConstructor(new Type[] { info.GenericType });
+                    if (!info.IsGenericType && info.OpCodeNewobj != null && constructorstu != null)
+                        iL.Emit(info.OpCodeNewobj.Value, constructorstu);
+                    if (info.IsGenericType && info.GenericOpCodeNewobj != null && info.IsDateTime)
+                        iL.Emit(info.OpCodeNewobj.Value, info.GenericType.GetConstructor(new Type[] { typeof(long) }));
+                    if (info.IsGenericType && info.GenericOpCodeNewobj != null && constructorstu != null)
+                        iL.Emit(info.GenericOpCodeNewobj.Value, constructorstu);
+                }
             }
             ExecIL(iL, local, method);
         }
