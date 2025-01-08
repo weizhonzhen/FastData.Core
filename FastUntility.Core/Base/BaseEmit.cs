@@ -142,6 +142,9 @@ namespace FastUntility.Core.Base
                     }
                 }
 
+                if (defType.IsClass)
+                    iL.Emit(OpCodes.Ldarg_1);
+
                 iL.Emit(OpCodes.Stloc, local);
                 iL.Emit(OpCodes.Ldarg_0);
                 iL.Emit(OpCodes.Ldloc, local);
@@ -238,6 +241,9 @@ namespace FastUntility.Core.Base
                             iL.Emit(info.GenericOpCodeNewobj.Value, constructorstu);
                     }
                 }
+
+                if (defType.IsClass)
+                    iL.Emit(OpCodes.Ldarg_1);
 
                 iL.Emit(OpCodes.Stloc, local);
                 iL.Emit(OpCodes.Ldarg_0);
