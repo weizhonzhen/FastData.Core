@@ -142,7 +142,7 @@ namespace FastUntility.Core.Base
                     }
                 }
 
-                if (defType.IsClass)
+                if (defType.IsClass && (defType != typeof(string) || defType != typeof(String)))
                     iL.Emit(OpCodes.Ldarg_1);
 
                 iL.Emit(OpCodes.Stloc, local);
@@ -242,7 +242,7 @@ namespace FastUntility.Core.Base
                     }
                 }
 
-                if (defType.IsClass)
+                if (defType.IsClass && (defType != typeof(string) || defType != typeof(String)))
                     iL.Emit(OpCodes.Ldarg_1);
 
                 iL.Emit(OpCodes.Stloc, local);
