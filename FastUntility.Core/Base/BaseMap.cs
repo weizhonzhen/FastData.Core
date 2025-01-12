@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -34,66 +33,7 @@ namespace FastUntility.Core.Base
             BaseDic.PropertyInfo<T1>().ForEach(m =>
             {
                 if (list.Exists(a => string.Compare(a.Name, m.Name, true) == 0))
-                {
-                    var property = list.Find(a => string.Compare(a.Name, m.Name, true) == 0);
-                    var isList = m.PropertyType.GetGenericArguments().Length > 0;
-                    var isLeafSystemType = isList && m.PropertyType.GetGenericArguments()[0].FullName.StartsWith("System.");
-                    var isSystemType = m.PropertyType.FullName.StartsWith("System.");
-
-                    if (isList && !isLeafSystemType)
-                    {
-                        var leafList = Activator.CreateInstance(typeof(List<>).MakeGenericType(property.PropertyType.GetGenericArguments()[0]));
-                        var tempList = Convert.ChangeType(BaseEmit.Get<T1>(model, m.Name), m.PropertyType) as IEnumerable;
-
-                        if (tempList != null)
-                        {
-                            foreach (var temp in tempList)
-                            {
-                                var leafModel = Activator.CreateInstance(property.PropertyType.GetGenericArguments()[0]);
-                                var propertyList = leafModel.GetType().GetProperties().ToList();
-                                var param = new Dictionary<string, object>();
-                                temp.GetType().GetProperties().ToList().ForEach(p =>
-                                {
-                                    if (propertyList.Exists(a => a.Name == p.Name))
-                                    {
-                                        //var tempProperty = propertyList.Find(a => string.Compare(a.Name, p.Name, true) == 0);
-                                        //BaseEmit.Set(leafModel, p.Name, BaseEmit.Get(temp, p.Name));
-                                        param.Add(p.Name, BaseEmit.Get(temp, p.Name));
-                                    }
-                                });
-                                BaseEmit.Set(leafModel, param);
-
-                                var method = leafList.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
-                                BaseEmit.Invoke(leafList, method, new object[] { leafModel });
-                            }
-                            BaseEmit.Set<T>(result, property.Name, leafList);
-                        }
-                    }
-                    else if (isSystemType)
-                    {
-                        BaseEmit.Set<T>(result, property.Name, BaseEmit.Get<T1>(model, m.Name));
-                    }
-                    else
-                    {
-                        var tempModel = Convert.ChangeType(BaseEmit.Get<T1>(model, m.Name), m.PropertyType);
-                        var leafModel = Activator.CreateInstance(property.PropertyType);
-                        var propertyList = (property.PropertyType as TypeInfo).GetProperties().ToList();
-
-                        var param = new Dictionary<string, object>();
-                        (m.PropertyType as TypeInfo).GetProperties().ToList().ForEach(p =>
-                        {
-                            if (propertyList.Exists(a => a.Name == p.Name))
-                            {
-                                //var temp = propertyList.Find(a => string.Compare(a.Name, p.Name, true) == 0);
-                                //BaseEmit.Set(leafModel, p.Name, BaseEmit.Get(tempModel, p.Name));
-                                param.Add(p.Name, BaseEmit.Get(tempModel, p.Name));
-                            }
-
-                        });
-                        BaseEmit.Set(leafModel, param);
-                        BaseEmit.Set<T>(result, property.Name, leafModel);
-                    }
-                }
+                    BaseEmit.Set<T>(result, m.Name, BaseEmit.Get<T1>(model, m.Name));
                 else
                 {
                     if (dic.ToList().Exists(n => string.Compare((n.Value as MemberExpression).Member.Name, m.Name, true) == 0))
