@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -32,19 +31,6 @@ namespace FastUntility.Core.Base
             {
                 cache.TryRemove(key, out _);
                 cache.TryAdd(key, method);
-            }
-        }
-
-        private static void SetDyn(string key, DynamicMethod dyn)
-        {
-            if (!cacheDyn.ContainsKey(key))
-            {
-                cacheDyn.TryAdd(key, dyn);
-            }
-            else
-            {
-                cacheDyn.TryRemove(key, out _);
-                cacheDyn.TryAdd(key, dyn);
             }
         }
 
@@ -339,13 +325,8 @@ namespace FastUntility.Core.Base
                 var listType = typeof(List<T>);
                 var type = typeof(T);
 
-                var dynKey = $"SetEmit_{listType}_{listType.Module}";
-                var dynamicMethod = GetDyn(dynKey);
-                if (dynamicMethod == null)
-                {
-                    dynamicMethod = new DynamicMethod("SetEmit", null, new[] { listType, typeof(List<Dictionary<string, object>>) }, type.Module);
-                    SetDyn(dynKey, dynamicMethod);
-                }
+                var dynamicMethod = new DynamicMethod("SetEmit", null, new[] { listType, typeof(List<Dictionary<string, object>>) }, type.Module);
+    
                 var iL = dynamicMethod.GetILGenerator();
 
                 var addKey = $"Add_{listType.FullName}";
@@ -452,12 +433,8 @@ namespace FastUntility.Core.Base
                 var listType = list.GetType();
 
                 var dynKey = $"SetEmit_{listType}_{listType.Module}";
-                var dynamicMethod = GetDyn(dynKey);
-                if (dynamicMethod == null)
-                {
-                    dynamicMethod = new DynamicMethod("SetEmit", null, new[] { typeof(object), typeof(List<Dictionary<string, object>>) }, type.Module);
-                    SetDyn(dynKey, dynamicMethod);
-                }
+                var dynamicMethod = new DynamicMethod("SetEmit", null, new[] { typeof(object), typeof(List<Dictionary<string, object>>) }, type.Module);
+
                 var iL = dynamicMethod.GetILGenerator();
 
                 var addKey = $"Add_{listType.FullName}";
