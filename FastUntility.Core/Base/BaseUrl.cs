@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FastUntility.Core.Base
@@ -31,7 +31,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -78,7 +82,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -108,7 +116,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -137,7 +149,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -183,7 +199,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -213,7 +233,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -242,7 +266,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -274,7 +302,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -306,7 +338,11 @@ namespace FastUntility.Core.Base
                 var response = http.SendAsync(handle).Result;
                 handle.Content?.Dispose();
                 handle.Dispose();
-                return response.Content.ReadAsStringAsync().Result;
+                var result = response.Content.ReadAsStringAsync().Result; 
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
+                return result;
             }
             catch (Exception ex)
             {
@@ -353,6 +389,9 @@ namespace FastUntility.Core.Base
                 handle.Content.Dispose();
                 handle.Dispose();
                 var result = response.Content.ReadAsStringAsync().Result;
+                response.Content.Dispose();
+                response.Dispose();
+                http.Dispose();
 
                 result = result.Replace("soap:Envelope", "Envelope");
                 result = result.Replace("soap:Body", "Body");
