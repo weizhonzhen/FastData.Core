@@ -3,13 +3,14 @@ using FastUntility.Core;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Text;
 using System.Linq;
 
 namespace FastData.Core.Aop
 {
     internal static class BaseAop
     {
+       private static IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
+
         #region Aop Before
         /// <summary>
         /// Aop Before
@@ -18,9 +19,8 @@ namespace FastData.Core.Aop
         /// <param name="name"></param>
         /// <param name="param"></param>
         /// <param name="config"></param>
-        public static void AopBefore(List<string> tableName, string sql, List<DbParameter> param, ConfigModel config, bool isRead, AopType type,object model=null)
+        public static void AopBefore(List<string> tableName, string sql, List<DbParameter> param, ConfigModel config, bool isRead, AopType type, object model = null)
         {
-            IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
             {
                 var context = new BeforeContext();
@@ -54,7 +54,6 @@ namespace FastData.Core.Aop
         /// <param name="config"></param>
         public static void AopAfter(List<string> tableName, string sql, List<DbParameter> param, ConfigModel config, bool isRead, AopType type, object result, object model = null)
         {
-            IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
             {
                 var context = new AfterContext();
@@ -87,7 +86,6 @@ namespace FastData.Core.Aop
         /// <param name="name"></param>
         public static void AopException(Exception ex, string name, AopType type, ConfigModel config, object model = null)
         {
-            IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
             {
                 var context = new ExceptionContext();
@@ -112,7 +110,6 @@ namespace FastData.Core.Aop
         /// <param name="config"></param>
         public static void AopMapBefore(string mapName, string sql, DbParameter[] param, ConfigModel config, AopType type)
         {
-            IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
             {
                 var context = new MapBeforeContext();
@@ -140,7 +137,6 @@ namespace FastData.Core.Aop
         /// <param name="config"></param>
         public static void AopMapAfter(string mapName, string sql, DbParameter[] param, ConfigModel config, AopType type, object data)
         {
-            IFastAop aop = ServiceContext.Engine.Resolve<IFastAop>();
             if (aop != null)
             {
                 var context = new MapAfterContext();
