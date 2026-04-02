@@ -1,18 +1,17 @@
+using FastData.Core.Model;
+using FastData.Core.Type;
+using FastUntility.Core.Base;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using FastUntility.Core.Base;
-using FastData.Core.Type;
-using FastData.Core.Model;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FastData.Core.Base
 {
     // <summary>
-    /// 标签：2015.9.6，魏中针
     /// 说明：lambda表达式解析
     /// </summary>
     internal static class VisitExpression
@@ -49,7 +48,13 @@ namespace FastData.Core.Base
                 {
                     var temp = DbProviderFactories.GetFactory(query.Config).CreateParameter();
                     temp.ParameterName = leftList[i] + i.ToString();
-                    temp.Value = rightList[i];
+
+                    if (typeof(T).GetProperty(leftList[i]).PropertyType == typeof(bool) && string.Compare("true", rightList[i],true) == 0)
+                        temp.Value = 1;
+                    else if (typeof(T).GetProperty(leftList[i]).PropertyType == typeof(bool) && string.Compare("false", rightList[i],true) == 0)
+                        temp.Value = 0;
+                    else
+                        temp.Value = rightList[i];
 
                     if (typeList.Count >= i + 1 && typeList[i].Name == "DateTime")
                     {
@@ -69,7 +74,7 @@ namespace FastData.Core.Base
             }
             catch (Exception ex)
             {
-                if (string.Compare(query.Config.SqlErrorType, SqlErrorType.Db, true) ==0)
+                if (string.Compare(query.Config.SqlErrorType, SqlErrorType.Db, true) == 0)
                     DbLogTable.LogException<T>(query.Config, ex, "LambdaWhere<T>", "");
                 else
                     DbLog.LogException<T>(query.Config.IsOutError, query.Config.DbType, ex, "LambdaWhere<T>", "");
@@ -134,7 +139,7 @@ namespace FastData.Core.Base
             {
                 Task.Factory.StartNew(() =>
                 {
-                    if (string.Compare(query.Config.SqlErrorType, SqlErrorType.Db, true) ==0)
+                    if (string.Compare(query.Config.SqlErrorType, SqlErrorType.Db, true) == 0)
                         DbLogTable.LogException(query.Config, ex, "LambdaWhere<T1, T2>", "");
                     else
                         DbLog.LogException(query.Config.IsOutError, query.Config.DbType, ex, "LambdaWhere<T1, T2>", "");
@@ -202,7 +207,7 @@ namespace FastData.Core.Base
 
                         #region 表别名
                         if (meExp.Object != null)
-                        {                            
+                        {
                             if (meExp.Object is MemberExpression && (meExp.Object as MemberExpression).Expression is ParameterExpression)
                                 asName = string.Format("{0}.", query.TableAsName.GetValue((meExp.Object as MemberExpression).Expression.Type.Name));
                             else if (meExp.Object is UnaryExpression)
@@ -315,7 +320,7 @@ namespace FastData.Core.Base
                         {
                             #region array.Contains
                             var array = Expression.Lambda(meExp.Arguments[0]).Compile().DynamicInvoke() as Array;
-                            var mName = (meExp.Arguments[1] as MemberExpression).Member.Name;                           
+                            var mName = (meExp.Arguments[1] as MemberExpression).Member.Name;
                             asName = string.Format("{0}.", query.TableAsName.GetValue((meExp.Arguments[1] as MemberExpression).Expression.Type.Name));
                             sb.AppendFormat(" {0}{1} in (", asName, mName);
                             for (int ary = 0; ary < array.Length; ary++)
@@ -333,7 +338,7 @@ namespace FastData.Core.Base
                         if (string.IsNullOrEmpty(asName) && meExp.Method.Name == "Contains" && meExp.Arguments.Count == 1)
                         {
                             #region list.Contains
-                            var mName = (meExp.Arguments[0] as MemberExpression).Member.Name;                            
+                            var mName = (meExp.Arguments[0] as MemberExpression).Member.Name;
                             asName = string.Format("{0}.", query.TableAsName.GetValue((meExp.Arguments[0] as MemberExpression).Expression.Type.Name));
                             var model = Expression.Lambda(meExp.Object).Compile().DynamicInvoke();
                             var count = (int)BaseEmit.Invoke(model, model.GetType().GetMethod("get_Count"), null);
@@ -449,7 +454,7 @@ namespace FastData.Core.Base
                                         , query.TableAsName.GetValue((right as MemberExpression).Expression.Type.Name), rightPar);
                     }
                     else if (!(left is MethodCallExpression))
-                    {                        
+                    {
                         sb.AppendFormat("{0}.{1}{2}{5}{3}{4} ", query.TableAsName.GetValue((left as MemberExpression).Expression.Type.Name), leftPar
                                                             , typeStr, leftPar, i.ToString(), query.Config.Flag);
                         rightList.Add(rightPar);
