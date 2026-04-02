@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -89,9 +89,9 @@ namespace FastUntility.Core.Base
                         else
                             iL.Emit(OpCodes.Ldc_I4_1);
 
-                        if (defType == typeof(bool))
-                            iL.Emit(OpCodes.Box, typeof(bool));
-                        else
+                        if (defType == typeof(bool?))
+                        //    iL.Emit(OpCodes.Box, typeof(bool));
+                        //else
                             iL.Emit(OpCodes.Newobj, typeof(bool?).GetConstructor(new Type[] { typeof(bool) }));
                     }
                 }
@@ -189,9 +189,9 @@ namespace FastUntility.Core.Base
                         else
                             iL.Emit(OpCodes.Ldc_I4_1);
 
-                        if (defType == typeof(bool))
-                            iL.Emit(OpCodes.Box, typeof(bool));
-                        else
+                        if (defType == typeof(bool?))
+                        //    iL.Emit(OpCodes.Box, typeof(bool));
+                        //else
                             iL.Emit(OpCodes.Newobj, typeof(bool?).GetConstructor(new Type[] { typeof(bool) }));
                     }
                 }
@@ -375,9 +375,9 @@ namespace FastUntility.Core.Base
                                 else
                                     iL.Emit(OpCodes.Ldc_I4_1);
 
-                                if (defType == typeof(bool))
-                                    iL.Emit(OpCodes.Box, typeof(bool));
-                                else
+                                if (defType == typeof(bool?))
+                                //    iL.Emit(OpCodes.Box, typeof(bool));
+                                //else
                                     iL.Emit(OpCodes.Newobj, typeof(bool?).GetConstructor(new Type[] { typeof(bool) }));
                             }
                         }
@@ -483,9 +483,9 @@ namespace FastUntility.Core.Base
                                 else
                                     iL.Emit(OpCodes.Ldc_I4_1);
 
-                                if (defType == typeof(bool))
-                                    iL.Emit(OpCodes.Box, typeof(bool));
-                                else
+                                if (defType == typeof(bool?))
+                                //    iL.Emit(OpCodes.Box, typeof(bool));
+                                //else
                                     iL.Emit(OpCodes.Newobj, typeof(bool?).GetConstructor(new Type[] { typeof(bool) }));
                             }
                         }
@@ -551,9 +551,9 @@ namespace FastUntility.Core.Base
                 else
                     iL.Emit(OpCodes.Ldc_I4_1);
 
-                if (defType == typeof(bool))
-                    iL.Emit(OpCodes.Box, typeof(bool));
-                else
+                if (defType == typeof(bool?))
+                //    iL.Emit(OpCodes.Box, typeof(bool));
+                //else
                     iL.Emit(OpCodes.Newobj, typeof(bool?).GetConstructor(new Type[] { typeof(bool) }));
 
                 ExecIL(iL, local, method);
