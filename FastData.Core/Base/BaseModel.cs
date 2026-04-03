@@ -1,20 +1,20 @@
-﻿using System;
+using FastData.Core.CacheModel;
+using FastData.Core.Model;
+using FastData.Core.Property;
+using FastData.Core.Type;
+using FastUntility.Core.Base;
+using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data.Common;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using FastData.Core.Property;
-using FastData.Core.Model;
-using System.Data.Common;
-using FastData.Core.Type;
-using System.Linq;
-using FastUntility.Core.Base;
+using System.Text;
 
 namespace FastData.Core.Base
 {
     /// <summary>
-    /// 标签：2015.7.13，魏中针
     /// 说明：实体转化SQL类
     /// </summary>
     internal static class BaseModel
@@ -45,7 +45,10 @@ namespace FastData.Core.Base
                     pInfo.ForEach(a =>
                     {
                         result.Sql = string.Format("{2} {0}={1}{0},", a.Name, config.Flag, result.Sql);
-                        var itemValue = BaseEmit.Get<T>(model, a.Name); 
+                        var itemValue = BaseEmit.Get<T>(model, a.Name);
+
+                        CheckBoolType(itemValue, a);
+
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = a.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -60,6 +63,9 @@ namespace FastData.Core.Base
                     {
                         result.Sql = string.Format("{2} {0}={1}{0},", a.Name, config.Flag, result.Sql);
                         var itemValue = BaseEmit.Get<T>(model, a.Name);
+                        var type = pInfo.Find(t => t.Name == a.Name);
+                        itemValue = CheckBoolType(itemValue, type);
+
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = a.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -127,6 +133,8 @@ namespace FastData.Core.Base
                         sbName.AppendFormat("{0},", p.Name);
                         sbValue.AppendFormat("{1}{0},", p.Name, config.Flag);
                         var itemValue = BaseEmit.Get<T>(model, p.Name);
+                        CheckBoolType(itemValue, p);
+
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = p.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -178,6 +186,7 @@ namespace FastData.Core.Base
                         sbName.AppendFormat("{0},", p.Name);
                         sbValue.AppendFormat("{1}{0},", p.Name, config.Flag);
                         var itemValue = BaseEmit.Get(model, p.Name);
+                        CheckBoolType(itemValue, p);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = p.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -241,6 +250,7 @@ namespace FastData.Core.Base
                         result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
                         var itemValue = BaseEmit.Get<T>(model, item.Name);
+                        CheckBoolType(itemValue, item);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = item.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -260,6 +270,8 @@ namespace FastData.Core.Base
                         result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
                         var itemValue = BaseEmit.Get<T>(model, item.Name);
+                        var type = pInfo.Find(t => t.Name == item.Name);
+                        CheckBoolType(itemValue, type);
                         var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                         temp.ParameterName = item.Name;
                         temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -336,7 +348,7 @@ namespace FastData.Core.Base
             try
             {
                 result.Sql = string.Format("update {0} set", model.GetType().Name);
-                var pInfo = PropertyCache.GetPropertyInfo(model,config.IsPropertyCache);
+                var pInfo = PropertyCache.GetPropertyInfo(model, config.IsPropertyCache);
 
                 foreach (var item in pInfo)
                 {
@@ -346,7 +358,8 @@ namespace FastData.Core.Base
                     result.Sql = string.Format("{2} {0}={1}{0},", item.Name, config.Flag, result.Sql);
 
                     var itemValue = BaseEmit.Get(model, item.Name);
-                    
+                    CheckBoolType(itemValue, item);
+
                     var temp = DbProviderFactories.GetFactory(config).CreateParameter();
                     temp.ParameterName = item.Name;
                     temp.Value = itemValue == null ? DBNull.Value : itemValue;
@@ -358,7 +371,7 @@ namespace FastData.Core.Base
                 var count = 1;
                 foreach (var item in where)
                 {
-                    var itemValue = BaseEmit.Get(model, item); 
+                    var itemValue = BaseEmit.Get(model, item);
 
                     if (itemValue == null)
                     {
@@ -481,21 +494,29 @@ namespace FastData.Core.Base
                     var row = result.Table.NewRow();
                     where.ForEach(a =>
                     {
-                        row[a] = BaseEmit.Get<T>(p, a);
+                        var property = pInfo.Find(b => b.Name == a);
+                        var itemValue = BaseEmit.Get<T>(p, a);
+                        CheckBoolType(itemValue, property);
+                        row[a] = itemValue;
                     });
 
                     if (field == null)
                     {
                         PropertyCache.GetPropertyInfo<T>().ForEach(a =>
                         {
-                            row[a.Name] = BaseEmit.Get<T>(p, a.Name);
+                            var itemValue = BaseEmit.Get<T>(p, a.Name);
+                            CheckBoolType(itemValue, a);
+                            row[a.Name] = itemValue;
                         });
                     }
                     else
                     {
                         (field.Body as NewExpression).Members.ToList().ForEach(a =>
                         {
-                            row[a.Name] = BaseEmit.Get<T>(p, a.Name);
+                            var property = pInfo.Find(b => b.Name == a.Name);
+                            var itemValue = BaseEmit.Get<T>(p, a.Name);
+                            CheckBoolType(itemValue, property);
+                            row[a.Name] = itemValue;
                         });
                     }
                     result.Table.Rows.Add(row);
@@ -542,10 +563,13 @@ namespace FastData.Core.Base
             {
                 result.Sql = string.Format("delete {0} ", typeof(T).Name);
 
+                var pInfo = PropertyCache.GetPropertyInfo<T>(config.IsPropertyCache);
                 var count = 1;
                 foreach (var item in where)
                 {
                     var itemValue = BaseEmit.Get<T>(model, item);
+                    var property = pInfo.Find(a => a.Name == item);
+                    CheckBoolType(itemValue, property);
 
                     if (itemValue == null)
                     {
@@ -592,7 +616,7 @@ namespace FastData.Core.Base
         /// <param name="model"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static OptionModel DeleteToSql(DbCommand cmd,object model,ConfigModel config)
+        public static OptionModel DeleteToSql(DbCommand cmd, object model, ConfigModel config)
         {
             var result = new OptionModel();
             result.IsCache = config.IsPropertyCache;
@@ -609,10 +633,14 @@ namespace FastData.Core.Base
             {
                 result.Sql = string.Format("delete {0} ", model.GetType().Name);
 
+                var pInfo = PropertyCache.GetPropertyInfo(model, config.IsPropertyCache);
                 var count = 1;
                 foreach (var item in where)
                 {
-                    var itemValue = BaseEmit.Get(model, item); 
+                    var itemValue = BaseEmit.Get(model, item);
+
+                    var property = pInfo.Find(a => a.Name == item);
+                    CheckBoolType(itemValue, property);
 
                     if (itemValue == null)
                     {
@@ -702,5 +730,16 @@ namespace FastData.Core.Base
             }
         }
         #endregion
+
+        private static object CheckBoolType(object itemValue, PropertyModel type)
+        {
+            if (type.PropertyType == typeof(bool?) && itemValue == null)
+                return DBNull.Value;
+
+            if (type.PropertyType == typeof(bool) || type.PropertyType == typeof(bool?))
+                return (bool)itemValue ? 1 : 0;
+
+            return 0;
+        }
     }
 }
